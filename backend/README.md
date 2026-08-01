@@ -13,6 +13,7 @@ API NestJS que soporta el flujo de originación digital de crédito de libre des
 - **Tests:** Jest con `ts-jest`.
 - **Documentación API:** Swagger (`/api/docs`).
 - **Health checks:** `@nestjs/terminus` (`/health`).
+- **Notificaciones en tiempo real:** Server-Sent Events (`/events`) para revalidación de cachés (SSG/ISR).
 
 ## Estructura de carpetas
 
@@ -59,10 +60,14 @@ backend/
 │       ├── health/
 │       │   ├── health.module.ts
 │       │   └── infrastructure/http/health.controller.ts
-│       └── seed/
-│           ├── seed.module.ts
-│           ├── application/services/seed.service.ts
-│           └── infrastructure/http/seed.controller.ts
+│       ├── seed/
+│       │   ├── seed.module.ts
+│       │   ├── application/services/seed.service.ts
+│       │   └── infrastructure/http/seed.controller.ts
+│       └── events/
+│           ├── events.module.ts
+│           ├── application/services/events.service.ts
+│           └── infrastructure/http/events.controller.ts
 ```
 
 ## Convenciones
@@ -180,7 +185,7 @@ Swagger agrupa los endpoints en **Solicitudes de crédito** y en subgrupos dentr
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
-| GET | `/applications/enums` | Enumeraciones activas de `status`, `channel` y `documentType` |
+| GET | `/applications/enums` | Enumeraciones activas agrupadas dinámicamente por dominio |
 
 #### Seed
 
@@ -193,6 +198,12 @@ Swagger agrupa los endpoints en **Solicitudes de crédito** y en subgrupos dentr
 | Método | Ruta | Descripción |
 |--------|------|-------------|
 | GET | `/health` | Health check de Prisma |
+
+#### Events
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| GET | `/events` | Stream Server-Sent Events (SSE) para notificaciones en tiempo real |
 
 ## Formato de respuestas
 
@@ -235,5 +246,7 @@ El listado paginado usa paginación por cursor:
 - **Servicio agregado:** `CreditApplicationsService` orquesta todos los casos de uso y mantiene el dominio como fuente de verdad.
 - **Persistencia transaccional:** el repositorio Prisma actualiza `CreditApplication` junto con sus eventos en una transacción.
 - **Paginación por cursor (keyset):** reemplaza `OFFSET/LIMIT` para mejor rendimiento y consistencia.
+- **Enumeraciones dinámicas:** `GET /applications/enums` devuelve todos los códigos activos agrupados bajo sus respectivos dominios, permitiendo agregar nuevos dominios sin tocar el endpoint.
+- **Notificaciones SSE:** `GET /events` expone un stream de eventos que el frontend consume para revalidar cachés (SSG/ISR) cuando cambian referencias o se limpia la base de datos.
 - **Referencias versionadas:** `DomainReference` guarda los valores de enumeración con `isActive`, `validFrom` y `validTo`, permitiendo activar/desactivar códigos sin perder la trazabilidad de registros anteriores.
 - **Prisma 5:** versión fija para evitar problemas de compatibilidad con el CLI y el schema.
