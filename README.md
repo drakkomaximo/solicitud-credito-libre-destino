@@ -154,6 +154,45 @@ curl -X POST http://localhost:3000/applications \
 - **Frontend App Router:** usa server/client components; formularios con `react-hook-form` y validación con Zod.
 - **Bun:** gestor de paquetes para backend y frontend.
 
+## Despliegue a producción
+
+El backend se empaqueta como imagen Docker y puede desplegarse en cualquier servicio de contenedores. La configuración de producción mantiene las variables de entorno fuera de la imagen y deja listo el punto de entrada para Azure, Railway, Render, etc.
+
+### Archivos de despliegue
+
+- `backend/Dockerfile` — imagen multi-etapa (`node:20-alpine`) que compila, genera el cliente Prisma y ejecuta `prisma migrate deploy` antes de iniciar.
+- `backend/.dockerignore` — evita copiar `node_modules`, `dist`, `.env` y otros archivos innecesarios.
+- `docker-compose.prod.yml` — levanta el backend localmente en modo producción usando un archivo `.env` externo.
+- `backend/.env.prod.example` — ejemplo de variables de producción.
+
+### Local con Docker Compose (modo producción)
+
+```bash
+cd backend
+cp .env.prod.example .env
+# editar .env con los valores reales de PostgreSQL
+cd ..
+docker compose -f docker-compose.prod.yml up --build
+```
+
+El contenedor aplica migraciones automáticamente y expone el backend en el puerto configurado (por defecto `3000`).
+
+### Railway (recomendado para la prueba)
+
+1. Conectar el repositorio de GitHub a Railway.
+2. Crear un servicio **PostgreSQL** desde el dashboard.
+3. Crear un servicio desde el `Dockerfile` del `backend/`.
+4. Configurar las variables de entorno copiando el contenido de `backend/.env.prod.example`.
+5. Railway generará una URL pública para el backend.
+
+### Azure (referencia sin despliegue real)
+
+- **Azure Container Apps:** apuntar el contexto de build al `backend/Dockerfile`; inyectar las variables en *Application Settings*.
+- **Azure Database for PostgreSQL - Flexible Server:** usar como base de datos gestionada.
+- **Azure App Service (Web App for Containers):** desplegar la misma imagen con variables de entorno.
+
+El proyecto queda **configurado** para Azure, pero no requiere un despliegue real en la nube para la prueba.
+
 ## Uso de inteligencia artificial
 
 Este proyecto fue desarrollado con asistencia de un agente de código (Cascade, modelo SWE-1.6 de Cognition), integrado en el IDE del desarrollador, bajo un flujo de pair programming iterativo.
