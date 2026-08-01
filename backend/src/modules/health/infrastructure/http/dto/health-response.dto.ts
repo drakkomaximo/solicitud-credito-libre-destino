@@ -30,15 +30,39 @@ export class HealthResultDto {
 }
 
 export class HealthCheckResponseDto {
-  @ApiProperty({ description: 'Indica que el health check fue exitoso', example: true })
+  @ApiProperty({ description: 'Indica que la operación HTTP finalizó sin excepción. No confundir con el estado de salud, que vive en `data.status`.', example: true })
   success!: boolean;
 
   @ApiProperty({ description: 'Código HTTP de la respuesta', example: 200 })
   statusCode!: number;
 
-  @ApiProperty({ description: 'Mensaje resumen del health check', example: 'Recurso obtenido con éxito' })
+  @ApiProperty({ description: 'Mensaje resumen del interceptor', example: 'Operación realizada con éxito' })
   message!: string;
 
   @ApiProperty({ description: 'Resultado del health check de Terminus', type: () => HealthResultDto })
   data!: HealthResultDto;
+}
+
+export class HealthCheckUnhealthyResponseDto {
+  @ApiProperty({ description: 'Indica que la operación HTTP finalizó sin excepción.', example: true })
+  success!: boolean;
+
+  @ApiProperty({ description: 'Código HTTP de la respuesta', example: 503 })
+  statusCode!: number;
+
+  @ApiProperty({ description: 'Mensaje resumen del interceptor', example: 'Operación realizada con éxito' })
+  message!: string;
+
+  @ApiProperty({
+    description: 'Resultado del health check cuando al menos un indicador falla',
+    type: 'object',
+    additionalProperties: true,
+    example: {
+      status: 'error',
+      info: {},
+      error: { prisma: { status: 'down' } },
+      details: { prisma: { status: 'down' } },
+    },
+  })
+  data!: Record<string, unknown>;
 }
