@@ -169,9 +169,10 @@ Swagger agrupa los endpoints en **Solicitudes de crédito** y en subgrupos dentr
 | Método | Ruta | Autenticación | Descripción |
 |--------|------|---------------|-------------|
 | POST | `/applications` | Pública | Crear solicitud. Devuelve la solicitud y su token de acceso. |
+| GET | `/applications/lookup` | Pública | Buscar una solicitud DRAFT por documento y teléfono para retomar. |
 | GET | `/applications` | JWT admin | Listar con filtros `status`, `channel`, `q` y paginación por cursor |
 | GET | `/applications/:id` | Token de solicitud o JWT admin | Detalle |
-| PATCH | `/applications/:id` | Token de solicitud o JWT admin | Actualizar datos complementarios |
+| PATCH | `/applications/:id` | Token de solicitud o JWT admin | Actualizar datos complementarios (parcial: se pueden enviar solo los campos editados). |
 | POST | `/applications/:id/simulate-offer` | Token de solicitud o JWT admin | Simular oferta |
 | POST | `/applications/:id/finalize` | Token de solicitud o JWT admin | Enviar a validación |
 | POST | `/applications/:id/abandon` | Token de solicitud o JWT admin | Abandonar |
@@ -309,7 +310,7 @@ curl -H "Authorization: Bearer <token>" -X PATCH http://localhost:3000/applicati
 curl -H "Authorization: Bearer <token>" http://localhost:3000/applications/<id>/events
 ```
 
-El token de solicitud permite acceder solo al `id` que lo generó. Un administrador puede usar su propio JWT para acceder a cualquiera.
+El token de solicitud permite acceder solo al `id` que lo generó. Un administrador puede usar su propio JWT para acceder a cualquiera. Si el token se pierde, el cliente puede usar `GET /applications/lookup?documentNumber=...&phone=...` para buscar su borrador y obtener uno nuevo.
 
 ### Eventos SSE
 
@@ -415,7 +416,7 @@ Listados como `GET /applications` o `GET /admin/references` devuelven `data` com
 
 Esta implementación se mantuvo deliberadamente mínima para cumplir el alcance del ejercicio. Por tiempo y complejidad se dejaron fuera los siguientes puntos, listados como trabajo futuro:
 
-- **Token de solicitud básico:** aunque `GET /applications/:id` y las mutaciones ahora requieren el token generado al crear, ese token no es revocable ni rotable. En producción debería tener expiración corta, revocación y asociación a sesión/dispositivo.
+- **Token de solicitud básico:** aunque `GET /applications/:id` y las mutaciones ahora requieren el token generado al crear, ese token no es revocable ni rotable. El flujo de recuperación por documento/teléfono (`GET /applications/lookup`) es funcional pero no verifica identidad de forma robusta; en producción debería incluir OTP o autenticación, expiración corta, revocación y asociación a sesión/dispositivo.
 - **Autorización por roles:** actualmente solo existe un rol `admin`. Se podría agregar `advisor` y permisos específicos.
 - **Rate limiting:** ningún endpoint tiene límites de peticiones. `POST /applications` y `/auth/login` deberían tener throttling.
 - **Logs de auditoría:** aunque `events` traza cambios internos, no hay logs de auditoría de qué usuario/admin realizó cada cambio.

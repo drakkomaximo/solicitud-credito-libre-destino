@@ -14,6 +14,7 @@ export interface ApplicationListQuery extends ApplicationListFilters {
 export interface ICreditApplicationRepository {
   save(application: CreditApplication): Promise<void>;
   findById(id: string): Promise<CreditApplication | null>;
+  findByDocumentNumber(documentNumber: string): Promise<CreditApplication[]>;
   findAll(query?: ApplicationListQuery): Promise<CreditApplication[]>;
   count(filters?: ApplicationListFilters): Promise<number>;
   update(application: CreditApplication): Promise<void>;

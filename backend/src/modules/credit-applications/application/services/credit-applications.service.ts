@@ -15,12 +15,12 @@ export interface ListApplicationsResult {
 }
 
 export interface UpdateApplicationCommand {
-  income: number;
-  expenses: number;
-  amount: number;
-  term: number;
-  purpose: string;
-  dataAuthorized: boolean;
+  income?: number;
+  expenses?: number;
+  amount?: number;
+  term?: number;
+  purpose?: string;
+  dataAuthorized?: boolean;
 }
 
 export interface AbandonApplicationCommand {
@@ -77,17 +77,33 @@ export class CreditApplicationsService {
     if (application.status !== 'DRAFT') {
       throw new BadRequestException('Solo se puede editar una solicitud en estado DRAFT');
     }
-    await this.validateTerm(command.term);
-    application.income = command.income;
-    application.expenses = command.expenses;
-    application.amount = command.amount;
-    application.term = command.term;
-    application.purpose = command.purpose;
-    application.dataAuthorized = command.dataAuthorized;
+
+    if (command.term !== undefined) {
+      await this.validateTerm(command.term);
+      application.term = command.term;
+    }
+    if (command.income !== undefined) application.income = command.income;
+    if (command.expenses !== undefined) application.expenses = command.expenses;
+    if (command.amount !== undefined) application.amount = command.amount;
+    if (command.purpose !== undefined) application.purpose = command.purpose;
+    if (command.dataAuthorized !== undefined) application.dataAuthorized = command.dataAuthorized;
+
     application.updatedAt = new Date();
-    application.recordEvent('UPDATED');
+
+    if (Object.values(command).some((value) => value !== undefined)) {
+      application.recordEvent('UPDATED');
+    }
+
     await this.repository.update(application);
     return application;
+  }
+
+  async lookup(documentNumber: string, phone: string): Promise<CreditApplication | null> {
+    const applications = await this.repository.findByDocumentNumber(documentNumber);
+    const draft = applications
+      .filter((a) => a.status === 'DRAFT' && a.phone === phone)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
+    return draft ?? null;
   }
 
   async simulateOffer(id: string): Promise<SimulationResult> {

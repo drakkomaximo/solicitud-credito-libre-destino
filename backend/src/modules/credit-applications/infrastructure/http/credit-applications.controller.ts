@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, NotFoundException, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ApiOkEnvelope, ApiCreatedEnvelope, ApiPaginatedEnvelope } from '@/common/decorators/api-responses.decorator';
 import { ErrorResponseDto } from '@/common/dto/error-response.dto';
@@ -11,6 +11,7 @@ import { ApplicationStatus, ApplicationChannel, DocumentType } from '@/modules/c
 import { CreateApplicationDto } from '@/modules/credit-applications/infrastructure/http/dto/create-application.dto';
 import { UpdateApplicationDto } from '@/modules/credit-applications/infrastructure/http/dto/update-application.dto';
 import { AbandonApplicationDto } from '@/modules/credit-applications/infrastructure/http/dto/abandon-application.dto';
+import { LookupApplicationDto } from '@/modules/credit-applications/infrastructure/http/dto/lookup-application.dto';
 
 @ApiTags('Solicitudes de crédito')
 @Controller('applications')
@@ -25,6 +26,19 @@ export class CreditApplicationsController {
   @ApiCreatedEnvelope('Solicitud creada exitosamente')
   async create(@Body() dto: CreateApplicationDto) {
     const application = await this.service.create(dto);
+    const accessToken = this.authService.generateApplicationToken(application.id);
+    return { ...application, accessToken };
+  }
+
+  @Get('lookup')
+  @ApiOperation({ summary: 'Buscar solicitud en borrador', description: 'Busca una solicitud DRAFT por número de documento y teléfono. Devuelve la solicitud con un nuevo token de acceso para retomarla.' })
+  @ApiOkEnvelope('Solicitud encontrada')
+  @ApiResponse({ status: 404, description: 'No se encontró solicitud en borrador con esos datos', type: ErrorResponseDto })
+  async lookup(@Query() query: LookupApplicationDto) {
+    const application = await this.service.lookup(query.documentNumber, query.phone);
+    if (!application) {
+      throw new NotFoundException('No se encontró solicitud en borrador con esos datos');
+    }
     const accessToken = this.authService.generateApplicationToken(application.id);
     return { ...application, accessToken };
   }

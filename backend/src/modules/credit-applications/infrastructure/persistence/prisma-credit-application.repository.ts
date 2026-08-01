@@ -50,6 +50,16 @@ export class PrismaCreditApplicationRepository implements ICreditApplicationRepo
     return raw ? this.toDomain(raw) : null;
   }
 
+  async findByDocumentNumber(documentNumber: string): Promise<CreditApplication[]> {
+    const raw = await this.prisma.creditApplication.findMany({
+      where: { documentNumber },
+      orderBy: { createdAt: 'desc' },
+      include: { events: true },
+    });
+
+    return raw.map((r) => this.toDomain(r));
+  }
+
   private buildWhere(filters: ApplicationListFilters = {}): any {
     const where: any = {};
     if (filters.status) where.status = filters.status;

@@ -1,34 +1,34 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsInt, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsBoolean, IsInt, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class UpdateApplicationDto {
-  @ApiProperty({ description: 'Ingresos mensuales', example: 5000000 })
+  @ApiPropertyOptional({ description: 'Ingresos mensuales', example: 5000000 })
   @IsNumber()
-  @IsNotEmpty()
-  income!: number;
+  @IsOptional()
+  income?: number;
 
-  @ApiProperty({ description: 'Gastos mensuales', example: 1500000 })
+  @ApiPropertyOptional({ description: 'Gastos mensuales', example: 1500000 })
   @IsNumber()
-  @IsNotEmpty()
-  expenses!: number;
+  @IsOptional()
+  expenses?: number;
 
-  @ApiProperty({ description: 'Monto solicitado', example: 10000000 })
+  @ApiPropertyOptional({ description: 'Monto solicitado', example: 10000000 })
   @IsNumber()
-  @IsNotEmpty()
-  amount!: number;
+  @IsOptional()
+  amount?: number;
 
-  @ApiProperty({ description: 'Plazo en meses', example: 24 })
+  @ApiPropertyOptional({ description: 'Plazo en meses', example: 24 })
   @IsInt()
-  @IsNotEmpty()
-  term!: number;
+  @IsOptional()
+  term?: number;
 
-  @ApiProperty({ description: 'Propósito del crédito', example: 'Viaje' })
+  @ApiPropertyOptional({ description: 'Propósito del crédito', example: 'Viaje' })
   @IsString()
-  @IsNotEmpty()
-  purpose!: string;
+  @IsOptional()
+  purpose?: string;
 
-  @ApiProperty({ description: 'Autorización de datos personales', example: true })
+  @ApiPropertyOptional({ description: 'Autorización de datos personales', example: true })
   @IsBoolean()
-  @IsNotEmpty()
-  dataAuthorized!: boolean;
+  @IsOptional()
+  dataAuthorized?: boolean;
 }
