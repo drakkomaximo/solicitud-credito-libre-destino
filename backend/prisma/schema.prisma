@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model CreditApplication {
+  id             String   @id @default(uuid())
+  channel        String
+  advisorId      String?
+  documentType   String
+  documentNumber String
+  firstName      String
+  lastName       String
+  phone          String
+  email          String
+  city           String
+  income         Float
+  expenses       Float
+  amount         Float
+  term           Int
+  purpose        String
+  dataAuthorized Boolean
+  status         String   @default("draft")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  events ApplicationEvent[]
+}
+
+model ApplicationEvent {
+  id            String   @id @default(uuid())
+  applicationId String
+  type          String
+  payload       Json?
+  occurredAt    DateTime @default(now())
+
+  application CreditApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+}
+
+model DomainReference {
+  id          String    @id @default(uuid())
+  domain      String
+  code        String
+  label       String
+  description String?
+  isActive    Boolean   @default(true)
+  validFrom   DateTime  @default(now())
+  validTo     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([domain, code])
+  @@index([domain, isActive])
+}

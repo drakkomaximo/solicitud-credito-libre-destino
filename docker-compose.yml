@@ -1,0 +1,31 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: credi-digital-postgres
+    environment:
+      POSTGRES_USER: credi
+      POSTGRES_PASSWORD: credi
+      POSTGRES_DB: credit
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U credi -d credit"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  backend:
+    image: credi-digital-backend
+    container_name: credi-digital-backend
+    build: ./backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://credi:credi@postgres:5432/credit
+      PORT: 3000
+    ports:
+      - "3000:3000"
+volumes:
+  pgdata:
