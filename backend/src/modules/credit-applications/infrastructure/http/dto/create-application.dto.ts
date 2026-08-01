@@ -18,26 +18,32 @@ export class CreateApplicationDto {
   @IsString()
   documentType!: string;
 
+  @ApiProperty({ description: 'Número de documento del solicitante', example: '1234567890' })
   @IsNotEmpty()
   @IsString()
   documentNumber!: string;
 
+  @ApiProperty({ description: 'Nombres del solicitante', example: 'Juan' })
   @IsNotEmpty()
   @IsString()
   firstName!: string;
 
+  @ApiProperty({ description: 'Apellidos del solicitante', example: 'Pérez' })
   @IsNotEmpty()
   @IsString()
   lastName!: string;
 
+  @ApiProperty({ description: 'Número de teléfono del solicitante', example: '3001234567' })
   @IsNotEmpty()
   @IsString()
   phone!: string;
 
+  @ApiProperty({ description: 'Correo electrónico del solicitante', example: 'juan.perez@example.com' })
   @IsNotEmpty()
   @IsEmail()
   email!: string;
 
+  @ApiProperty({ description: 'Ciudad de residencia del solicitante', example: 'Bogotá' })
   @IsNotEmpty()
   @IsString()
   city!: string;

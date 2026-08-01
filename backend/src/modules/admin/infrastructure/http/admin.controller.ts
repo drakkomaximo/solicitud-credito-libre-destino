@@ -52,7 +52,7 @@ export class AdminController {
   }
 
   @Post('references')
-  @ApiOperation({ summary: 'Crear una referencia de dominio', description: 'Agrega un nuevo valor a un dominio.' })
+  @ApiOperation({ summary: 'Crear una referencia de dominio', description: 'Crea un nuevo valor dentro de un dominio. El par domain+code debe ser único.' })
   @ApiBody({ type: CreateReferenceDto })
   @ApiResponse({ status: 201, description: 'Referencia creada' })
   async createReference(@Body() dto: CreateReferenceDto) {
@@ -60,7 +60,7 @@ export class AdminController {
   }
 
   @Patch('references/:id')
-  @ApiOperation({ summary: 'Actualizar una referencia', description: 'Permite cambiar label, descripción o estado activo.' })
+  @ApiOperation({ summary: 'Actualizar una referencia', description: 'Permite modificar el label, la descripción o el estado activo de una referencia existente.' })
   @ApiBody({ type: UpdateReferenceDto })
   @ApiResponse({ status: 200, description: 'Referencia actualizada' })
   @ApiResponse({ status: 404, description: 'Referencia no encontrada' })
@@ -69,7 +69,7 @@ export class AdminController {
   }
 
   @Post('references/:id/toggle')
-  @ApiOperation({ summary: 'Activar o desactivar una referencia', description: 'Cambia el campo isActive de la referencia.' })
+  @ApiOperation({ summary: 'Activar o desactivar una referencia', description: 'Invierte el valor del campo isActive. Útil para deshabilitar valores sin borrarlos.' })
   @ApiResponse({ status: 200, description: 'Estado cambiado' })
   @ApiResponse({ status: 404, description: 'Referencia no encontrada' })
   async toggleReference(@Param('id') id: string) {

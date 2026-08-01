@@ -46,7 +46,7 @@ export class CreditApplicationsController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Obtener una solicitud por id' })
+  @ApiOperation({ summary: 'Obtener una solicitud por id', description: 'Devuelve el detalle completo de una solicitud de crédito incluyendo su historial de eventos.' })
   @ApiResponse({ status: 200, description: 'Solicitud encontrada' })
   @ApiResponse({ status: 404, description: 'Solicitud no encontrada' })
   async getById(@Param('id') id: string) {
@@ -54,7 +54,7 @@ export class CreditApplicationsController {
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Actualizar una solicitud', description: 'Permite modificar los datos mientras la solicitud esté en estado DRAFT.' })
+  @ApiOperation({ summary: 'Actualizar una solicitud', description: 'Actualiza los datos complementarios de la solicitud. Solo permite edición mientras esté en estado DRAFT.' })
   @ApiResponse({ status: 200, description: 'Solicitud actualizada' })
   @ApiResponse({ status: 400, description: 'Datos inválidos o la solicitud no permite edición' })
   @ApiResponse({ status: 404, description: 'Solicitud no encontrada' })
@@ -72,7 +72,7 @@ export class CreditApplicationsController {
   }
 
   @Post(':id/finalize')
-  @ApiOperation({ summary: 'Finalizar una solicitud' })
+  @ApiOperation({ summary: 'Finalizar una solicitud', description: 'Cambia el estado de la solicitud a PENDING_VALIDATION para que pase al proceso de validación.' })
   @ApiResponse({ status: 200, description: 'Solicitud finalizada' })
   @ApiResponse({ status: 400, description: 'No se puede finalizar la solicitud' })
   @ApiResponse({ status: 404, description: 'Solicitud no encontrada' })
@@ -81,7 +81,7 @@ export class CreditApplicationsController {
   }
 
   @Post(':id/abandon')
-  @ApiOperation({ summary: 'Abandonar una solicitud' })
+  @ApiOperation({ summary: 'Abandonar una solicitud', description: 'Registra el abandono de la solicitud con un motivo. No aplica si ya fue finalizada o enviada a validación.' })
   @ApiResponse({ status: 200, description: 'Solicitud abandonada' })
   @ApiResponse({ status: 400, description: 'No se puede abandonar la solicitud' })
   @ApiResponse({ status: 404, description: 'Solicitud no encontrada' })
@@ -90,7 +90,7 @@ export class CreditApplicationsController {
   }
 
   @Get(':id/events')
-  @ApiOperation({ summary: 'Consultar eventos de una solicitud' })
+  @ApiOperation({ summary: 'Consultar eventos de una solicitud', description: 'Devuelve la trazabilidad de cambios de estado y acciones realizadas sobre la solicitud.' })
   @ApiResponse({ status: 200, description: 'Eventos obtenidos' })
   @ApiResponse({ status: 404, description: 'Solicitud no encontrada' })
   async getEvents(@Param('id') id: string) {
