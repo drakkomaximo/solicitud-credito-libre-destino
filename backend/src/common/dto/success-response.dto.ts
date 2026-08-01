@@ -1,5 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { PaginationMetaDto } from './pagination-meta.dto';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class SuccessResponseDto {
   @ApiProperty({ description: 'Indica que la operación fue exitosa', example: true })
@@ -13,7 +12,4 @@ export class SuccessResponseDto {
 
   @ApiProperty({ description: 'Carga útil de la respuesta. Su forma depende del endpoint.', example: {} })
   data!: unknown;
-
-  @ApiPropertyOptional({ description: 'Metadatos de paginación por cursor', type: () => PaginationMetaDto })
-  meta?: PaginationMetaDto;
 }
