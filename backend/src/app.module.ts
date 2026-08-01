@@ -5,9 +5,8 @@ import { CreditApplicationsModule } from '@/modules/credit-applications/credit-a
 import { SeedModule } from '@/modules/seed/seed.module';
 import { AdminModule } from '@/modules/admin/admin.module';
 import { EventsModule } from '@/modules/events/events.module';
-import { GitHubActionsModule } from '@/modules/github-actions/github-actions.module';
 
 @Module({
-  imports: [PrismaModule, HealthModule, CreditApplicationsModule, SeedModule, AdminModule, EventsModule, GitHubActionsModule],
+  imports: [PrismaModule, HealthModule, CreditApplicationsModule, SeedModule, AdminModule, EventsModule],
 })
 export class AppModule {}

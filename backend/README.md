@@ -14,7 +14,6 @@ API NestJS que soporta el flujo de originación digital de crédito de libre des
 - **Documentación API:** Swagger (`/api/docs`).
 - **Health checks:** `@nestjs/terminus` (`/health`).
 - **Notificaciones en tiempo real:** Server-Sent Events (`/events`) para revalidación de cachés (SSG/ISR).
-- **GitHub Actions:** `repository_dispatch` disparado automáticamente por cambios en referencias o base de datos.
 
 ## Estructura de carpetas
 
@@ -96,11 +95,6 @@ DATABASE_URL=postgresql://credi:credi@localhost:5432/credit
 PORT=3000
 ADMIN_SECRET=super-secret-local-only
 NODE_ENV=development
-
-# GitHub Actions (repository_dispatch)
-GITHUB_TOKEN=ghp_xxx
-GITHUB_OWNER=drakkomaximo
-GITHUB_REPO=solicitud-credito-libre-destino
 ```
 
 ## Instalación
@@ -211,11 +205,45 @@ Swagger agrupa los endpoints en **Solicitudes de crédito** y en subgrupos dentr
 |--------|------|-------------|
 | GET | `/events` | Stream Server-Sent Events (SSE) para notificaciones en tiempo real |
 
-#### GitHub Actions
+### Revalidación on-demand (SSG/ISR)
 
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| POST | `/github/dispatch` | Disparar manualmente un `repository_dispatch` en GitHub |
+El backend notifica al frontend a través de SSE cuando cambian referencias o se limpia la base de datos. Para revalidar contenido estático bajo demanda sin webhooks ni GitHub Actions, el frontend debe:
+
+1. Conectarse a `GET /events` con `EventSource`.
+2. Escuchar los eventos `reference.created`, `reference.updated`, `reference.toggled` o `database.cleaned`.
+3. Llamar a una API route de Next.js (`/api/revalidate`) con el `tag` a invalidar.
+4. La API route ejecuta `revalidateTag('references')` (o `revalidatePath`) para regenerar el contenido afectado.
+
+Ejemplo de conexión SSE en el frontend:
+
+```js
+const source = new EventSource('http://localhost:3000/events');
+source.onmessage = async (event) => {
+  const { type } = JSON.parse(event.data);
+  if (type.startsWith('reference.') || type === 'database.cleaned') {
+    await fetch('/api/revalidate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tag: 'references' }),
+    });
+  }
+};
+```
+
+Ejemplo de API route en Next.js (`app/api/revalidate/route.ts`):
+
+```ts
+import { revalidateTag } from 'next/cache';
+import { NextRequest, NextResponse } from 'next/server';
+
+export async function POST(request: NextRequest) {
+  const { tag } = await request.json();
+  revalidateTag(tag);
+  return NextResponse.json({ revalidated: true });
+}
+```
+
+Para que esto funcione, las consultas del frontend deben etiquetarse con `next: { tags: ['references'] }` o `unstable_cache` con el mismo tag.
 
 ### Eventos SSE
 
@@ -290,6 +318,5 @@ El listado paginado usa paginación por cursor:
 - **Paginación por cursor (keyset):** reemplaza `OFFSET/LIMIT` para mejor rendimiento y consistencia.
 - **Enumeraciones dinámicas:** `GET /applications/enums` devuelve todos los códigos activos agrupados bajo sus respectivos dominios, permitiendo agregar nuevos dominios sin tocar el endpoint.
 - **Notificaciones SSE:** `GET /events` expone un stream de eventos que el frontend consume para revalidar cachés (SSG/ISR) cuando cambian referencias o se limpia la base de datos.
-- **GitHub Actions:** eventos `reference.*` y `database.cleaned` disparan automáticamente `repository_dispatch` con tipo `solicitud-cambio`, permitiendo workflows como deploys, revalidaciones o notificaciones.
 - **Referencias versionadas:** `DomainReference` guarda los valores de enumeración con `isActive`, `validFrom` y `validTo`, permitiendo activar/desactivar códigos sin perder la trazabilidad de registros anteriores.
 - **Prisma 5:** versión fija para evitar problemas de compatibilidad con el CLI y el schema.
