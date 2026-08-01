@@ -11,7 +11,7 @@ export class EnumsController {
   @Get('enums')
   @ApiOperation({
     summary: 'Listar enumeraciones del dominio',
-    description: 'Devuelve los valores activos para status, channel y documentType. Útil para poblar listas desplegables en el frontend.',
+    description: 'Devuelve de forma dinámica los códigos activos agrupados por dominio. Cada clave del objeto es un dominio existente y su valor es un array de codes activos.',
   })
   @ApiOkEnvelope('Enumeraciones obtenidas exitosamente')
   async getEnums() {

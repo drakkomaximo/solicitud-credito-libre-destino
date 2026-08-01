@@ -15,11 +15,7 @@ export interface UpdateReferenceDto {
   isActive?: boolean;
 }
 
-export interface EnumsResult {
-  status: string[];
-  channel: string[];
-  documentType: string[];
-}
+export type EnumsResult = Record<string, string[]>;
 
 export interface ListReferencesQuery {
   domain?: string;
@@ -76,17 +72,18 @@ export class ReferencesService {
   }
 
   async getEnums(): Promise<EnumsResult> {
-    const [status, channel, documentType] = await Promise.all([
-      this.getByDomain('application-status'),
-      this.getByDomain('application-channel'),
-      this.getByDomain('document-type'),
-    ]);
+    const refs = await this.prisma.domainReference.findMany({
+      where: { isActive: true },
+      orderBy: [{ domain: 'asc' }, { code: 'asc' }],
+      select: { domain: true, code: true },
+    });
 
-    return {
-      status: status.map((r) => r.code),
-      channel: channel.map((r) => r.code),
-      documentType: documentType.map((r) => r.code),
-    };
+    const result: EnumsResult = {};
+    for (const { domain, code } of refs) {
+      (result[domain] ||= []).push(code);
+    }
+
+    return result;
   }
 
   async create(dto: CreateReferenceDto): Promise<DomainReference> {
