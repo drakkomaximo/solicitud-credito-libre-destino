@@ -4,6 +4,7 @@ import { ApiOkEnvelope, ApiCreatedEnvelope, ApiPaginatedEnvelope } from '@/commo
 import { ErrorResponseDto } from '@/common/dto/error-response.dto';
 import { AdminService } from '@/modules/admin/application/services/admin.service';
 import { ReferencesService } from '@/modules/references/application/services/references.service';
+import { EventsService } from '@/modules/events/application/services/events.service';
 import { CreateReferenceDto } from './dto/create-reference.dto';
 import { UpdateReferenceDto } from './dto/update-reference.dto';
 
@@ -13,6 +14,7 @@ export class AdminController {
   constructor(
     private readonly adminService: AdminService,
     private readonly referencesService: ReferencesService,
+    private readonly eventsService: EventsService,
   ) {}
 
   @Post('database/clean')
@@ -24,7 +26,9 @@ export class AdminController {
     if (!secret) {
       throw new ForbiddenException('Se requiere el header x-admin-secret');
     }
-    return await this.adminService.cleanDatabase(secret);
+    const result = await this.adminService.cleanDatabase(secret);
+    this.eventsService.emit({ type: 'database.cleaned', payload: { source: 'admin' } });
+    return result;
   }
 
   @Get('references')
@@ -57,7 +61,9 @@ export class AdminController {
   @ApiBody({ type: CreateReferenceDto })
   @ApiCreatedEnvelope('Referencia creada')
   async createReference(@Body() dto: CreateReferenceDto) {
-    return this.referencesService.create(dto);
+    const ref = await this.referencesService.create(dto);
+    this.eventsService.emit({ type: 'reference.created', payload: { id: ref.id, domain: ref.domain, code: ref.code } });
+    return ref;
   }
 
   @Patch('references/:id')
@@ -65,13 +71,17 @@ export class AdminController {
   @ApiBody({ type: UpdateReferenceDto })
   @ApiOkEnvelope('Referencia actualizada')
   async updateReference(@Param('id') id: string, @Body() dto: UpdateReferenceDto) {
-    return this.referencesService.update(id, dto);
+    const ref = await this.referencesService.update(id, dto);
+    this.eventsService.emit({ type: 'reference.updated', payload: { id: ref.id, domain: ref.domain, code: ref.code } });
+    return ref;
   }
 
   @Post('references/:id/toggle')
   @ApiOperation({ summary: 'Activar o desactivar una referencia', description: 'Invierte el valor del campo isActive. Útil para deshabilitar valores sin borrarlos.' })
   @ApiOkEnvelope('Estado cambiado')
   async toggleReference(@Param('id') id: string) {
-    return this.referencesService.toggle(id);
+    const ref = await this.referencesService.toggle(id);
+    this.eventsService.emit({ type: 'reference.toggled', payload: { id: ref.id, domain: ref.domain, code: ref.code, isActive: ref.isActive } });
+    return ref;
   }
 }
