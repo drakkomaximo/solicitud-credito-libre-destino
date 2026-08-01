@@ -79,10 +79,13 @@ bun run dev
 
 El backend sigue una arquitectura hexagonal y modular bajo `src/modules/`:
 
-- `credit-applications/` — flujo principal de solicitudes de crédito.
+- `common/` — filtros, interceptores, DTOs y decoradores compartidos.
+- `credit-applications/` — flujo principal de solicitudes de crédito (creación, actualización parcial, simulación, finalización, abandono, búsqueda y trazabilidad).
 - `references/` — gestión de referencias de dominio versionadas (enums activables/desactivables).
-- `admin/` — limpieza de base de datos y CRUD de referencias.
-- `seed/` — población de datos de prueba.
+- `admin/` — limpieza de base de datos y CRUD de referencias (JWT requerido).
+- `seed/` — población de datos de prueba (JWT requerido).
+- `auth/` — autenticación administrativa y guardia de tokens de solicitud.
+- `events/` — emisión de eventos de dominio por Server-Sent Events (SSE).
 - `health/` — health checks con Terminus/Prisma.
 - `prisma/` — módulo y cliente de Prisma.
 
@@ -92,14 +95,17 @@ El backend sigue una arquitectura hexagonal y modular bajo `src/modules/`:
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
-| POST | `/applications` | Crear solicitud |
-| GET | `/applications` | Listar con filtros `status`, `channel`, `q` y paginación por cursor |
-| GET | `/applications/:id` | Detalle de la solicitud |
-| PATCH | `/applications/:id` | Actualizar datos complementarios |
-| POST | `/applications/:id/simulate-offer` | Simular oferta preliminar |
-| POST | `/applications/:id/finalize` | Enviar a validación |
-| POST | `/applications/:id/abandon` | Abandonar solicitud con motivo |
-| GET | `/applications/:id/events` | Trazabilidad de eventos |
+| POST | `/applications` | Crear solicitud (devuelve `accessToken`) |
+| GET | `/applications/lookup` | Buscar borrador por documento y teléfono |
+| GET | `/applications` | Listar con filtros `status`, `channel`, `q` y paginación por cursor (admin) |
+| GET | `/applications/:id` | Detalle de la solicitud (token de solicitud o admin) |
+| PATCH | `/applications/:id` | Actualizar datos complementarios (parcial; token o admin) |
+| POST | `/applications/:id/simulate-offer` | Simular oferta preliminar (token o admin) |
+| POST | `/applications/:id/finalize` | Enviar a validación (token o admin) |
+| POST | `/applications/:id/abandon` | Abandonar solicitud con motivo (token o admin) |
+| GET | `/applications/:id/events` | Trazabilidad de eventos (token o admin) |
+| POST | `/auth/login` | Login de administrador (JWT) |
+| GET | `/events` | Stream SSE de eventos de dominio |
 
 ### Complementarios
 
@@ -110,7 +116,7 @@ El backend sigue una arquitectura hexagonal y modular bajo `src/modules/`:
 | POST | `/admin/references` | Crear referencia de dominio |
 | PATCH | `/admin/references/:id` | Actualizar referencia |
 | POST | `/admin/references/:id/toggle` | Activar/desactivar referencia |
-| POST | `/admin/database/clean` | Limpiar base de datos (`x-admin-secret`) |
+| POST | `/admin/database/clean` | Limpiar base de datos (JWT) |
 | POST | `/seed` | Poblar datos de prueba |
 | GET | `/health` | Health check (app + Prisma) |
 
@@ -137,6 +143,10 @@ curl -X POST http://localhost:3000/applications \
 - **Módulos por bounded context:** `credit-applications`, `references`, `admin`, `seed` y `health` viven bajo `src/modules/`.
 - **Hexagonal por módulo:** cada módulo separa `application`, `domain` e `infrastructure`.
 - **Referencias versionadas:** `DomainReference` permite activar/desactivar valores de enumeración sin perder trazabilidad.
+- **Autenticación dual:** JWT de administrador (`/auth/login`) para `admin`, `seed` y listado; token de solicitud generado al crear para las demás operaciones del cliente.
+- **PATCH parcial:** `PATCH /applications/:id` acepta solo los campos editados, permitiendo guardar borrador paso a paso.
+- **Recuperación de borradores:** `GET /applications/lookup` permite retomar una solicitud por documento y teléfono.
+- **Eventos SSE:** `GET /events` notifica al frontend cambios en referencias y limpieza de base de datos.
 - **Respuestas estandarizadas:** `ResponseFormatInterceptor` y `AllExceptionsFilter` envuelven todas las respuestas con `success`, `statusCode`, `message`, `data` y `meta`.
 - **Paginación por cursor (keyset):** reemplaza `OFFSET/LIMIT` para mejor rendimiento y consistencia.
 - **Prisma 5:** genera el cliente y maneja migraciones.
@@ -144,9 +154,35 @@ curl -X POST http://localhost:3000/applications \
 - **Frontend App Router:** usa server/client components; formularios con `react-hook-form` y validación con Zod.
 - **Bun:** gestor de paquetes para backend y frontend.
 
+## Uso de inteligencia artificial
+
+Este proyecto fue desarrollado con asistencia de un agente de código (Cascade, modelo SWE-1.6 de Cognition), integrado en el IDE del desarrollador, bajo un flujo de pair programming iterativo.
+
+### Versionamiento
+
+- **Control de versiones:** Git, con el repositorio alojado en GitHub bajo la rama `main`.
+- **Versiones del código:** cada cambio se registró mediante commits atómicos con mensajes en inglés siguiendo Conventional Commits (`feat`, `fix`, `docs`, `refactor`, etc.).
+- **Historial de cambios:** el repo mantiene un historial lineal con los puntos de control del desarrollo; ver `git log` para el detalle.
+
+### Tipo de IA y herramientas
+
+- **Asistente:** Cascade (agente de programación de Cognition, modelo SWE-1.6).
+- **IDE:** editor con integración nativa del asistente (entorno de pair programming en el IDE).
+- **Comunicación:** prompts en español, respuestas y código en español/inglés según el contexto.
+
+### Proceso seguido
+
+1. **Definición del alcance:** el desarrollador describió el requerimiento del micrositio de crédito de libre destino.
+2. **Planificación:** se construyó una lista de tareas priorizada; el desarrollador aprobó o ajustó el plan en cada paso.
+3. **Implementación por pares (pair programming):** el agente escribió el código, explicó decisiones y aplicó cambios bajo la dirección del desarrollador.
+4. **Revisión y feedback:** el desarrollador solicitó ajustes (autenticación, documentación, estructura de carpetas, etc.), que fueron implementados y versionados.
+5. **Verificación:** `bun run build`, revisión de Swagger y commits frecuentes para mantener el repo sincronizado.
+6. **Documentación:** el `README` global y el del `backend` se actualizaron en cada iteración para reflejar el estado actual.
+
 ## Supuestos y limitaciones
 
 - La simulación de oferta es una lógica interna de ejemplo; en producción se conectaría al motor de scoring/riesgo correspondiente.
 - Docker Desktop debe estar corriendo para levantar PostgreSQL; si no está disponible, el backend no iniciará por la conexión a Prisma.
 - No se incluyen logos ni imágenes alusivas a entidades financieras reales.
 - El seed deja la base en un estado inicial determinístico y está pensado solo para desarrollo.
+- El token de solicitud es básico (no revocable ni rotativo); el flujo de recuperación por documento/teléfono es funcional pero no verifica identidad con OTP.
