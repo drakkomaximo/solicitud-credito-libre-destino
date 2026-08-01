@@ -1,4 +1,4 @@
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from '@/app.module';
@@ -19,7 +19,7 @@ async function bootstrap() {
       transform: true,
     }),
   );
-  app.useGlobalInterceptors(new ResponseFormatInterceptor());
+  app.useGlobalInterceptors(new ResponseFormatInterceptor(app.get(Reflector)));
   app.useGlobalFilters(new AllExceptionsFilter());
   app.enableCors();
 

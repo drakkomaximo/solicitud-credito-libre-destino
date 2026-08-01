@@ -205,6 +205,36 @@ Swagger agrupa los endpoints en **Solicitudes de crédito** y en subgrupos dentr
 |--------|------|-------------|
 | GET | `/events` | Stream Server-Sent Events (SSE) para notificaciones en tiempo real |
 
+### Eventos SSE
+
+Cada mensaje del stream tiene la siguiente estructura:
+
+```json
+{
+  "type": "reference.created",
+  "payload": { "id": "...", "domain": "...", "code": "..." },
+  "timestamp": "2026-08-01T18:00:00.000Z"
+}
+```
+
+En el transporte SSE se ve como:
+
+```
+data: {"type":"reference.created","payload":{...},"timestamp":"..."}
+
+```
+
+**Tipos actuales:**
+
+- `reference.created`
+- `reference.updated`
+- `reference.toggled`
+- `database.cleaned`
+
+**Errores:** si ocurre un error al abrir el stream, la respuesta sigue el formato estándar de error (`success: false`, `message: [...]`) con el código correspondiente. Una vez abierto el stream, no hay mensajes de error en línea; la conexión simplemente se cierra.
+
+**Consumo de recursos:** cada cliente mantiene una conexión HTTP abierta. En producción, limitar el número de conexiones concurrentes y asegurar que el balanceador (Nginx, ALB, Cloudflare, etc.) no corte conexiones largas por timeout. En local esto no es un problema para el volumen esperado de pruebas.
+
 ## Formato de respuestas
 
 Todas las respuestas exitosas y de error comparten un envelope común gracias a `ResponseFormatInterceptor` y `AllExceptionsFilter`:
