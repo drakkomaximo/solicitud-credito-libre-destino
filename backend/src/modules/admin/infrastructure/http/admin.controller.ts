@@ -26,14 +26,29 @@ export class AdminController {
   }
 
   @Get('references')
-  @ApiOperation({ summary: 'Listar referencias de dominio', description: 'Devuelve los valores de referencia. Permite filtrar por dominio.' })
+  @ApiOperation({ summary: 'Listar referencias de dominio', description: 'Devuelve los valores de referencia paginados por cursor. Permite filtrar por dominio.' })
   @ApiQuery({ name: 'domain', required: false, description: 'Dominio a filtrar' })
+  @ApiQuery({ name: 'cursor', required: false, description: 'Cursor de paginación' })
+  @ApiQuery({ name: 'limit', required: false, description: 'Cantidad de resultados (máx. 100)' })
   @ApiResponse({ status: 200, description: 'Referencias obtenidas' })
-  async listReferences(@Query('domain') domain?: string) {
-    if (domain) {
-      return this.referencesService.getByDomain(domain, false);
-    }
-    return this.referencesService.findAll();
+  async listReferences(
+    @Query('domain') domain?: string,
+    @Query('cursor') cursor?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.referencesService.list({
+      domain,
+      cursor,
+      limit: limit ? Number(limit) : undefined,
+    });
+  }
+
+  @Get('references/:id')
+  @ApiOperation({ summary: 'Obtener una referencia por ID', description: 'Devuelve el detalle de una referencia de dominio.' })
+  @ApiResponse({ status: 200, description: 'Referencia obtenida' })
+  @ApiResponse({ status: 404, description: 'Referencia no encontrada' })
+  async getReference(@Param('id') id: string) {
+    return this.referencesService.findById(id);
   }
 
   @Post('references')
