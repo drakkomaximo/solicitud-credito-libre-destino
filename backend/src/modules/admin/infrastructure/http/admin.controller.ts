@@ -1,14 +1,17 @@
-import { Body, Controller, ForbiddenException, Get, Headers, Param, Patch, Post, Query } from '@nestjs/common';
-import { ApiBody, ApiHeader, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ApiOkEnvelope, ApiCreatedEnvelope, ApiPaginatedEnvelope } from '@/common/decorators/api-responses.decorator';
 import { ErrorResponseDto } from '@/common/dto/error-response.dto';
 import { AdminService } from '@/modules/admin/application/services/admin.service';
 import { ReferencesService } from '@/modules/references/application/services/references.service';
 import { EventsService } from '@/modules/events/application/services/events.service';
+import { JwtAuthGuard } from '@/modules/auth/infrastructure/guards/jwt-auth.guard';
 import { CreateReferenceDto } from './dto/create-reference.dto';
 import { UpdateReferenceDto } from './dto/update-reference.dto';
 
+@ApiBearerAuth()
 @ApiTags('Admin')
+@UseGuards(JwtAuthGuard)
 @Controller('admin')
 export class AdminController {
   constructor(
@@ -18,15 +21,12 @@ export class AdminController {
   ) {}
 
   @Post('database/clean')
-  @ApiOperation({ summary: 'Limpiar base de datos', description: 'Elimina los registros de solicitudes. Solo disponible en ambiente local con la clave administrativa correcta.' })
-  @ApiHeader({ name: 'x-admin-secret', description: 'Clave secreta de administrador', required: true })
+  @ApiOperation({ summary: 'Limpiar base de datos', description: 'Elimina los registros de solicitudes. Requiere token JWT de administrador. Solo disponible en ambiente local.' })
   @ApiCreatedEnvelope('Base de datos limpiada')
-  @ApiResponse({ status: 403, description: 'Clave faltante, incorrecta o ambiente no permitido', type: ErrorResponseDto })
-  async cleanDatabase(@Headers('x-admin-secret') secret: string) {
-    if (!secret) {
-      throw new ForbiddenException('Se requiere el header x-admin-secret');
-    }
-    const result = await this.adminService.cleanDatabase(secret);
+  @ApiResponse({ status: 403, description: 'Ambiente no permitido', type: ErrorResponseDto })
+  @ApiResponse({ status: 401, description: 'Token faltante, inválido o expirado', type: ErrorResponseDto })
+  async cleanDatabase() {
+    const result = await this.adminService.cleanDatabase();
     this.eventsService.emit({ type: 'database.cleaned', payload: { source: 'admin' } });
     return result;
   }

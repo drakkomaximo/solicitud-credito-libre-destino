@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '@/prisma/prisma.service';
 
@@ -9,14 +9,9 @@ export class AdminService {
     private readonly config: ConfigService,
   ) {}
 
-  async cleanDatabase(secret: string): Promise<{ deletedApplications: number }> {
+  async cleanDatabase(): Promise<{ deletedApplications: number }> {
     if (this.config.get('NODE_ENV') === 'production') {
       throw new ForbiddenException('Este servicio no está disponible en producción');
-    }
-
-    const expected = this.config.get<string>('ADMIN_SECRET');
-    if (!expected || secret !== expected) {
-      throw new UnauthorizedException('Clave de administrador inválida');
     }
 
     const result = await this.prisma.creditApplication.deleteMany({});

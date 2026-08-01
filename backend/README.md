@@ -14,6 +14,7 @@ API NestJS que soporta el flujo de originación digital de crédito de libre des
 - **Documentación API:** Swagger (`/api/docs`).
 - **Health checks:** `@nestjs/terminus` (`/health`).
 - **Notificaciones en tiempo real:** Server-Sent Events (`/events`) para revalidación de cachés (SSG/ISR).
+- **Autenticación administrativa:** JWT (`/auth/login`) para proteger el panel admin y seed.
 
 ## Estructura de carpetas
 
@@ -64,10 +65,15 @@ backend/
 │       │   ├── seed.module.ts
 │       │   ├── application/services/seed.service.ts
 │       │   └── infrastructure/http/seed.controller.ts
-│       └── events/
-│           ├── events.module.ts
-│           ├── application/services/events.service.ts
-│           └── infrastructure/http/events.controller.ts
+│       ├── events/
+│       │   ├── events.module.ts
+│       │   ├── events.service.ts
+│       │   └── events.controller.ts
+│       └── auth/
+│           ├── auth.module.ts
+│           ├── auth.service.ts
+│           ├── auth.controller.ts
+│           └── jwt-auth.guard.ts
 ```
 
 ## Convenciones
@@ -94,6 +100,8 @@ Ejemplo:
 DATABASE_URL=postgresql://credi:credi@localhost:5432/credit
 PORT=3000
 ADMIN_SECRET=super-secret-local-only
+JWT_SECRET=super-secret-jwt-signing-key
+JWT_EXPIRES_IN=8h
 NODE_ENV=development
 ```
 
@@ -154,7 +162,7 @@ bun run test:e2e     # end-to-end (requiere DB)
 
 ## Endpoints principales
 
-Swagger agrupa los endpoints en **Solicitudes de crédito** y en subgrupos dentro de **Complementarios**: `Admin`, `Dominios`, `Seed` y `Health`.
+Swagger agrupa los endpoints en **Solicitudes de crédito** y en subgrupos dentro de **Complementarios**: `Admin`, `Dominios`, `Seed`, `Health` y `Auth`.
 
 ### Solicitudes de crédito
 
@@ -175,7 +183,7 @@ Swagger agrupa los endpoints en **Solicitudes de crédito** y en subgrupos dentr
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
-| POST | `/admin/database/clean` | Limpiar la base de datos (`x-admin-secret` requerido, solo local) |
+| POST | `/admin/database/clean` | Limpiar la base de datos (JWT requerido, solo local) |
 | GET | `/admin/references` | Listar referencias de dominio (opcionalmente filtrar por `?domain=`) |
 | POST | `/admin/references` | Crear una referencia de dominio |
 | PATCH | `/admin/references/:id` | Actualizar label/descripción/estado de una referencia |
@@ -191,7 +199,13 @@ Swagger agrupa los endpoints en **Solicitudes de crédito** y en subgrupos dentr
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
-| POST | `/seed` | Poblar datos de prueba (solo si la tabla está vacía) |
+| POST | `/seed` | Poblar datos de prueba (JWT requerido) |
+
+#### Auth
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| POST | `/auth/login` | Obtener token JWT con `username` y `password` |
 
 #### Health
 
@@ -244,6 +258,33 @@ export async function POST(request: NextRequest) {
 ```
 
 Para que esto funcione, las consultas del frontend deben etiquetarse con `next: { tags: ['references'] }` o `unstable_cache` con el mismo tag.
+
+## Autenticación administrativa
+
+Los endpoints bajo `/admin` y `/seed` requieren un token JWT. Flujo típico:
+
+```bash
+POST /auth/login
+{
+  "username": "admin",
+  "password": "<ADMIN_SECRET>"
+}
+```
+
+Respuesta:
+
+```json
+{
+  "success": true,
+  "data": { "accessToken": "..." }
+}
+```
+
+Usar el token en cada petición protegida:
+
+```bash
+curl -H "Authorization: Bearer <accessToken>" http://localhost:3000/admin/references
+```
 
 ### Eventos SSE
 
@@ -316,7 +357,10 @@ El listado paginado usa paginación por cursor:
 - **Servicio agregado:** `CreditApplicationsService` orquesta todos los casos de uso y mantiene el dominio como fuente de verdad.
 - **Persistencia transaccional:** el repositorio Prisma actualiza `CreditApplication` junto con sus eventos en una transacción.
 - **Paginación por cursor (keyset):** reemplaza `OFFSET/LIMIT` para mejor rendimiento y consistencia.
-- **Enumeraciones dinámicas:** `GET /applications/enums` devuelve todos los códigos activos agrupados bajo sus respectivos dominios, permitiendo agregar nuevos dominios sin tocar el endpoint.
+- **Enumeraciones dinámicas:** `GET /applications/enums` devuelve todos los códigos activos agrupados bajo sus respectivos dominios, permitiendo agregar nuevos dominios sin tocar el endpoint (incluye `credit-term` con plazos 12, 24, 36, 48, 60, 72 meses).
+- **Plazo controlado:** el campo `term` se valida contra el dominio `credit-term`, evitando plazos arbitrarios.
+- **Canal asistido:** `advisorId` identifica al asesor cuando `channel === 'advisor'`.
+- **Autenticación JWT:** el panel administrativo (`/admin`, `/seed`) requiere token Bearer obtenido en `/auth/login`.
 - **Notificaciones SSE:** `GET /events` expone un stream de eventos que el frontend consume para revalidar cachés (SSG/ISR) cuando cambian referencias o se limpia la base de datos.
 - **Referencias versionadas:** `DomainReference` guarda los valores de enumeración con `isActive`, `validFrom` y `validTo`, permitiendo activar/desactivar códigos sin perder la trazabilidad de registros anteriores.
 - **Prisma 5:** versión fija para evitar problemas de compatibilidad con el CLI y el schema.

@@ -2,6 +2,7 @@ import { BadRequestException, Inject, Injectable, NotFoundException, ServiceUnav
 import { CreditApplication } from '@/modules/credit-applications/domain/entities/credit-application';
 import type { ApplicationListFilters, ApplicationListQuery, ICreditApplicationRepository } from '@/modules/credit-applications/domain/repositories/credit-application.repository';
 import { CreateApplicationUseCase } from '@/modules/credit-applications/application/use-cases/create-application/create-application.use-case';
+import { ReferencesService } from '@/modules/references/application/services/references.service';
 import type { CreateApplicationCommand } from '@/modules/credit-applications/application/use-cases/create-application/create-application.command';
 
 export interface ListApplicationsQuery extends ApplicationListQuery {}
@@ -39,7 +40,15 @@ export class CreditApplicationsService {
   constructor(
     @Inject('CreditApplicationRepository') private readonly repository: ICreditApplicationRepository,
     private readonly createApplicationUseCase: CreateApplicationUseCase,
+    private readonly referencesService: ReferencesService,
   ) {}
+
+  private async validateTerm(term: number): Promise<void> {
+    const refs = await this.referencesService.getByDomain('credit-term');
+    if (!refs.some((r) => r.code === String(term))) {
+      throw new BadRequestException(`El plazo ${term} meses no está permitido`);
+    }
+  }
 
   async create(command: CreateApplicationCommand): Promise<CreditApplication> {
     return this.createApplicationUseCase.execute(command);
@@ -68,6 +77,7 @@ export class CreditApplicationsService {
     if (application.status !== 'DRAFT') {
       throw new BadRequestException('Solo se puede editar una solicitud en estado DRAFT');
     }
+    await this.validateTerm(command.term);
     application.income = command.income;
     application.expenses = command.expenses;
     application.amount = command.amount;

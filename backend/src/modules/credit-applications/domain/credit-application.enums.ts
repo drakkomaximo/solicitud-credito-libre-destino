@@ -23,3 +23,14 @@ export const DocumentType = {
 } as const;
 
 export type DocumentTypeValue = (typeof DocumentType)[keyof typeof DocumentType];
+
+export const CreditTerm = {
+  12: '12',
+  24: '24',
+  36: '36',
+  48: '48',
+  60: '60',
+  72: '72',
+} as const;
+
+export type CreditTermValue = (typeof CreditTerm)[keyof typeof CreditTerm];
