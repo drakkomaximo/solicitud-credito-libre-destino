@@ -1,5 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOkEnvelope } from '@/common/decorators/api-responses.decorator';
 import { ReferencesService } from '@/modules/references/application/services/references.service';
 
 @ApiTags('Dominios')
@@ -12,7 +13,7 @@ export class EnumsController {
     summary: 'Listar enumeraciones del dominio',
     description: 'Devuelve los valores activos para status, channel y documentType. Útil para poblar listas desplegables en el frontend.',
   })
-  @ApiResponse({ status: 200, description: 'Enumeraciones obtenidas exitosamente' })
+  @ApiOkEnvelope('Enumeraciones obtenidas exitosamente')
   async getEnums() {
     return this.referencesService.getEnums();
   }

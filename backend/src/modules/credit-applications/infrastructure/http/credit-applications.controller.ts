@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
-import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiOkEnvelope, ApiCreatedEnvelope, ApiPaginatedEnvelope } from '@/common/decorators/api-responses.decorator';
 import type { ListApplicationsQuery } from '@/modules/credit-applications/application/services/credit-applications.service';
 import { CreditApplicationsService } from '@/modules/credit-applications/application/services/credit-applications.service';
 import { ApplicationStatus, ApplicationChannel, DocumentType } from '@/modules/credit-applications/domain/credit-application.enums';
@@ -14,8 +15,7 @@ export class CreditApplicationsController {
 
   @Post()
   @ApiOperation({ summary: 'Crear una solicitud de crédito', description: 'Registra una nueva solicitud en estado DRAFT.' })
-  @ApiResponse({ status: 201, description: 'Solicitud creada exitosamente' })
-  @ApiResponse({ status: 400, description: 'Datos de entrada inválidos' })
+  @ApiCreatedEnvelope('Solicitud creada exitosamente')
   async create(@Body() dto: CreateApplicationDto) {
     return await this.service.create(dto);
   }
@@ -30,8 +30,7 @@ export class CreditApplicationsController {
   @ApiQuery({ name: 'q', required: false, description: 'Texto de búsqueda libre sobre documento, nombre o apellido' })
   @ApiQuery({ name: 'cursor', required: false, type: String, description: 'Cursor para paginación basada en id (el id del último registro visto)' })
   @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Tamaño de página (default 10, máx 100)' })
-  @ApiResponse({ status: 200, description: 'Listado obtenido exitosamente' })
-  @ApiResponse({ status: 400, description: 'Parámetros de consulta inválidos' })
+  @ApiPaginatedEnvelope('Listado obtenido exitosamente')
   list(
     @Query('status') status?: string,
     @Query('channel') channel?: string,
@@ -47,52 +46,42 @@ export class CreditApplicationsController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Obtener una solicitud por id', description: 'Devuelve el detalle completo de una solicitud de crédito incluyendo su historial de eventos.' })
-  @ApiResponse({ status: 200, description: 'Solicitud encontrada' })
-  @ApiResponse({ status: 404, description: 'Solicitud no encontrada' })
+  @ApiOkEnvelope('Solicitud encontrada')
   async getById(@Param('id') id: string) {
     return await this.service.getById(id);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Actualizar una solicitud', description: 'Actualiza los datos complementarios de la solicitud. Solo permite edición mientras esté en estado DRAFT.' })
-  @ApiResponse({ status: 200, description: 'Solicitud actualizada' })
-  @ApiResponse({ status: 400, description: 'Datos inválidos o la solicitud no permite edición' })
-  @ApiResponse({ status: 404, description: 'Solicitud no encontrada' })
+  @ApiOkEnvelope('Solicitud actualizada')
   async update(@Param('id') id: string, @Body() dto: UpdateApplicationDto) {
     return await this.service.update(id, dto);
   }
 
   @Post(':id/simulate-offer')
   @ApiOperation({ summary: 'Simular oferta de crédito', description: 'Calcula la oferta de acuerdo a la capacidad de pago del solicitante.' })
-  @ApiResponse({ status: 200, description: 'Oferta simulada' })
-  @ApiResponse({ status: 400, description: 'No se puede simular la oferta' })
-  @ApiResponse({ status: 404, description: 'Solicitud no encontrada' })
+  @ApiOkEnvelope('Oferta simulada')
   async simulateOffer(@Param('id') id: string) {
     return await this.service.simulateOffer(id);
   }
 
   @Post(':id/finalize')
   @ApiOperation({ summary: 'Finalizar una solicitud', description: 'Cambia el estado de la solicitud a PENDING_VALIDATION para que pase al proceso de validación.' })
-  @ApiResponse({ status: 200, description: 'Solicitud finalizada' })
-  @ApiResponse({ status: 400, description: 'No se puede finalizar la solicitud' })
-  @ApiResponse({ status: 404, description: 'Solicitud no encontrada' })
+  @ApiOkEnvelope('Solicitud finalizada')
   async finalize(@Param('id') id: string) {
     return await this.service.finalize(id);
   }
 
   @Post(':id/abandon')
   @ApiOperation({ summary: 'Abandonar una solicitud', description: 'Registra el abandono de la solicitud con un motivo. No aplica si ya fue finalizada o enviada a validación.' })
-  @ApiResponse({ status: 200, description: 'Solicitud abandonada' })
-  @ApiResponse({ status: 400, description: 'No se puede abandonar la solicitud' })
-  @ApiResponse({ status: 404, description: 'Solicitud no encontrada' })
+  @ApiOkEnvelope('Solicitud abandonada')
   async abandon(@Param('id') id: string, @Body() dto: AbandonApplicationDto) {
     return await this.service.abandon(id, dto);
   }
 
   @Get(':id/events')
   @ApiOperation({ summary: 'Consultar eventos de una solicitud', description: 'Devuelve la trazabilidad de cambios de estado y acciones realizadas sobre la solicitud.' })
-  @ApiResponse({ status: 200, description: 'Eventos obtenidos' })
-  @ApiResponse({ status: 404, description: 'Solicitud no encontrada' })
+  @ApiOkEnvelope('Eventos obtenidos')
   async getEvents(@Param('id') id: string) {
     return await this.service.getEvents(id);
   }
