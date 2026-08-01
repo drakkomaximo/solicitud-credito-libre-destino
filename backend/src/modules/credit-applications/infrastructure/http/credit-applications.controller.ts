@@ -1,8 +1,12 @@
-import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
-import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ApiOkEnvelope, ApiCreatedEnvelope, ApiPaginatedEnvelope } from '@/common/decorators/api-responses.decorator';
+import { ErrorResponseDto } from '@/common/dto/error-response.dto';
 import type { ListApplicationsQuery } from '@/modules/credit-applications/application/services/credit-applications.service';
 import { CreditApplicationsService } from '@/modules/credit-applications/application/services/credit-applications.service';
+import { AuthService } from '@/modules/auth/application/services/auth.service';
+import { JwtAuthGuard } from '@/modules/auth/infrastructure/guards/jwt-auth.guard';
+import { ApplicationOrAdminGuard } from '@/modules/auth/infrastructure/guards/application-or-admin.guard';
 import { ApplicationStatus, ApplicationChannel, DocumentType } from '@/modules/credit-applications/domain/credit-application.enums';
 import { CreateApplicationDto } from '@/modules/credit-applications/infrastructure/http/dto/create-application.dto';
 import { UpdateApplicationDto } from '@/modules/credit-applications/infrastructure/http/dto/update-application.dto';
@@ -11,19 +15,26 @@ import { AbandonApplicationDto } from '@/modules/credit-applications/infrastruct
 @ApiTags('Solicitudes de crédito')
 @Controller('applications')
 export class CreditApplicationsController {
-  constructor(private readonly service: CreditApplicationsService) {}
+  constructor(
+    private readonly service: CreditApplicationsService,
+    private readonly authService: AuthService,
+  ) {}
 
   @Post()
-  @ApiOperation({ summary: 'Crear una solicitud de crédito', description: 'Registra una nueva solicitud en estado DRAFT.' })
+  @ApiOperation({ summary: 'Crear una solicitud de crédito', description: 'Registra una nueva solicitud en estado DRAFT. Devuelve la solicitud junto con un token de acceso para los siguientes pasos.' })
   @ApiCreatedEnvelope('Solicitud creada exitosamente')
   async create(@Body() dto: CreateApplicationDto) {
-    return await this.service.create(dto);
+    const application = await this.service.create(dto);
+    const accessToken = this.authService.generateApplicationToken(application.id);
+    return { ...application, accessToken };
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Listar solicitudes de crédito',
-    description: 'Listado paginado por cursor (keyset) con filtros opcionales de status, channel y búsqueda libre.',
+    description: 'Listado paginado por cursor (keyset) con filtros opcionales de status, channel y búsqueda libre. Requiere JWT de administrador.',
   })
   @ApiQuery({ name: 'status', required: false, enum: Object.values(ApplicationStatus), description: 'Filtrar por estado de la solicitud' })
   @ApiQuery({ name: 'channel', required: false, enum: Object.values(ApplicationChannel), description: 'Filtrar por canal de atención' })
@@ -31,6 +42,7 @@ export class CreditApplicationsController {
   @ApiQuery({ name: 'cursor', required: false, type: String, description: 'Cursor para paginación basada en id (el id del último registro visto)' })
   @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Tamaño de página (default 10, máx 100)' })
   @ApiPaginatedEnvelope('Listado obtenido exitosamente')
+  @ApiResponse({ status: 401, description: 'Token faltante, inválido o expirado', type: ErrorResponseDto })
   list(
     @Query('status') status?: string,
     @Query('channel') channel?: string,
@@ -45,43 +57,61 @@ export class CreditApplicationsController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Obtener una solicitud por id', description: 'Devuelve el detalle completo de una solicitud de crédito incluyendo su historial de eventos.' })
+  @UseGuards(ApplicationOrAdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Obtener una solicitud por id', description: 'Devuelve el detalle completo de una solicitud. Requiere el token de la solicitud o JWT de administrador.' })
   @ApiOkEnvelope('Solicitud encontrada')
+  @ApiResponse({ status: 401, description: 'Token faltante, inválido o expirado', type: ErrorResponseDto })
   async getById(@Param('id') id: string) {
     return await this.service.getById(id);
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Actualizar una solicitud', description: 'Actualiza los datos complementarios de la solicitud. Solo permite edición mientras esté en estado DRAFT.' })
+  @UseGuards(ApplicationOrAdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Actualizar una solicitud', description: 'Actualiza los datos complementarios. Requiere el token de la solicitud o JWT de administrador. Solo permite edición mientras esté en estado DRAFT.' })
   @ApiOkEnvelope('Solicitud actualizada')
+  @ApiResponse({ status: 401, description: 'Token faltante, inválido o expirado', type: ErrorResponseDto })
   async update(@Param('id') id: string, @Body() dto: UpdateApplicationDto) {
     return await this.service.update(id, dto);
   }
 
   @Post(':id/simulate-offer')
-  @ApiOperation({ summary: 'Simular oferta de crédito', description: 'Calcula la oferta de acuerdo a la capacidad de pago del solicitante.' })
+  @UseGuards(ApplicationOrAdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Simular oferta de crédito', description: 'Calcula la oferta. Requiere el token de la solicitud o JWT de administrador.' })
   @ApiOkEnvelope('Oferta simulada')
+  @ApiResponse({ status: 401, description: 'Token faltante, inválido o expirado', type: ErrorResponseDto })
   async simulateOffer(@Param('id') id: string) {
     return await this.service.simulateOffer(id);
   }
 
   @Post(':id/finalize')
-  @ApiOperation({ summary: 'Finalizar una solicitud', description: 'Cambia el estado de la solicitud a PENDING_VALIDATION para que pase al proceso de validación.' })
+  @UseGuards(ApplicationOrAdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Finalizar una solicitud', description: 'Cambia el estado a PENDING_VALIDATION. Requiere el token de la solicitud o JWT de administrador.' })
   @ApiOkEnvelope('Solicitud finalizada')
+  @ApiResponse({ status: 401, description: 'Token faltante, inválido o expirado', type: ErrorResponseDto })
   async finalize(@Param('id') id: string) {
     return await this.service.finalize(id);
   }
 
   @Post(':id/abandon')
-  @ApiOperation({ summary: 'Abandonar una solicitud', description: 'Registra el abandono de la solicitud con un motivo. No aplica si ya fue finalizada o enviada a validación.' })
+  @UseGuards(ApplicationOrAdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Abandonar una solicitud', description: 'Registra el abandono. Requiere el token de la solicitud o JWT de administrador.' })
   @ApiOkEnvelope('Solicitud abandonada')
+  @ApiResponse({ status: 401, description: 'Token faltante, inválido o expirado', type: ErrorResponseDto })
   async abandon(@Param('id') id: string, @Body() dto: AbandonApplicationDto) {
     return await this.service.abandon(id, dto);
   }
 
   @Get(':id/events')
-  @ApiOperation({ summary: 'Consultar eventos de una solicitud', description: 'Devuelve la trazabilidad de cambios de estado y acciones realizadas sobre la solicitud.' })
+  @UseGuards(ApplicationOrAdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Consultar eventos de una solicitud', description: 'Devuelve la trazabilidad. Requiere el token de la solicitud o JWT de administrador.' })
   @ApiOkEnvelope('Eventos obtenidos')
+  @ApiResponse({ status: 401, description: 'Token faltante, inválido o expirado', type: ErrorResponseDto })
   async getEvents(@Param('id') id: string) {
     return await this.service.getEvents(id);
   }

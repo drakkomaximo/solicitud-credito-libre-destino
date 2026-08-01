@@ -11,6 +11,10 @@ export interface LoginResult {
   accessToken: string;
 }
 
+export interface ApplicationTokenResult {
+  accessToken: string;
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -30,5 +34,10 @@ export class AuthService {
     const accessToken = this.jwtService.sign(payload);
 
     return { accessToken };
+  }
+
+  generateApplicationToken(applicationId: string): string {
+    const payload = { sub: applicationId, role: 'application' };
+    return this.jwtService.sign(payload);
   }
 }

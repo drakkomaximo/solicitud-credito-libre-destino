@@ -166,16 +166,16 @@ Swagger agrupa los endpoints en **Solicitudes de crédito** y en subgrupos dentr
 
 ### Solicitudes de crédito
 
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| POST | `/applications` | Crear solicitud |
-| GET | `/applications` | Listar con filtros `status`, `channel`, `q` y paginación por cursor |
-| GET | `/applications/:id` | Detalle |
-| PATCH | `/applications/:id` | Actualizar datos complementarios |
-| POST | `/applications/:id/simulate-offer` | Simular oferta |
-| POST | `/applications/:id/finalize` | Enviar a validación |
-| POST | `/applications/:id/abandon` | Abandonar |
-| GET | `/applications/:id/events` | Trazabilidad |
+| Método | Ruta | Autenticación | Descripción |
+|--------|------|---------------|-------------|
+| POST | `/applications` | Pública | Crear solicitud. Devuelve la solicitud y su token de acceso. |
+| GET | `/applications` | JWT admin | Listar con filtros `status`, `channel`, `q` y paginación por cursor |
+| GET | `/applications/:id` | Token de solicitud o JWT admin | Detalle |
+| PATCH | `/applications/:id` | Token de solicitud o JWT admin | Actualizar datos complementarios |
+| POST | `/applications/:id/simulate-offer` | Token de solicitud o JWT admin | Simular oferta |
+| POST | `/applications/:id/finalize` | Token de solicitud o JWT admin | Enviar a validación |
+| POST | `/applications/:id/abandon` | Token de solicitud o JWT admin | Abandonar |
+| GET | `/applications/:id/events` | Token de solicitud o JWT admin | Trazabilidad |
 
 ### Complementarios
 
@@ -259,9 +259,14 @@ export async function POST(request: NextRequest) {
 
 Para que esto funcione, las consultas del frontend deben etiquetarse con `next: { tags: ['references'] }` o `unstable_cache` con el mismo tag.
 
-## Autenticación administrativa
+## Autenticación
 
-Los endpoints bajo `/admin` y `/seed` requieren un token JWT. Flujo típico:
+El backend usa dos tipos de JWT:
+
+1. **Token de administrador** (`/auth/login`): para panel admin (`/admin/*`, `/seed`, `GET /applications`).
+2. **Token de solicitud** (`/applications`): se genera al crear una solicitud y permite continuar el flujo del cliente.
+
+### Administrador
 
 ```bash
 POST /auth/login
@@ -280,11 +285,31 @@ Respuesta:
 }
 ```
 
-Usar el token en cada petición protegida:
+### Token de solicitud
+
+Al crear una solicitud, `POST /applications` devuelve:
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "...",
+    "accessToken": "...",
+    "status": "DRAFT",
+    ...
+  }
+}
+```
+
+Usar ese token en las siguientes operaciones:
 
 ```bash
-curl -H "Authorization: Bearer <accessToken>" http://localhost:3000/admin/references
+curl -H "Authorization: Bearer <token>" http://localhost:3000/applications/<id>
+curl -H "Authorization: Bearer <token>" -X PATCH http://localhost:3000/applications/<id>
+curl -H "Authorization: Bearer <token>" http://localhost:3000/applications/<id>/events
 ```
+
+El token de solicitud permite acceder solo al `id` que lo generó. Un administrador puede usar su propio JWT para acceder a cualquiera.
 
 ### Eventos SSE
 
@@ -390,7 +415,7 @@ Listados como `GET /applications` o `GET /admin/references` devuelven `data` com
 
 Esta implementación se mantuvo deliberadamente mínima para cumplir el alcance del ejercicio. Por tiempo y complejidad se dejaron fuera los siguientes puntos, listados como trabajo futuro:
 
-- **Autenticación en `/applications`:** el flujo del cliente es público para permitir que un usuario solicite crédito sin registrarse. En producción debería existir un mecanismo de sesión/token por cliente (ej. JWT de corta duración ligado al `id` de la solicitud) para evitar que terceros consulten o modifiquen solicitudes ajenas.
+- **Token de solicitud básico:** aunque `GET /applications/:id` y las mutaciones ahora requieren el token generado al crear, ese token no es revocable ni rotable. En producción debería tener expiración corta, revocación y asociación a sesión/dispositivo.
 - **Autorización por roles:** actualmente solo existe un rol `admin`. Se podría agregar `advisor` y permisos específicos.
 - **Rate limiting:** ningún endpoint tiene límites de peticiones. `POST /applications` y `/auth/login` deberían tener throttling.
 - **Logs de auditoría:** aunque `events` traza cambios internos, no hay logs de auditoría de qué usuario/admin realizó cada cambio.
