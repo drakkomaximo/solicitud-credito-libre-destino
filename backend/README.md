@@ -318,24 +318,31 @@ data: {"type":"reference.created","payload":{...},"timestamp":"..."}
 
 ## Formato de respuestas
 
-Todas las respuestas exitosas y de error comparten un envelope común gracias a `ResponseFormatInterceptor` y `AllExceptionsFilter`:
+Todas las respuestas comparten un envelope estandarizado. La forma exacta depende del tipo de operación:
+
+### 1. Éxito con un solo recurso
+
+Operaciones como `POST /applications`, `GET /applications/:id`, `POST /auth/login`, `PATCH /admin/references/:id` o `POST /seed` devuelven `data` como objeto.
 
 ```json
 {
   "success": true,
   "statusCode": 200,
   "message": "Operación realizada con éxito",
-  "data": { ... },
-  "meta": { ... }
+  "data": { "id": "..." },
+  "meta": {}
 }
 ```
 
-El listado paginado usa paginación por cursor:
+### 2. Éxito con arreglo paginado
+
+Listados como `GET /applications` o `GET /admin/references` devuelven `data` como arreglo y `meta` con la paginación por cursor.
 
 ```json
 {
   "success": true,
   "statusCode": 200,
+  "message": "Elementos obtenidos",
   "data": [ ... ],
   "meta": {
     "limit": 10,
@@ -344,6 +351,20 @@ El listado paginado usa paginación por cursor:
   }
 }
 ```
+
+### 3. Error
+
+```json
+{
+  "success": false,
+  "statusCode": 400,
+  "message": ["El campo term no está permitido"],
+  "data": {},
+  "meta": {}
+}
+```
+
+`statusCode` refleja el código HTTP. `message` puede ser un string o un arreglo de strings en errores de validación.
 
 ## Documentación y salud
 
@@ -364,3 +385,15 @@ El listado paginado usa paginación por cursor:
 - **Notificaciones SSE:** `GET /events` expone un stream de eventos que el frontend consume para revalidar cachés (SSG/ISR) cuando cambian referencias o se limpia la base de datos.
 - **Referencias versionadas:** `DomainReference` guarda los valores de enumeración con `isActive`, `validFrom` y `validTo`, permitiendo activar/desactivar códigos sin perder la trazabilidad de registros anteriores.
 - **Prisma 5:** versión fija para evitar problemas de compatibilidad con el CLI y el schema.
+
+## Limitaciones conocidas y futuras mejoras
+
+Esta implementación se mantuvo deliberadamente mínima para cumplir el alcance del ejercicio. Por tiempo y complejidad se dejaron fuera los siguientes puntos, listados como trabajo futuro:
+
+- **Autenticación en `/applications`:** el flujo del cliente es público para permitir que un usuario solicite crédito sin registrarse. En producción debería existir un mecanismo de sesión/token por cliente (ej. JWT de corta duración ligado al `id` de la solicitud) para evitar que terceros consulten o modifiquen solicitudes ajenas.
+- **Autorización por roles:** actualmente solo existe un rol `admin`. Se podría agregar `advisor` y permisos específicos.
+- **Rate limiting:** ningún endpoint tiene límites de peticiones. `POST /applications` y `/auth/login` deberían tener throttling.
+- **Logs de auditoría:** aunque `events` traza cambios internos, no hay logs de auditoría de qué usuario/admin realizó cada cambio.
+- **Pruebas E2E y unitarias:** hay cobertura básica pero faltan casos de guardia JWT, auth y flujos edge.
+- **Soft delete y archivado:** `DELETE` o limpieza de base de datos es física. En producción debería ser lógica.
+- **Notificaciones SSE persistentes:** los eventos se mantienen en memoria; en producción conviene usar Redis o cola para múltiples instancias.
