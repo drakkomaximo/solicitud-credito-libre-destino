@@ -32,13 +32,14 @@ async function bootstrap() {
     .addTag('Dominios', 'Enumeraciones y valores de referencia versionados')
     .addTag('Seed', 'Población de datos de prueba')
     .addTag('Health', 'Health checks del servicio')
+    .addTag('GitHub Actions', 'Disparo de workflows mediante repository_dispatch')
     .build();
   const document = SwaggerModule.createDocument(app, config, {
     extraModels: [ErrorResponseDto, SuccessResponseDto, PaginatedResponseDto, PaginationMetaDto],
   });
   (document as any)['x-tagGroups'] = [
     { name: 'Solicitudes de crédito', tags: ['Solicitudes de crédito'] },
-    { name: 'Complementarios', tags: ['Admin', 'Dominios', 'Seed', 'Health'] },
+    { name: 'Complementarios', tags: ['Admin', 'Dominios', 'Seed', 'Health', 'GitHub Actions'] },
   ];
   SwaggerModule.setup('api/docs', app, document);
 
