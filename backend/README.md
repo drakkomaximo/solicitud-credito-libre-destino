@@ -30,6 +30,14 @@ backend/
 │   │   ├── prisma.module.ts
 │   │   └── prisma.service.ts
 │   ├── common/
+│   │   ├── decorators/
+│   │   │   ├── api-responses.decorator.ts
+│   │   │   └── no-envelope.decorator.ts
+│   │   ├── dto/
+│   │   │   ├── error-response.dto.ts
+│   │   │   ├── paginated-response.dto.ts
+│   │   │   ├── pagination-meta.dto.ts
+│   │   │   └── success-response.dto.ts
 │   │   ├── filters/
 │   │   │   └── all-exceptions.filter.ts
 │   │   └── interceptors/
@@ -37,43 +45,87 @@ backend/
 │   └── modules/
 │       ├── admin/
 │       │   ├── admin.module.ts
-│       │   ├── application/services/admin.service.ts
-│       │   └── infrastructure/http/admin.controller.ts
-│       ├── references/
-│       │   ├── references.module.ts
-│       │   └── application/services/references.service.ts
+│       │   ├── application/
+│       │   │   └── services/
+│       │   │       └── admin.service.ts
+│       │   └── infrastructure/
+│       │       └── http/
+│       │           ├── admin.controller.ts
+│       │           └── dto/
+│       │               ├── create-reference.dto.ts
+│       │               └── update-reference.dto.ts
+│       ├── auth/
+│       │   ├── auth.module.ts
+│       │   ├── application/
+│       │   │   └── services/
+│       │   │       └── auth.service.ts
+│       │   └── infrastructure/
+│       │       ├── guards/
+│       │       │   ├── application-or-admin.guard.ts
+│       │       │   └── jwt-auth.guard.ts
+│       │       └── http/
+│       │           ├── auth.controller.ts
+│       │           └── dto/
+│       │               └── login.dto.ts
 │       ├── credit-applications/
 │       │   ├── credit-applications.module.ts
 │       │   ├── application/
-│       │   │   ├── services/credit-applications.service.ts
+│       │   │   ├── services/
+│       │   │   │   ├── credit-applications.service.spec.ts
+│       │   │   │   └── credit-applications.service.ts
 │       │   │   └── use-cases/
+│       │   │       └── create-application/
+│       │   │           ├── create-application.command.ts
+│       │   │           ├── create-application.use-case.spec.ts
+│       │   │           └── create-application.use-case.ts
 │       │   ├── domain/
+│       │   │   ├── credit-application.enums.ts
 │       │   │   ├── entities/
-│       │   │   ├── repositories/
-│       │   │   └── credit-application.enums.ts
+│       │   │   │   └── credit-application.ts
+│       │   │   └── repositories/
+│       │   │       └── credit-application.repository.ts
 │       │   └── infrastructure/
 │       │       ├── http/
+│       │       │   ├── credit-applications.controller.spec.ts
 │       │       │   ├── credit-applications.controller.ts
 │       │       │   ├── enums.controller.ts
 │       │       │   └── dto/
+│       │       │       ├── abandon-application.dto.ts
+│       │       │       ├── create-application.dto.ts
+│       │       │       ├── lookup-application.dto.ts
+│       │       │       └── update-application.dto.ts
 │       │       └── persistence/
 │       │           └── prisma-credit-application.repository.ts
-│       ├── health/
-│       │   ├── health.module.ts
-│       │   └── infrastructure/http/health.controller.ts
-│       ├── seed/
-│       │   ├── seed.module.ts
-│       │   ├── application/services/seed.service.ts
-│       │   └── infrastructure/http/seed.controller.ts
 │       ├── events/
 │       │   ├── events.module.ts
-│       │   ├── events.service.ts
-│       │   └── events.controller.ts
-│       └── auth/
-│           ├── auth.module.ts
-│           ├── auth.service.ts
-│           ├── auth.controller.ts
-│           └── jwt-auth.guard.ts
+│       │   ├── application/
+│       │   │   └── services/
+│       │   │       └── events.service.ts
+│       │   └── infrastructure/
+│       │       └── http/
+│       │           ├── dto/
+│       │           │   └── server-sent-event.dto.ts
+│       │           └── events.controller.ts
+│       ├── health/
+│       │   ├── health.module.ts
+│       │   └── infrastructure/
+│       │       └── http/
+│       │           ├── dto/
+│       │           │   └── health-response.dto.ts
+│       │           └── health.controller.ts
+│       ├── references/
+│       │   ├── references.module.ts
+│       │   └── application/
+│       │       └── services/
+│       │           └── references.service.ts
+│       ├── seed/
+│       │   ├── seed.module.ts
+│       │   ├── application/
+│       │   │   └── services/
+│       │   │       └── seed.service.ts
+│       │   └── infrastructure/
+│       │       └── http/
+│       │           └── seed.controller.ts
 ```
 
 ## Convenciones
