@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import { useState, useTransition, Suspense } from 'react';
+import { useEffect, useState, useTransition, Suspense } from 'react';
 import Link from 'next/link';
 import { useApplicationActions } from '@/presentation/hooks/useApplicationActions';
 import { useSuspenseQuery } from '@/presentation/hooks/useSuspenseQuery';
@@ -15,6 +15,7 @@ import { commonMessages } from '@/presentation/messages/common';
 import type { CreditApplication, ListApplicationsResult } from '@/domain/entities/Application';
 
 const PAGE_SIZE = 10;
+const SEARCH_DEBOUNCE_MS = 500;
 
 function resetPagination(
   setExtraItems: (v: CreditApplication[]) => void,
@@ -28,11 +29,35 @@ function resetPagination(
   setListError(null);
 }
 
+function ScrollToTop() {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setVisible(window.scrollY > 300);
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  if (!visible) return null;
+
+  return (
+    <button
+      type="button"
+      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      className="fixed bottom-6 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-sky-600 text-2xl text-white shadow-lg hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
+      aria-label="Volver arriba"
+    >
+      ↑
+    </button>
+  );
+}
+
 function ListContent() {
   const { list } = useApplicationActions();
   const [status, setStatus] = useState('all');
   const [channel, setChannel] = useState('all');
   const [q, setQ] = useState('');
+  const [search, setSearch] = useState('');
   const [isPending, startTransition] = useTransition();
 
   const [extraItems, setExtraItems] = useState<CreditApplication[]>([]);
@@ -40,6 +65,18 @@ function ListContent() {
   const [extraHasMore, setExtraHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [listError, setListError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (search !== q) {
+        startTransition(() => {
+          resetPagination(setExtraItems, setExtraCursor, setExtraHasMore, setListError);
+          setQ(search);
+        });
+      }
+    }, SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timer);
+  }, [search, q, startTransition]);
 
   const { data: references } = useSuspenseQuery(
     'applications-list-references',
@@ -71,11 +108,6 @@ function ListContent() {
     startTransition(() => {
       resetPagination(setExtraItems, setExtraCursor, setExtraHasMore, setListError);
       setChannel(value);
-    });
-  const changeQ = (value: string) =>
-    startTransition(() => {
-      resetPagination(setExtraItems, setExtraCursor, setExtraHasMore, setListError);
-      setQ(value);
     });
 
   const loadMore = async () => {
@@ -111,41 +143,71 @@ function ListContent() {
     <main className="mx-auto max-w-5xl p-6">
       <h1 className="text-2xl font-bold text-slate-900">{listPageMessages.title}</h1>
       {isPending && <p className="mt-2 text-slate-600">{commonMessages.loading}</p>}
+
       <div className="mt-4 flex flex-wrap gap-4">
-        <select
-          value={status}
-          onChange={(e) => changeStatus(e.target.value)}
-          className="border rounded p-2"
-          aria-label={listPageMessages.allStatuses}
-        >
-          <option value="all">{listPageMessages.allStatuses}</option>
-          {statusOptions.map((code) => (
-            <option key={code} value={code}>
-              {STATUS_LABELS[code] ?? code}
-            </option>
-          ))}
-        </select>
-        <select
-          value={channel}
-          onChange={(e) => changeChannel(e.target.value)}
-          className="border rounded p-2"
-          aria-label={listPageMessages.allChannels}
-        >
-          <option value="all">{listPageMessages.allChannels}</option>
-          {channelOptions.map((code) => (
-            <option key={code} value={code}>
-              {CHANNEL_LABELS[code] ?? code}
-            </option>
-          ))}
-        </select>
-        <input
-          value={q}
-          onChange={(e) => changeQ(e.target.value)}
-          placeholder={listPageMessages.searchPlaceholder}
-          className="border rounded p-2"
-          aria-label={listPageMessages.searchPlaceholder}
-        />
+        <div className="flex flex-col gap-1">
+          <label htmlFor="status-filter" className="text-xs text-slate-500">
+            Estado
+          </label>
+          {statusOptions.length > 0 ? (
+            <select
+              id="status-filter"
+              value={status}
+              onChange={(e) => changeStatus(e.target.value)}
+              className="border rounded p-2"
+              aria-label={listPageMessages.allStatuses}
+            >
+              <option value="all">{listPageMessages.allStatuses}</option>
+              {statusOptions.map((code) => (
+                <option key={code} value={code}>
+                  {STATUS_LABELS[code] ?? code}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <span className="text-sm text-slate-400">No hay estados disponibles</span>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label htmlFor="channel-filter" className="text-xs text-slate-500">
+            Canal
+          </label>
+          {channelOptions.length > 0 ? (
+            <select
+              id="channel-filter"
+              value={channel}
+              onChange={(e) => changeChannel(e.target.value)}
+              className="border rounded p-2"
+              aria-label={listPageMessages.allChannels}
+            >
+              <option value="all">{listPageMessages.allChannels}</option>
+              {channelOptions.map((code) => (
+                <option key={code} value={code}>
+                  {CHANNEL_LABELS[code] ?? code}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <span className="text-sm text-slate-400">No hay canales disponibles</span>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label htmlFor="search-filter" className="text-xs text-slate-500">
+            Buscar
+          </label>
+          <input
+            id="search-filter"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={listPageMessages.searchPlaceholder}
+            className="border rounded p-2"
+            aria-label={listPageMessages.searchPlaceholder}
+          />
+        </div>
       </div>
+
       <ul className="mt-6 space-y-4">
         {items.length === 0 && (
           <li className="text-slate-600">{listPageMessages.empty}</li>
@@ -177,6 +239,8 @@ function ListContent() {
           </button>
         </div>
       )}
+
+      <ScrollToTop />
     </main>
   );
 }
