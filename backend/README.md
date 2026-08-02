@@ -477,3 +477,4 @@ Esta implementación se mantuvo deliberadamente mínima para cumplir el alcance 
 - **Pruebas E2E y unitarias:** hay cobertura básica pero faltan casos de guardia JWT, auth y flujos edge.
 - **Soft delete y archivado:** `DELETE` o limpieza de base de datos es física. En producción debería ser lógica.
 - **Notificaciones SSE persistentes:** los eventos se mantienen en memoria; en producción conviene usar Redis o cola para múltiples instancias.
+- **Protección adicional de catálogos públicos:** `GET /api/v1/applications/enums` es público para que el formulario inicial del frontend pueda cargar tipos de documento, plazos y canales. Si se requiere endurecer su acceso, se puede agregar un guard por `X-Api-Key` con clave compartida en variables de entorno del backend y del frontend (Server Actions), manteniendo el endpoint funcional sin exponer la clave en el bundle del cliente.
