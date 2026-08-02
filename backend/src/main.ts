@@ -22,7 +22,11 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ResponseFormatInterceptor(app.get(Reflector)));
   app.useGlobalFilters(new AllExceptionsFilter());
   const apiPrefix = process.env.API_PREFIX || 'api/v1';
-  app.enableCors();
+  const corsOrigin = process.env.CORS_ORIGIN || '*';
+  app.enableCors({
+    origin: corsOrigin as any,
+    credentials: true,
+  });
   app.setGlobalPrefix(apiPrefix);
 
   const config = new DocumentBuilder()

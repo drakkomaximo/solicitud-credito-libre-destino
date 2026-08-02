@@ -151,6 +151,8 @@ Ejemplo:
 ```env
 DATABASE_URL=postgresql://credi:credi@localhost:5432/credit
 PORT=3000
+API_PREFIX=api/v1
+CORS_ORIGIN=*
 ADMIN_SECRET=super-secret-local-only
 JWT_SECRET=super-secret-jwt-signing-key
 JWT_EXPIRES_IN=8h
