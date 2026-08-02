@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Frontend — Solicitud Digital de Crédito de Libre Destino
 
-## Getting Started
+Aplicación Next.js del micrositio de originación digital. Consume la API del backend y ofrece flujos para administradores y clientes.
 
-First, run the development server:
+## 🛠️ Tecnologías
+
+- Next.js 16 (App Router)
+- React 19
+- TypeScript
+- Tailwind CSS 4
+- React Hook Form + Zod
+- Bun
+
+## 🚀 Ejecución
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+bun install
+bun run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abrir http://localhost:3001.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📁 Estructura
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+frontend/src/
+├── app/                 # páginas del App Router
+├── application/         # casos de uso
+├── domain/              # entidades y puertos
+├── infrastructure/      # repositorios API, client HTTP, storage
+└── presentation/        # componentes, hooks, mensajes, validaciones
+```
 
-## Learn More
+## 🔐 Roles
 
-To learn more about Next.js, take a look at the following resources:
+- **admin**: inicia sesión con usuario/contraseña y ve el listado completo.
+- **cliente**: inicia con documento y teléfono; ve únicamente sus solicitudes.
+- **solicitud** (token de aplicación): permite continuar una solicitud sin sesión.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## ✅ Comandos
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+bun run lint        # ESLint
+bun run build       # build de producción
+bun test            # pruebas unitarias
+```

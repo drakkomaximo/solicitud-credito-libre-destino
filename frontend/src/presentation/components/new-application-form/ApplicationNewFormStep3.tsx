@@ -1,4 +1,5 @@
 import { applicationFormLabels, summaryLabels } from '@/presentation/messages/applicationForm';
+import { formatCOP } from '@/presentation/utils/formatCOP';
 import type { NewApplicationFormData } from '@/presentation/validation/newApplicationSchema';
 
 interface Step3Props {
@@ -15,8 +16,8 @@ export function ApplicationNewFormStep3({ watched }: Step3Props) {
         <p>{summaryLabels.document}: {watched.documentType} {watched.documentNumber}</p>
         <p>{summaryLabels.name}: {watched.firstName} {watched.lastName}</p>
         <p>{summaryLabels.email}: {watched.email}</p>
-        <p>{summaryLabels.income}: {watched.income} — {summaryLabels.expenses}: {watched.expenses}</p>
-        <p>{summaryLabels.amount}: {watched.amount} — {summaryLabels.term}: {watched.term} {summaryLabels.termSuffix}</p>
+        <p>{summaryLabels.income}: {formatCOP(watched.income ?? 0)} — {summaryLabels.expenses}: {formatCOP(watched.expenses ?? 0)}</p>
+        <p>{summaryLabels.amount}: {formatCOP(watched.amount ?? 0)} — {summaryLabels.term}: {watched.term} {summaryLabels.termSuffix}</p>
         <p>{summaryLabels.purpose}: {watched.purpose}</p>
       </div>
     </section>

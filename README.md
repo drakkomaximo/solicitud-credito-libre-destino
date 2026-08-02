@@ -97,16 +97,17 @@ El backend sigue una arquitectura hexagonal y modular bajo `src/modules/`:
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
-| POST | `/api/v1/applications` | Crear solicitud (devuelve `accessToken`) |
+| POST | `/api/v1/applications` | Crear solicitud (devuelve `accessToken` de solicitud) |
 | GET | `/api/v1/applications/lookup` | Buscar borrador por documento y teléfono |
-| GET | `/api/v1/applications` | Listar con filtros `status`, `channel`, `q` y paginación por cursor (admin) |
-| GET | `/api/v1/applications/:id` | Detalle de la solicitud (token de solicitud o admin) |
-| PATCH | `/api/v1/applications/:id` | Actualizar datos complementarios (parcial; token o admin) |
-| POST | `/api/v1/applications/:id/simulate-offer` | Simular oferta preliminar (token o admin) |
-| POST | `/api/v1/applications/:id/finalize` | Enviar a validación (token o admin) |
-| POST | `/api/v1/applications/:id/abandon` | Abandonar solicitud con motivo (token o admin) |
-| GET | `/api/v1/applications/:id/events` | Trazabilidad de eventos (token o admin) |
+| GET | `/api/v1/applications` | Listar con filtros `status`, `channel`, `q` y paginación por cursor. Admin ve todo; cliente ve solo las suyas. |
+| GET | `/api/v1/applications/:id` | Detalle de la solicitud (token de solicitud, admin o cliente propietario) |
+| PATCH | `/api/v1/applications/:id` | Actualizar datos complementarios (parcial; token, admin o cliente propietario) |
+| POST | `/api/v1/applications/:id/simulate-offer` | Simular oferta preliminar (token, admin o cliente propietario) |
+| POST | `/api/v1/applications/:id/finalize` | Enviar a validación (token, admin o cliente propietario) |
+| POST | `/api/v1/applications/:id/abandon` | Abandonar solicitud con motivo (token, admin o cliente propietario) |
+| GET | `/api/v1/applications/:id/events` | Trazabilidad de eventos (token, admin o cliente propietario) |
 | POST | `/api/v1/auth/login` | Login de administrador (JWT) |
+| POST | `/api/v1/auth/client` | Login de cliente con documento y teléfono (JWT) |
 | GET | `/api/v1/events` | Stream SSE de eventos de dominio |
 
 ### Complementarios
@@ -154,7 +155,7 @@ curl -X POST http://localhost:3000/api/v1/applications \
 - **Módulos por bounded context:** `credit-applications`, `references`, `admin`, `seed` y `health` viven bajo `src/modules/`.
 - **Hexagonal por módulo:** cada módulo separa `application`, `domain` e `infrastructure`.
 - **Referencias versionadas:** `DomainReference` permite activar/desactivar valores de enumeración sin perder trazabilidad.
-- **Autenticación dual:** JWT de administrador (`/auth/login`) para `admin`, `seed` y listado; token de solicitud generado al crear para las demás operaciones del cliente.
+- **Autenticación por roles:** JWT de administrador (`/auth/login`) para `admin`, `seed` y listado general; JWT de cliente (`/auth/client`) generado a partir de `documentNumber`/`phone`; token de solicitud generado al crear para continuar un caso sin sesión.
 - **PATCH parcial:** `PATCH /api/v1/applications/:id` acepta solo los campos editados, permitiendo guardar borrador paso a paso.
 - **Recuperación de borradores:** `GET /api/v1/applications/lookup` permite retomar una solicitud por documento y teléfono.
 - **Eventos SSE:** `GET /api/v1/events` notifica al frontend cambios en referencias y limpieza de base de datos.

@@ -1,15 +1,17 @@
 'use client';
 
 import { Suspense, useState } from 'react';
-import { useForm, type Resolver } from 'react-hook-form';
+import { useForm, useWatch, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useApplicationActions } from '@/presentation/hooks/useApplicationActions';
-import { useSuspenseQuery } from '@/presentation/hooks/useSuspenseQuery';
+import { useSuspenseQuery, invalidateSuspenseQuery } from '@/presentation/hooks/useSuspenseQuery';
 import { SuspenseFallback } from '@/presentation/components/SuspenseFallback';
 import { FormField } from '@/presentation/components/forms/FormField';
+import { TextareaField } from '@/presentation/components/forms/TextareaField';
 import { CheckboxField } from '@/presentation/components/forms/CheckboxField';
+import { formatCOP } from '@/presentation/utils/formatCOP';
 import { editApplicationSchema, type EditApplicationFormData } from '@/presentation/validation/editApplicationSchema';
 import { applicationFormLabels } from '@/presentation/messages/applicationForm';
 
@@ -25,6 +27,7 @@ function FormContent({ id }: { id: string }) {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(editApplicationSchema) as Resolver<FormData>,
@@ -40,9 +43,14 @@ function FormContent({ id }: { id: string }) {
       : undefined,
   });
 
+  const watched = useWatch({ control });
+
   const onSubmit = async (data: FormData) => {
     try {
       await save.execute(id, data);
+      invalidateSuspenseQuery('applications-list-');
+      invalidateSuspenseQuery('edit-form-');
+      invalidateSuspenseQuery('application-detail-');
       router.push(`/applications/${id}`);
     } catch (err) {
       setFormError(err instanceof Error ? err.message : applicationFormLabels.saveError);
@@ -84,6 +92,7 @@ function FormContent({ id }: { id: string }) {
           registration={register('income')}
           error={errors.income}
         />
+        <p className="text-sm text-slate-500">{formatCOP(watched.income ?? 0)}</p>
         <FormField
           id="expenses"
           label={applicationFormLabels.expenses}
@@ -91,6 +100,7 @@ function FormContent({ id }: { id: string }) {
           registration={register('expenses')}
           error={errors.expenses}
         />
+        <p className="text-sm text-slate-500">{formatCOP(watched.expenses ?? 0)}</p>
         <FormField
           id="amount"
           label={applicationFormLabels.amount}
@@ -98,6 +108,7 @@ function FormContent({ id }: { id: string }) {
           registration={register('amount')}
           error={errors.amount}
         />
+        <p className="text-sm text-slate-500">{formatCOP(watched.amount ?? 0)}</p>
         <FormField
           id="term"
           label={applicationFormLabels.term}
@@ -105,7 +116,7 @@ function FormContent({ id }: { id: string }) {
           registration={register('term')}
           error={errors.term}
         />
-        <FormField
+        <TextareaField
           id="purpose"
           label={applicationFormLabels.purpose}
           registration={register('purpose')}

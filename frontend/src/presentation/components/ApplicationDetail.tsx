@@ -2,12 +2,15 @@
 
 import { useState, useTransition, Suspense } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useApplicationActions } from '@/presentation/hooks/useApplicationActions';
 import { useSuspenseQuery } from '@/presentation/hooks/useSuspenseQuery';
 import { SuspenseFallback } from '@/presentation/components/SuspenseFallback';
 import { detailMessages } from '@/presentation/messages/detail';
+import { formatCOP } from '@/presentation/utils/formatCOP';
 
 function DetailContent({ id }: { id: string }) {
+  const router = useRouter();
   const { get, getEvents, simulate, finalize, abandon } = useApplicationActions();
   const [refreshKey, setRefreshKey] = useState(0);
   const [isPending, startTransition] = useTransition();
@@ -70,9 +73,19 @@ function DetailContent({ id }: { id: string }) {
 
   return (
     <main className="mx-auto max-w-3xl p-6">
-      <h1 className="text-2xl font-bold text-slate-900">
-        {detailMessages.requestTitle} {app.firstName} {app.lastName}
-      </h1>
+      <div className="flex items-center gap-4">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="rounded border px-3 py-1 text-sm hover:bg-slate-100"
+          aria-label={detailMessages.back}
+        >
+          {detailMessages.back}
+        </button>
+        <h1 className="text-2xl font-bold text-slate-900">
+          {detailMessages.requestTitle} {app.firstName} {app.lastName}
+        </h1>
+      </div>
       <p className="mt-2 text-slate-700">
         {detailMessages.status}: <span className="font-semibold">{app.status}</span>
       </p>
@@ -84,49 +97,49 @@ function DetailContent({ id }: { id: string }) {
         {detailMessages.document}: {app.documentType} {app.documentNumber}
       </p>
       <p className="text-slate-700">
-        {detailMessages.amount}: ${app.amount} — {detailMessages.term}: {app.term} {detailMessages.termSuffix}
+        {detailMessages.amount}: {formatCOP(app.amount)} — {detailMessages.term}: {app.term} {detailMessages.termSuffix}
       </p>
 
-      <div className="mt-6 flex flex-wrap items-center gap-3">
-        {app.status === 'DRAFT' && (
+      {app.status === 'DRAFT' && (
+        <div className="mt-6 flex flex-wrap items-center gap-3">
           <Link
             href={`/applications/${id}/edit`}
             className="rounded bg-sky-600 px-4 py-2 text-white"
           >
             {detailMessages.edit}
           </Link>
-        )}
-        <button
-          onClick={handleSimulate}
-          className="rounded bg-emerald-600 px-4 py-2 text-white"
-          disabled={isPending}
-        >
-          {detailMessages.simulate}
-        </button>
-        <button
-          onClick={handleFinalize}
-          className="rounded bg-blue-600 px-4 py-2 text-white"
-          disabled={isPending}
-        >
-          {detailMessages.finalize}
-        </button>
-        <div className="flex items-center gap-2">
-          <input
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            placeholder={detailMessages.reasonPlaceholder}
-            className="border rounded p-2"
-            aria-label={detailMessages.reasonPlaceholder}
-          />
           <button
-            onClick={handleAbandon}
-            className="rounded bg-red-600 px-4 py-2 text-white"
+            onClick={handleSimulate}
+            className="rounded bg-emerald-600 px-4 py-2 text-white"
             disabled={isPending}
           >
-            {detailMessages.abandon}
+            {detailMessages.simulate}
           </button>
+          <button
+            onClick={handleFinalize}
+            className="rounded bg-blue-600 px-4 py-2 text-white"
+            disabled={isPending}
+          >
+            {detailMessages.finalize}
+          </button>
+          <div className="flex items-center gap-2">
+            <input
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder={detailMessages.reasonPlaceholder}
+              className="border rounded p-2"
+              aria-label={detailMessages.reasonPlaceholder}
+            />
+            <button
+              onClick={handleAbandon}
+              className="rounded bg-red-600 px-4 py-2 text-white"
+              disabled={isPending}
+            >
+              {detailMessages.abandon}
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {message && <p className="mt-4 text-green-600">{message}</p>}
 
@@ -134,7 +147,7 @@ function DetailContent({ id }: { id: string }) {
         <div className="mt-4 p-4 border rounded bg-slate-50">
           <p className="font-semibold">{detailMessages.simulationTitle}: {simulation.status}</p>
           {simulation.amount && (
-            <p>{detailMessages.requestedValue}: ${simulation.amount} — {detailMessages.term}: {simulation.term} {detailMessages.termSuffix}</p>
+            <p>{detailMessages.requestedValue}: {formatCOP(simulation.amount)} — {detailMessages.term}: {simulation.term} {detailMessages.termSuffix}</p>
           )}
         </div>
       )}

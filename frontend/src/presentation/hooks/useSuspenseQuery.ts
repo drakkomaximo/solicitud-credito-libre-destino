@@ -6,6 +6,14 @@ type SuspenseResult<T> =
 
 const promiseCache = new Map<string, Promise<SuspenseResult<unknown>>>();
 
+export function invalidateSuspenseQuery(prefix: string): void {
+  for (const key of promiseCache.keys()) {
+    if (key.startsWith(prefix)) {
+      promiseCache.delete(key);
+    }
+  }
+}
+
 export function useSuspenseQuery<T>(
   queryKey: string,
   fetcher: () => Promise<T>,

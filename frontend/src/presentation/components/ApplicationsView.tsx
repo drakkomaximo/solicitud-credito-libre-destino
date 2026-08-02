@@ -72,7 +72,7 @@ export function ApplicationsView() {
   return (
     <>
       <RoleHeader role={role} onLogout={handleLogout} />
-      {(role === 'admin' || role === 'client') && <ApplicationsList />}
+      {(role === 'admin' || role === 'client') && <ApplicationsList role={role} />}
       {role === 'application' && (
         <LoginForm
           onAdminLogin={handleAuthChange}

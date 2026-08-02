@@ -17,6 +17,7 @@ export const detailMessages = {
   abandonSuccess: 'Solicitud abandonada.',
   simulationTitle: 'Resultado simulación',
   requestedValue: 'Valor solicitado',
+  back: 'Volver',
   traceability: 'Trazabilidad',
   loadError: 'Error cargando solicitud',
   simulationError: 'Error en simulación',

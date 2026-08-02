@@ -17,7 +17,7 @@ export class ApplicationApiRepository implements ApplicationRepository {
       body: JSON.stringify(input),
       headers: this.authHeaders(),
     });
-    if (created.accessToken) {
+    if (created.accessToken && !this.tokenStorage.getToken()) {
       this.tokenStorage.saveToken(created.accessToken);
     }
     return created;
