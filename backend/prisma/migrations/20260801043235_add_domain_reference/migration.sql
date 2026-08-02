@@ -1,5 +1,5 @@
 -- CreateTable
-CREATE TABLE "DomainReference" (
+CREATE TABLE IF NOT EXISTS "DomainReference" (
     "id" TEXT NOT NULL,
     "domain" TEXT NOT NULL,
     "code" TEXT NOT NULL,
@@ -15,7 +15,7 @@ CREATE TABLE "DomainReference" (
 );
 
 -- CreateIndex
-CREATE INDEX "DomainReference_domain_isActive_idx" ON "DomainReference"("domain", "isActive");
+CREATE INDEX IF NOT EXISTS "DomainReference_domain_isActive_idx" ON "DomainReference"("domain", "isActive");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "DomainReference_domain_code_key" ON "DomainReference"("domain", "code");
+CREATE UNIQUE INDEX IF NOT EXISTS "DomainReference_domain_code_key" ON "DomainReference"("domain", "code");
