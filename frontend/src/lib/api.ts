@@ -1,4 +1,6 @@
-const API = 'http://localhost:3000/api/v1';
+declare const process: { env: Record<string, string | undefined> };
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+const API = `${API_BASE}/api/v1`;
 
 export async function createApplication(data: any) {
   const res = await fetch(`${API}/applications`, {
