@@ -73,6 +73,8 @@ export class PrismaCreditApplicationRepository implements ICreditApplicationRepo
     const where: any = {};
     if (filters.status) where.status = filters.status;
     if (filters.channel) where.channel = filters.channel;
+    if (filters.documentNumber) where.documentNumber = filters.documentNumber;
+    if (filters.phone) where.phone = filters.phone;
     if (filters.q) {
       where.OR = [
         { documentNumber: { contains: filters.q, mode: 'insensitive' } },

@@ -4,6 +4,8 @@ export interface ApplicationListFilters {
   status?: string;
   channel?: string;
   q?: string;
+  documentNumber?: string;
+  phone?: string;
 }
 
 export interface ApplicationListQuery extends ApplicationListFilters {

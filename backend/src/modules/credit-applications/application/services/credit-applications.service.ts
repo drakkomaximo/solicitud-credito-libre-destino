@@ -81,6 +81,8 @@ export class CreditApplicationsService {
       channel: query.channel,
       q: query.q,
     };
+    if (query.documentNumber) filters.documentNumber = query.documentNumber;
+    if (query.phone) filters.phone = query.phone;
 
     const apps = await this.repository.findAll({
       ...filters,

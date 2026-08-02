@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -25,7 +26,6 @@ import { ErrorResponseDto } from '@/common/dto/error-response.dto';
 import type { ListApplicationsQuery } from '@/modules/credit-applications/application/services/credit-applications.service';
 import { CreditApplicationsService } from '@/modules/credit-applications/application/services/credit-applications.service';
 import { AuthService } from '@/modules/auth/application/services/auth.service';
-import { JwtAuthGuard } from '@/modules/auth/infrastructure/guards/jwt-auth.guard';
 import { ApplicationOrAdminGuard } from '@/modules/auth/infrastructure/guards/application-or-admin.guard';
 import {
   ApplicationStatus,
@@ -89,12 +89,12 @@ export class CreditApplicationsController {
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(ApplicationOrAdminGuard)
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Listar solicitudes de crédito',
     description:
-      'Listado paginado por cursor (keyset) con filtros opcionales de status, channel y búsqueda libre. Requiere JWT de administrador.',
+      'Listado paginado por cursor (keyset) con filtros opcionales. Administradores ven todo; clientes solo ven sus propias solicitudes.',
   })
   @ApiQuery({
     name: 'status',
@@ -133,6 +133,8 @@ export class CreditApplicationsController {
     type: ErrorResponseDto,
   })
   list(
+    @Req()
+    req: { user?: { role?: string; documentNumber?: string; phone?: string } },
     @Query('status') status?: string,
     @Query('channel') channel?: string,
     @Query('q') q?: string,
@@ -142,6 +144,10 @@ export class CreditApplicationsController {
     const query: ListApplicationsQuery = { status, channel, q };
     if (cursor !== undefined) query.cursor = cursor;
     if (limit !== undefined) query.limit = parseInt(limit, 10);
+    if (req.user?.role === 'client') {
+      query.documentNumber = req.user.documentNumber;
+      query.phone = req.user.phone;
+    }
     return this.service.list(query);
   }
 

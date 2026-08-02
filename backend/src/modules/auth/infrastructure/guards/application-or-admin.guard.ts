@@ -5,6 +5,7 @@
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { PrismaService } from '@/prisma/prisma.service';
 
 const TOKEN_COOKIE = 'credit_token';
 
@@ -31,7 +32,10 @@ function extractToken(request: {
 
 @Injectable()
 export class ApplicationOrAdminGuard implements CanActivate {
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<{
@@ -60,6 +64,27 @@ export class ApplicationOrAdminGuard implements CanActivate {
       ) {
         request.user = payload;
         return true;
+      }
+
+      if (payload.role === 'client') {
+        if (!request.params.id) {
+          request.user = payload;
+          return true;
+        }
+
+        const application = await this.prisma.creditApplication.findUnique({
+          where: { id: request.params.id },
+          select: { documentNumber: true, phone: true },
+        });
+
+        if (
+          application &&
+          application.documentNumber === payload.documentNumber &&
+          application.phone === payload.phone
+        ) {
+          request.user = payload;
+          return true;
+        }
       }
 
       throw new UnauthorizedException(

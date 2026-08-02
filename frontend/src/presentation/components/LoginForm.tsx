@@ -3,15 +3,14 @@
 import { useState } from 'react';
 import { useAuthActions } from '@/presentation/hooks/useAuthActions';
 import { authMessages } from '@/presentation/messages/auth';
-import type { CreditApplication } from '@/domain/entities/Application';
 
 interface LoginFormProps {
   onAdminLogin: () => void;
-  onClientLookup: (app: CreditApplication) => void;
+  onClientLogin: () => void;
 }
 
-export function LoginForm({ onAdminLogin, onClientLookup }: LoginFormProps) {
-  const { login, lookup } = useAuthActions();
+export function LoginForm({ onAdminLogin, onClientLogin }: LoginFormProps) {
+  const { login, clientLogin } = useAuthActions();
   const [mode, setMode] = useState<'admin' | 'client'>('client');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -34,13 +33,13 @@ export function LoginForm({ onAdminLogin, onClientLookup }: LoginFormProps) {
     }
   };
 
-  const handleClientLookup = async (e: React.FormEvent) => {
+  const handleClientLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      const app = await lookup.execute({ documentNumber, phone });
-      onClientLookup(app);
+      await clientLogin({ documentNumber, phone });
+      onClientLogin();
     } catch (err) {
       setError(err instanceof Error ? err.message : authMessages.lookupError);
     } finally {
@@ -114,7 +113,7 @@ export function LoginForm({ onAdminLogin, onClientLookup }: LoginFormProps) {
           </button>
         </form>
       ) : (
-        <form onSubmit={handleClientLookup} className="mt-6 space-y-4">
+        <form onSubmit={handleClientLogin} className="mt-6 space-y-4">
           <div>
             <label htmlFor="document" className="block text-sm font-medium text-slate-700">
               {authMessages.documentNumber}
