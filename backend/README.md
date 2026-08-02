@@ -2,7 +2,9 @@
 
 API NestJS que soporta el flujo de originación digital de crédito de libre destino. Implementa arquitectura hexagonal, TDD, persistencia con Prisma/PostgreSQL, respuestas estandarizadas y paginación por cursor.
 
-## Tecnologías y estándares
+> 💡 **Versión actual de la API:** todos los endpoints se exponen bajo el prefijo `/api/v1`. La documentación interactiva de Swagger está disponible en `/api/v1/docs` una vez levantado el servidor.
+
+## 🛠️ Tecnologías y estándares
 
 - **Framework:** NestJS 11 con TypeScript 5.
 - **Gestor de paquetes:** Bun (compatible con `npm` como fallback).
@@ -16,7 +18,7 @@ API NestJS que soporta el flujo de originación digital de crédito de libre des
 - **Notificaciones en tiempo real:** Server-Sent Events (`/api/v1/events`) para revalidación de cachés (SSG/ISR).
 - **Autenticación administrativa:** JWT (`/api/v1/auth/login`) para proteger el panel `/api/v1/admin` y `/api/v1/seed`.
 
-## Estructura de carpetas
+## 📁 Estructura de carpetas
 
 ```
 backend/
@@ -128,7 +130,7 @@ backend/
 │       │           └── seed.controller.ts
 ```
 
-## Convenciones
+## 📜 Convenciones
 
 1. **Dominio puro:** las entidades y los puertos no dependen de librerías externas.
 2. **Inyección de dependencias:** se usa `interface` de repositorio e inyección por token.
@@ -138,7 +140,7 @@ backend/
 6. **Alias `@/`:** todos los imports internos se resuelven desde `src/`, evitando `../../../`.
 7. **TDD:** casos de uso, servicios y controladores deben tener pruebas unitarias.
 
-## Variables de entorno
+## ⚙️ Variables de entorno
 
 Copiar y ajustar:
 
@@ -159,13 +161,13 @@ JWT_EXPIRES_IN=8h
 NODE_ENV=development
 ```
 
-## Instalación
+## 📦 Instalación
 
 ```bash
 bun install
 ```
 
-## Base de datos
+## 🐘 Base de datos
 
 Con Docker (PowerShell):
 
@@ -189,7 +191,7 @@ bunx prisma migrate deploy
 bunx prisma generate
 ```
 
-## Ejecución
+## 🚀 Ejecución
 
 En Windows, la forma más rápida de levantar el entorno completo es usar los scripts de PowerShell:
 
@@ -206,7 +208,7 @@ bun run build        # build de producción
 bun run start:prod   # ejecutar build
 ```
 
-## Tests
+## 🧪 Tests
 
 ```bash
 bun run test         # unitarios
@@ -214,7 +216,7 @@ bun run test:cov     # con cobertura
 bun run test:e2e     # end-to-end (requiere DB)
 ```
 
-## Endpoints principales
+## 🔌 Endpoints principales
 
 Swagger agrupa los endpoints en **Solicitudes de crédito** y en subgrupos dentro de **Complementarios**: `Admin`, `Dominios`, `Seed`, `Health` y `Auth`.
 
@@ -314,7 +316,7 @@ export async function POST(request: NextRequest) {
 
 Para que esto funcione, las consultas del frontend deben etiquetarse con `next: { tags: ['references'] }` o `unstable_cache` con el mismo tag.
 
-## Autenticación
+## 🔐 Autenticación
 
 El backend usa dos tipos de JWT:
 
@@ -396,7 +398,7 @@ data: {"type":"reference.created","payload":{...},"timestamp":"..."}
 
 **Consumo de recursos:** cada cliente mantiene una conexión HTTP abierta. En producción, limitar el número de conexiones concurrentes y asegurar que el balanceador (Nginx, ALB, Cloudflare, etc.) no corte conexiones largas por timeout. En local esto no es un problema para el volumen esperado de pruebas.
 
-## Formato de respuestas
+## 📦 Formato de respuestas
 
 Todas las respuestas comparten un envelope estandarizado. La forma exacta depende del tipo de operación:
 
@@ -446,12 +448,12 @@ Listados como `GET /api/v1/applications` o `GET /api/v1/admin/references` devuel
 
 `statusCode` refleja el código HTTP. `message` puede ser un string o un arreglo de strings en errores de validación.
 
-## Documentación y salud
+## 📚 Documentación y salud
 
 - Swagger: `http://localhost:3000/api/v1/docs`
 - Health: `http://localhost:3000/api/v1/health`
 
-## Decisiones de arquitectura
+## 🏗️ Decisiones de arquitectura
 
 - **Módulos por bounded context:** `credit-applications`, `admin`, `seed` y `health` viven bajo `src/modules/`.
 - **Hexagonal por módulo:** cada módulo separa `application`, `domain` e `infrastructure`.
@@ -466,7 +468,7 @@ Listados como `GET /api/v1/applications` o `GET /api/v1/admin/references` devuel
 - **Referencias versionadas:** `DomainReference` guarda los valores de enumeración con `isActive`, `validFrom` y `validTo`, permitiendo activar/desactivar códigos sin perder la trazabilidad de registros anteriores.
 - **Prisma 5:** versión fija para evitar problemas de compatibilidad con el CLI y el schema.
 
-## Limitaciones conocidas y futuras mejoras
+## 🚧 Limitaciones conocidas y futuras mejoras
 
 Esta implementación se mantuvo deliberadamente mínima para cumplir el alcance del ejercicio. Por tiempo y complejidad se dejaron fuera los siguientes puntos, listados como trabajo futuro:
 
