@@ -1,6 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { JwtService } from '@nestjs/jwt';
 import { CreditApplicationsController } from '@/modules/credit-applications/infrastructure/http/credit-applications.controller';
 import { CreditApplicationsService } from '@/modules/credit-applications/application/services/credit-applications.service';
+import { AuthService } from '@/modules/auth/application/services/auth.service';
+import { PrismaService } from '@/prisma/prisma.service';
 
 describe('CreditApplicationsController', () => {
   let controller: CreditApplicationsController;
@@ -20,7 +23,24 @@ describe('CreditApplicationsController', () => {
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [CreditApplicationsController],
-      providers: [{ provide: CreditApplicationsService, useValue: service }],
+      providers: [
+        { provide: CreditApplicationsService, useValue: service },
+        {
+          provide: AuthService,
+          useValue: {
+            generateApplicationToken: jest.fn(),
+            generateClientToken: jest.fn(),
+          },
+        },
+        {
+          provide: JwtService,
+          useValue: { sign: jest.fn(), verify: jest.fn() },
+        },
+        {
+          provide: PrismaService,
+          useValue: { creditApplication: { findUnique: jest.fn() } },
+        },
+      ],
     }).compile();
 
     controller = module.get(CreditApplicationsController);
@@ -32,7 +52,7 @@ describe('CreditApplicationsController', () => {
     service.create.mockResolvedValue(created);
     const result = await controller.create(dto);
     expect(service.create).toHaveBeenCalledWith(dto);
-    expect(result).toBe(created);
+    expect(result).toMatchObject(created);
   });
 
   it('debería listar con filtros y cursor', async () => {
@@ -44,6 +64,7 @@ describe('CreditApplicationsController', () => {
     };
     service.list.mockResolvedValue(list);
     const result = await controller.list(
+      { user: undefined },
       'DRAFT',
       'self-service',
       'Juan',
