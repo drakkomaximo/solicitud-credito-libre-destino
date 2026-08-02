@@ -22,6 +22,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ResponseFormatInterceptor(app.get(Reflector)));
   app.useGlobalFilters(new AllExceptionsFilter());
   app.enableCors();
+  app.setGlobalPrefix('api/v1');
 
   const config = new DocumentBuilder()
     .setTitle('Credit Applications API')
@@ -42,7 +43,7 @@ async function bootstrap() {
     { name: 'Solicitudes de crédito', tags: ['Solicitudes de crédito'] },
     { name: 'Complementarios', tags: ['Admin', 'Dominios', 'Seed', 'Health', 'Auth'] },
   ];
-  SwaggerModule.setup('api/docs', app, document);
+  SwaggerModule.setup('docs', app, document);
 
   await app.listen(process.env.PORT ?? 3000);
 }

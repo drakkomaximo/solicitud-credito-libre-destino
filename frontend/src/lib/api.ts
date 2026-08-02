@@ -1,4 +1,4 @@
-const API = 'http://localhost:3000';
+const API = 'http://localhost:3000/api/v1';
 
 export async function createApplication(data: any) {
   const res = await fetch(`${API}/applications`, {

@@ -11,10 +11,10 @@ API NestJS que soporta el flujo de originación digital de crédito de libre des
 - **ORM:** Prisma 5.
 - **Base de datos:** PostgreSQL 16 (Docker).
 - **Tests:** Jest con `ts-jest`.
-- **Documentación API:** Swagger (`/api/docs`).
-- **Health checks:** `@nestjs/terminus` (`/health`).
-- **Notificaciones en tiempo real:** Server-Sent Events (`/events`) para revalidación de cachés (SSG/ISR).
-- **Autenticación administrativa:** JWT (`/auth/login`) para proteger el panel admin y seed.
+- **Documentación API:** Swagger (`/api/v1/docs`).
+- **Health checks:** `@nestjs/terminus` (`/api/v1/health`).
+- **Notificaciones en tiempo real:** Server-Sent Events (`/api/v1/events`) para revalidación de cachés (SSG/ISR).
+- **Autenticación administrativa:** JWT (`/api/v1/auth/login`) para proteger el panel `/api/v1/admin` y `/api/v1/seed`.
 
 ## Estructura de carpetas
 
@@ -168,7 +168,7 @@ bun install
 Con Docker (PowerShell):
 
 ```powershell
-.\scripts\start-dev.ps1    # sube Postgres, migra, genera cliente y arranca
+.\scripts\start-dev.ps1    # sube Postgres, migra, genera cliente e inicia NestJS
 .\scripts\stop-dev.ps1     # detiene el proceso y baja contenedores
 ```
 
@@ -220,15 +220,15 @@ Swagger agrupa los endpoints en **Solicitudes de crédito** y en subgrupos dentr
 
 | Método | Ruta | Autenticación | Descripción |
 |--------|------|---------------|-------------|
-| POST | `/applications` | Pública | Crear solicitud. Devuelve la solicitud y su token de acceso. |
-| GET | `/applications/lookup` | Pública | Buscar una solicitud DRAFT por documento y teléfono para retomar. |
-| GET | `/applications` | JWT admin | Listar con filtros `status`, `channel`, `q` y paginación por cursor |
-| GET | `/applications/:id` | Token de solicitud o JWT admin | Detalle |
-| PATCH | `/applications/:id` | Token de solicitud o JWT admin | Actualizar datos complementarios (parcial: se pueden enviar solo los campos editados). |
-| POST | `/applications/:id/simulate-offer` | Token de solicitud o JWT admin | Simular oferta |
-| POST | `/applications/:id/finalize` | Token de solicitud o JWT admin | Enviar a validación |
-| POST | `/applications/:id/abandon` | Token de solicitud o JWT admin | Abandonar |
-| GET | `/applications/:id/events` | Token de solicitud o JWT admin | Trazabilidad |
+| POST | `/api/v1/applications` | Pública | Crear solicitud. Devuelve la solicitud y su token de acceso. |
+| GET | `/api/v1/applications/lookup` | Pública | Buscar una solicitud DRAFT por documento y teléfono para retomar. |
+| GET | `/api/v1/applications` | JWT admin | Listar con filtros `status`, `channel`, `q` y paginación por cursor |
+| GET | `/api/v1/applications/:id` | Token de solicitud o JWT admin | Detalle |
+| PATCH | `/api/v1/applications/:id` | Token de solicitud o JWT admin | Actualizar datos complementarios (parcial: se pueden enviar solo los campos editados). |
+| POST | `/api/v1/applications/:id/simulate-offer` | Token de solicitud o JWT admin | Simular oferta |
+| POST | `/api/v1/applications/:id/finalize` | Token de solicitud o JWT admin | Enviar a validación |
+| POST | `/api/v1/applications/:id/abandon` | Token de solicitud o JWT admin | Abandonar |
+| GET | `/api/v1/applications/:id/events` | Token de solicitud o JWT admin | Trazabilidad |
 
 ### Complementarios
 
@@ -236,47 +236,47 @@ Swagger agrupa los endpoints en **Solicitudes de crédito** y en subgrupos dentr
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
-| POST | `/admin/database/clean` | Limpiar la base de datos (JWT requerido, solo local) |
-| GET | `/admin/references` | Listar referencias de dominio (opcionalmente filtrar por `?domain=`) |
-| POST | `/admin/references` | Crear una referencia de dominio |
-| PATCH | `/admin/references/:id` | Actualizar label/descripción/estado de una referencia |
-| POST | `/admin/references/:id/toggle` | Activar o desactivar una referencia |
+| POST | `/api/v1/admin/database/clean` | Limpiar la base de datos (JWT requerido, solo local) |
+| GET | `/api/v1/admin/references` | Listar referencias de dominio (opcionalmente filtrar por `?domain=`) |
+| POST | `/api/v1/admin/references` | Crear una referencia de dominio |
+| PATCH | `/api/v1/admin/references/:id` | Actualizar label/descripción/estado de una referencia |
+| POST | `/api/v1/admin/references/:id/toggle` | Activar o desactivar una referencia |
 
 #### Dominios
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
-| GET | `/applications/enums` | Enumeraciones activas agrupadas dinámicamente por dominio |
+| GET | `/api/v1/applications/enums` | Enumeraciones activas agrupadas dinámicamente por dominio |
 
 #### Seed
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
-| POST | `/seed` | Poblar datos de prueba (JWT requerido) |
+| POST | `/api/v1/seed` | Poblar datos de prueba (JWT requerido) |
 
 #### Auth
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
-| POST | `/auth/login` | Obtener token JWT con `username` y `password` |
+| POST | `/api/v1/auth/login` | Obtener token JWT con `username` y `password` |
 
 #### Health
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
-| GET | `/health` | Health check de Prisma |
+| GET | `/api/v1/health` | Health check de Prisma |
 
 #### Events
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
-| GET | `/events` | Stream Server-Sent Events (SSE) para notificaciones en tiempo real |
+| GET | `/api/v1/events` | Stream Server-Sent Events (SSE) para notificaciones en tiempo real |
 
 ### Revalidación on-demand (SSG/ISR)
 
 El backend notifica al frontend a través de SSE cuando cambian referencias o se limpia la base de datos. Para revalidar contenido estático bajo demanda sin webhooks ni GitHub Actions, el frontend debe:
 
-1. Conectarse a `GET /events` con `EventSource`.
+1. Conectarse a `GET /api/v1/events` con `EventSource`.
 2. Escuchar los eventos `reference.created`, `reference.updated`, `reference.toggled` o `database.cleaned`.
 3. Llamar a una API route de Next.js (`/api/revalidate`) con el `tag` a invalidar.
 4. La API route ejecuta `revalidateTag('references')` (o `revalidatePath`) para regenerar el contenido afectado.
@@ -284,7 +284,7 @@ El backend notifica al frontend a través de SSE cuando cambian referencias o se
 Ejemplo de conexión SSE en el frontend:
 
 ```js
-const source = new EventSource('http://localhost:3000/events');
+const source = new EventSource('http://localhost:3000/api/v1/events');
 source.onmessage = async (event) => {
   const { type } = JSON.parse(event.data);
   if (type.startsWith('reference.') || type === 'database.cleaned') {
@@ -316,13 +316,13 @@ Para que esto funcione, las consultas del frontend deben etiquetarse con `next: 
 
 El backend usa dos tipos de JWT:
 
-1. **Token de administrador** (`/auth/login`): para panel admin (`/admin/*`, `/seed`, `GET /applications`).
-2. **Token de solicitud** (`/applications`): se genera al crear una solicitud y permite continuar el flujo del cliente.
+1. **Token de administrador** (`/api/v1/auth/login`): para panel admin (`/api/v1/admin/*`, `/api/v1/seed`, `GET /api/v1/applications`).
+2. **Token de solicitud** (`/api/v1/applications`): se genera al crear una solicitud y permite continuar el flujo del cliente.
 
 ### Administrador
 
 ```bash
-POST /auth/login
+POST /api/v1/auth/login
 {
   "username": "admin",
   "password": "<ADMIN_SECRET>"
@@ -340,7 +340,7 @@ Respuesta:
 
 ### Token de solicitud
 
-Al crear una solicitud, `POST /applications` devuelve:
+Al crear una solicitud, `POST /api/v1/applications` devuelve:
 
 ```json
 {
@@ -357,12 +357,12 @@ Al crear una solicitud, `POST /applications` devuelve:
 Usar ese token en las siguientes operaciones:
 
 ```bash
-curl -H "Authorization: Bearer <token>" http://localhost:3000/applications/<id>
-curl -H "Authorization: Bearer <token>" -X PATCH http://localhost:3000/applications/<id>
-curl -H "Authorization: Bearer <token>" http://localhost:3000/applications/<id>/events
+curl -H "Authorization: Bearer <token>" http://localhost:3000/api/v1/applications/<id>
+curl -H "Authorization: Bearer <token>" -X PATCH http://localhost:3000/api/v1/applications/<id>
+curl -H "Authorization: Bearer <token>" http://localhost:3000/api/v1/applications/<id>/events
 ```
 
-El token de solicitud permite acceder solo al `id` que lo generó. Un administrador puede usar su propio JWT para acceder a cualquiera. Si el token se pierde, el cliente puede usar `GET /applications/lookup?documentNumber=...&phone=...` para buscar su borrador y obtener uno nuevo.
+El token de solicitud permite acceder solo al `id` que lo generó. Un administrador puede usar su propio JWT para acceder a cualquiera. Si el token se pierde, el cliente puede usar `GET /api/v1/applications/lookup?documentNumber=...&phone=...` para buscar su borrador y obtener uno nuevo.
 
 ### Eventos SSE
 
@@ -400,7 +400,7 @@ Todas las respuestas comparten un envelope estandarizado. La forma exacta depend
 
 ### 1. Éxito con un solo recurso
 
-Operaciones como `POST /applications`, `GET /applications/:id`, `POST /auth/login`, `PATCH /admin/references/:id` o `POST /seed` devuelven `data` como objeto.
+Operaciones como `POST /api/v1/applications`, `GET /api/v1/applications/:id`, `POST /api/v1/auth/login`, `PATCH /api/v1/admin/references/:id` o `POST /api/v1/seed` devuelven `data` como objeto.
 
 ```json
 {
@@ -414,7 +414,7 @@ Operaciones como `POST /applications`, `GET /applications/:id`, `POST /auth/logi
 
 ### 2. Éxito con arreglo paginado
 
-Listados como `GET /applications` o `GET /admin/references` devuelven `data` como arreglo y `meta` con la paginación por cursor.
+Listados como `GET /api/v1/applications` o `GET /api/v1/admin/references` devuelven `data` como arreglo y `meta` con la paginación por cursor.
 
 ```json
 {
@@ -446,8 +446,8 @@ Listados como `GET /applications` o `GET /admin/references` devuelven `data` com
 
 ## Documentación y salud
 
-- Swagger: `http://localhost:3000/api/docs`
-- Health: `http://localhost:3000/health`
+- Swagger: `http://localhost:3000/api/v1/docs`
+- Health: `http://localhost:3000/api/v1/health`
 
 ## Decisiones de arquitectura
 
@@ -456,11 +456,11 @@ Listados como `GET /applications` o `GET /admin/references` devuelven `data` com
 - **Servicio agregado:** `CreditApplicationsService` orquesta todos los casos de uso y mantiene el dominio como fuente de verdad.
 - **Persistencia transaccional:** el repositorio Prisma actualiza `CreditApplication` junto con sus eventos en una transacción.
 - **Paginación por cursor (keyset):** reemplaza `OFFSET/LIMIT` para mejor rendimiento y consistencia.
-- **Enumeraciones dinámicas:** `GET /applications/enums` devuelve todos los códigos activos agrupados bajo sus respectivos dominios, permitiendo agregar nuevos dominios sin tocar el endpoint (incluye `credit-term` con plazos 12, 24, 36, 48, 60, 72 meses).
+- **Enumeraciones dinámicas:** `GET /api/v1/applications/enums` devuelve todos los códigos activos agrupados bajo sus respectivos dominios, permitiendo agregar nuevos dominios sin tocar el endpoint (incluye `credit-term` con plazos 12, 24, 36, 48, 60, 72 meses).
 - **Plazo controlado:** el campo `term` se valida contra el dominio `credit-term`, evitando plazos arbitrarios.
 - **Canal asistido:** `advisorId` identifica al asesor cuando `channel === 'advisor'`.
-- **Autenticación JWT:** el panel administrativo (`/admin`, `/seed`) requiere token Bearer obtenido en `/auth/login`.
-- **Notificaciones SSE:** `GET /events` expone un stream de eventos que el frontend consume para revalidar cachés (SSG/ISR) cuando cambian referencias o se limpia la base de datos.
+- **Autenticación JWT:** el panel administrativo (`/api/v1/admin`, `/api/v1/seed`) requiere token Bearer obtenido en `/api/v1/auth/login`.
+- **Notificaciones SSE:** `GET /api/v1/events` expone un stream de eventos que el frontend consume para revalidar cachés (SSG/ISR) cuando cambian referencias o se limpia la base de datos.
 - **Referencias versionadas:** `DomainReference` guarda los valores de enumeración con `isActive`, `validFrom` y `validTo`, permitiendo activar/desactivar códigos sin perder la trazabilidad de registros anteriores.
 - **Prisma 5:** versión fija para evitar problemas de compatibilidad con el CLI y el schema.
 
@@ -468,9 +468,9 @@ Listados como `GET /applications` o `GET /admin/references` devuelven `data` com
 
 Esta implementación se mantuvo deliberadamente mínima para cumplir el alcance del ejercicio. Por tiempo y complejidad se dejaron fuera los siguientes puntos, listados como trabajo futuro:
 
-- **Token de solicitud básico:** aunque `GET /applications/:id` y las mutaciones ahora requieren el token generado al crear, ese token no es revocable ni rotable. El flujo de recuperación por documento/teléfono (`GET /applications/lookup`) es funcional pero no verifica identidad de forma robusta; en producción debería incluir OTP o autenticación, expiración corta, revocación y asociación a sesión/dispositivo.
+- **Token de solicitud básico:** aunque `GET /api/v1/applications/:id` y las mutaciones ahora requieren el token generado al crear, ese token no es revocable ni rotable. El flujo de recuperación por documento/teléfono (`GET /api/v1/applications/lookup`) es funcional pero no verifica identidad de forma robusta; en producción debería incluir OTP o autenticación, expiración corta, revocación y asociación a sesión/dispositivo.
 - **Autorización por roles:** actualmente solo existe un rol `admin`. Se podría agregar `advisor` y permisos específicos.
-- **Rate limiting:** ningún endpoint tiene límites de peticiones. `POST /applications` y `/auth/login` deberían tener throttling.
+- **Rate limiting:** ningún endpoint tiene límites de peticiones. `POST /api/v1/applications` y `/api/v1/auth/login` deberían tener throttling.
 - **Logs de auditoría:** aunque `events` traza cambios internos, no hay logs de auditoría de qué usuario/admin realizó cada cambio.
 - **Pruebas E2E y unitarias:** hay cobertura básica pero faltan casos de guardia JWT, auth y flujos edge.
 - **Soft delete y archivado:** `DELETE` o limpieza de base de datos es física. En producción debería ser lógica.

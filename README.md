@@ -61,8 +61,8 @@ bun run start:dev
 ```
 
 - API: http://localhost:3000
-- Swagger: http://localhost:3000/api/docs
-- Health: http://localhost:3000/health
+- Swagger: http://localhost:3000/api/v1/docs
+- Health: http://localhost:3000/api/v1/health
 
 ### Ejecutar frontend
 
@@ -95,35 +95,44 @@ El backend sigue una arquitectura hexagonal y modular bajo `src/modules/`:
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
-| POST | `/applications` | Crear solicitud (devuelve `accessToken`) |
-| GET | `/applications/lookup` | Buscar borrador por documento y teléfono |
-| GET | `/applications` | Listar con filtros `status`, `channel`, `q` y paginación por cursor (admin) |
-| GET | `/applications/:id` | Detalle de la solicitud (token de solicitud o admin) |
-| PATCH | `/applications/:id` | Actualizar datos complementarios (parcial; token o admin) |
-| POST | `/applications/:id/simulate-offer` | Simular oferta preliminar (token o admin) |
-| POST | `/applications/:id/finalize` | Enviar a validación (token o admin) |
-| POST | `/applications/:id/abandon` | Abandonar solicitud con motivo (token o admin) |
-| GET | `/applications/:id/events` | Trazabilidad de eventos (token o admin) |
-| POST | `/auth/login` | Login de administrador (JWT) |
-| GET | `/events` | Stream SSE de eventos de dominio |
+| POST | `/api/v1/applications` | Crear solicitud (devuelve `accessToken`) |
+| GET | `/api/v1/applications/lookup` | Buscar borrador por documento y teléfono |
+| GET | `/api/v1/applications` | Listar con filtros `status`, `channel`, `q` y paginación por cursor (admin) |
+| GET | `/api/v1/applications/:id` | Detalle de la solicitud (token de solicitud o admin) |
+| PATCH | `/api/v1/applications/:id` | Actualizar datos complementarios (parcial; token o admin) |
+| POST | `/api/v1/applications/:id/simulate-offer` | Simular oferta preliminar (token o admin) |
+| POST | `/api/v1/applications/:id/finalize` | Enviar a validación (token o admin) |
+| POST | `/api/v1/applications/:id/abandon` | Abandonar solicitud con motivo (token o admin) |
+| GET | `/api/v1/applications/:id/events` | Trazabilidad de eventos (token o admin) |
+| POST | `/api/v1/auth/login` | Login de administrador (JWT) |
+| GET | `/api/v1/events` | Stream SSE de eventos de dominio |
 
 ### Complementarios
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
-| GET | `/applications/enums` | Enumeraciones activas de dominio |
-| GET | `/admin/references` | Listar referencias de dominio |
-| POST | `/admin/references` | Crear referencia de dominio |
-| PATCH | `/admin/references/:id` | Actualizar referencia |
-| POST | `/admin/references/:id/toggle` | Activar/desactivar referencia |
-| POST | `/admin/database/clean` | Limpiar base de datos (JWT) |
-| POST | `/seed` | Poblar datos de prueba |
-| GET | `/health` | Health check (app + Prisma) |
+| GET | `/api/v1/applications/enums` | Enumeraciones activas de dominio |
+| GET | `/api/v1/admin/references` | Listar referencias de dominio |
+| POST | `/api/v1/admin/references` | Crear referencia de dominio |
+| PATCH | `/api/v1/admin/references/:id` | Actualizar referencia |
+| POST | `/api/v1/admin/references/:id/toggle` | Activar/desactivar referencia |
+| POST | `/api/v1/admin/database/clean` | Limpiar base de datos (JWT) |
+| POST | `/api/v1/seed` | Poblar datos de prueba |
+| GET | `/api/v1/health` | Health check (app + Prisma) |
+
+### Versionado de la API
+
+A partir de esta versión, todos los endpoints se exponen bajo el prefijo `/api/v1`. Esta decisión técnica busca:
+
+- **Versionado semántico:** permitir evolucionar la API en el futuro (`/api/v2`) sin romper a consumidores actuales.
+- **Separación clara:** distinguir la API REST del resto de rutas del dominio, como la documentación Swagger (`/api/v1/docs`) o futuros activos estáticos.
+- **Coherencia profesional:** adoptar una convención estándar en APIs públicas y microservicios.
+- **Compatibilidad documentada:** Swagger y los ejemplos de contrato reflejan la ruta base completa.
 
 ### Ejemplo de creación
 
 ```bash
-curl -X POST http://localhost:3000/applications \
+curl -X POST http://localhost:3000/api/v1/applications \
   -H "Content-Type: application/json" \
   -d '{
     "channel": "self-service",
@@ -144,9 +153,9 @@ curl -X POST http://localhost:3000/applications \
 - **Hexagonal por módulo:** cada módulo separa `application`, `domain` e `infrastructure`.
 - **Referencias versionadas:** `DomainReference` permite activar/desactivar valores de enumeración sin perder trazabilidad.
 - **Autenticación dual:** JWT de administrador (`/auth/login`) para `admin`, `seed` y listado; token de solicitud generado al crear para las demás operaciones del cliente.
-- **PATCH parcial:** `PATCH /applications/:id` acepta solo los campos editados, permitiendo guardar borrador paso a paso.
-- **Recuperación de borradores:** `GET /applications/lookup` permite retomar una solicitud por documento y teléfono.
-- **Eventos SSE:** `GET /events` notifica al frontend cambios en referencias y limpieza de base de datos.
+- **PATCH parcial:** `PATCH /api/v1/applications/:id` acepta solo los campos editados, permitiendo guardar borrador paso a paso.
+- **Recuperación de borradores:** `GET /api/v1/applications/lookup` permite retomar una solicitud por documento y teléfono.
+- **Eventos SSE:** `GET /api/v1/events` notifica al frontend cambios en referencias y limpieza de base de datos.
 - **Respuestas estandarizadas:** `ResponseFormatInterceptor` y `AllExceptionsFilter` envuelven todas las respuestas con `success`, `statusCode`, `message`, `data` y `meta`.
 - **Paginación por cursor (keyset):** reemplaza `OFFSET/LIMIT` para mejor rendimiento y consistencia.
 - **Prisma 5:** genera el cliente y maneja migraciones.
