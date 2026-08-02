@@ -1,9 +1,12 @@
 # Multi-stage Dockerfile para despliegue de producción
 # Compatible con Azure Container Apps, Azure App Service, Railway, Render, etc.
 
-FROM node:20-alpine AS builder
+FROM node:20-slim AS builder
 
 WORKDIR /app
+
+# Prisma requiere OpenSSL y ca-certificates para descargar engines
+RUN apt-get update && apt-get install -y openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 
 # 1. Instalar dependencias de build
 COPY package*.json bun.lockb* ./
@@ -14,9 +17,13 @@ COPY . .
 RUN if [ -f bun.lockb ]; then bunx prisma generate && bun run build; else npx prisma generate && npm run build; fi
 
 # 3. Imagen final de producción
-FROM node:20-alpine AS runner
+FROM node:20-slim AS runner
 
 WORKDIR /app
+
+# Prisma requiere OpenSSL y ca-certificates en runtime
+RUN apt-get update && apt-get install -y openssl ca-certificates && rm -rf /var/lib/apt/lists/*
+
 ENV NODE_ENV=production
 
 COPY --from=builder /app/dist ./dist

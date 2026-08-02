@@ -160,7 +160,7 @@ El backend se empaqueta como imagen Docker y puede desplegarse en cualquier serv
 
 ### Archivos de despliegue
 
-- `backend/Dockerfile` — imagen multi-etapa (`node:20-alpine`) que compila, genera el cliente Prisma y ejecuta `prisma migrate deploy` antes de iniciar.
+- `backend/Dockerfile` — imagen multi-etapa (`node:20-slim` Debian) que instala OpenSSL, genera el cliente Prisma y ejecuta `prisma migrate deploy` antes de iniciar.
 - `backend/.dockerignore` — evita copiar `node_modules`, `dist`, `.env` y otros archivos innecesarios.
 - `docker-compose.prod.yml` — levanta el backend localmente en modo producción usando un archivo `.env` externo.
 - `backend/.env.prod.example` — ejemplo de variables de producción.
