@@ -1,8 +1,10 @@
 import type { UseFormRegister, FieldErrors } from 'react-hook-form';
 import { FormField } from '@/presentation/components/forms/FormField';
+import { TextareaField } from '@/presentation/components/forms/TextareaField';
 import { SelectField } from '@/presentation/components/forms/SelectField';
 import { CheckboxField } from '@/presentation/components/forms/CheckboxField';
 import { applicationFormLabels } from '@/presentation/messages/applicationForm';
+import { formatCOP } from '@/presentation/utils/formatCOP';
 import { REFERENCE_CREDIT_TERM } from '@/presentation/constants/referenceDomains';
 import type { NewApplicationFormData } from '@/presentation/validation/newApplicationSchema';
 
@@ -10,12 +12,14 @@ interface Step2Props {
   register: UseFormRegister<NewApplicationFormData>;
   errors: FieldErrors<NewApplicationFormData>;
   references: Record<string, string[]>;
+  watched: Partial<NewApplicationFormData>;
 }
 
 export function ApplicationNewFormStep2({
   register,
   errors,
   references,
+  watched,
 }: Step2Props) {
   const termOptions =
     references[REFERENCE_CREDIT_TERM]?.map((code) => ({
@@ -32,6 +36,7 @@ export function ApplicationNewFormStep2({
         registration={register('income')}
         error={errors.income}
       />
+      <p className="text-sm text-slate-500">{formatCOP(watched.income ?? 0)}</p>
       <FormField
         id="expenses"
         label={applicationFormLabels.expenses}
@@ -39,6 +44,7 @@ export function ApplicationNewFormStep2({
         registration={register('expenses')}
         error={errors.expenses}
       />
+      <p className="text-sm text-slate-500">{formatCOP(watched.expenses ?? 0)}</p>
       <FormField
         id="amount"
         label={applicationFormLabels.amount}
@@ -46,6 +52,7 @@ export function ApplicationNewFormStep2({
         registration={register('amount')}
         error={errors.amount}
       />
+      <p className="text-sm text-slate-500">{formatCOP(watched.amount ?? 0)}</p>
       <SelectField
         id="term"
         label={applicationFormLabels.term}
@@ -54,7 +61,7 @@ export function ApplicationNewFormStep2({
         error={errors.term}
         registration={register('term')}
       />
-      <FormField
+      <TextareaField
         id="purpose"
         label={applicationFormLabels.purpose}
         registration={register('purpose')}

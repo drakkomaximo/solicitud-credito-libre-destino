@@ -24,3 +24,13 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+button,
+[role="button"],
+a,
+select,
+summary,
+input[type="checkbox"],
+input[type="radio"] {
+  cursor: pointer;
+}

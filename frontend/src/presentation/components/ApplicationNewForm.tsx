@@ -132,6 +132,7 @@ function FormContent() {
             register={register}
             errors={errors}
             references={references}
+            watched={watched}
           />
         )}
 
