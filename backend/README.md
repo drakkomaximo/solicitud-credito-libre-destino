@@ -236,43 +236,43 @@ Swagger agrupa los endpoints en **Solicitudes de crédito** y en subgrupos dentr
 
 #### Admin
 
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| POST | `/api/v1/admin/database/clean` | Limpiar la base de datos (JWT requerido, solo local) |
-| GET | `/api/v1/admin/references` | Listar referencias de dominio (opcionalmente filtrar por `?domain=`) |
-| POST | `/api/v1/admin/references` | Crear una referencia de dominio |
-| PATCH | `/api/v1/admin/references/:id` | Actualizar label/descripción/estado de una referencia |
-| POST | `/api/v1/admin/references/:id/toggle` | Activar o desactivar una referencia |
+| Método | Ruta | Autenticación | Descripción |
+|--------|------|---------------|-------------|
+| POST | `/api/v1/admin/database/clean` | JWT admin | Limpiar la base de datos (solo local) |
+| GET | `/api/v1/admin/references` | JWT admin | Listar referencias de dominio (opcionalmente filtrar por `?domain=`) |
+| POST | `/api/v1/admin/references` | JWT admin | Crear una referencia de dominio |
+| PATCH | `/api/v1/admin/references/:id` | JWT admin | Actualizar label/descripción/estado de una referencia |
+| POST | `/api/v1/admin/references/:id/toggle` | JWT admin | Activar o desactivar una referencia |
 
 #### Dominios
 
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| GET | `/api/v1/applications/enums` | Enumeraciones activas agrupadas dinámicamente por dominio |
+| Método | Ruta | Autenticación | Descripción |
+|--------|------|---------------|-------------|
+| GET | `/api/v1/applications/enums` | Pública | Enumeraciones activas agrupadas dinámicamente por dominio |
 
 #### Seed
 
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| POST | `/api/v1/seed` | Poblar datos de prueba (JWT requerido) |
+| Método | Ruta | Autenticación | Descripción |
+|--------|------|---------------|-------------|
+| POST | `/api/v1/seed` | JWT admin | Poblar datos de prueba |
 
 #### Auth
 
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| POST | `/api/v1/auth/login` | Obtener token JWT con `username` y `password` |
+| Método | Ruta | Autenticación | Descripción |
+|--------|------|---------------|-------------|
+| POST | `/api/v1/auth/login` | Pública | Obtener token JWT con `username` y `password` |
 
 #### Health
 
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| GET | `/api/v1/health` | Health check de Prisma |
+| Método | Ruta | Autenticación | Descripción |
+|--------|------|---------------|-------------|
+| GET | `/api/v1/health` | Pública | Health check de Prisma |
 
 #### Events
 
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| GET | `/api/v1/events` | Stream Server-Sent Events (SSE) para notificaciones en tiempo real |
+| Método | Ruta | Autenticación | Descripción |
+|--------|------|---------------|-------------|
+| GET | `/api/v1/events` | Pública | Stream Server-Sent Events (SSE) para notificaciones en tiempo real |
 
 ### Revalidación on-demand (SSG/ISR)
 
