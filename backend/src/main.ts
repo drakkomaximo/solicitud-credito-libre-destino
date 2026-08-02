@@ -46,6 +46,9 @@ async function bootstrap() {
   ];
   SwaggerModule.setup(`${apiPrefix}/docs`, app, document, {
     customSiteTitle: 'Credit Applications API',
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
   });
 
   await app.listen(process.env.PORT ?? 3000);
