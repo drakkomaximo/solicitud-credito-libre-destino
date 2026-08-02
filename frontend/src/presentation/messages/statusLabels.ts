@@ -3,6 +3,8 @@ export const STATUS_LABELS: Record<string, string> = {
   NOT_VIABLE: 'No viable',
   PENDING_VALIDATION: 'Pendiente validación',
   FINALIZED: 'Finalizada',
+  APPROVED: 'Aprobada',
+  REJECTED: 'Rechazada',
   ABANDONED: 'Abandonada',
 } as const;
 

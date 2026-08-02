@@ -7,14 +7,16 @@ export const ApplicationStatus = {
   ABANDONED: 'ABANDONED',
 } as const;
 
-export type ApplicationStatusValue = (typeof ApplicationStatus)[keyof typeof ApplicationStatus];
+export type ApplicationStatusValue =
+  (typeof ApplicationStatus)[keyof typeof ApplicationStatus];
 
 export const ApplicationChannel = {
   SELF_SERVICE: 'self-service',
   ADVISOR: 'advisor',
 } as const;
 
-export type ApplicationChannelValue = (typeof ApplicationChannel)[keyof typeof ApplicationChannel];
+export type ApplicationChannelValue =
+  (typeof ApplicationChannel)[keyof typeof ApplicationChannel];
 
 export const DocumentType = {
   CC: 'CC',
@@ -22,7 +24,8 @@ export const DocumentType = {
   PA: 'PA',
 } as const;
 
-export type DocumentTypeValue = (typeof DocumentType)[keyof typeof DocumentType];
+export type DocumentTypeValue =
+  (typeof DocumentType)[keyof typeof DocumentType];
 
 export const CreditTerm = {
   12: '12',

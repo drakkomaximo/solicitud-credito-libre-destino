@@ -26,7 +26,10 @@ export class AuthService {
     const expectedUsername = this.config.get<string>('ADMIN_USERNAME', 'admin');
     const expectedPassword = this.config.get<string>('ADMIN_SECRET');
 
-    if (command.username !== expectedUsername || command.password !== expectedPassword) {
+    if (
+      command.username !== expectedUsername ||
+      command.password !== expectedPassword
+    ) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 

@@ -1,15 +1,13 @@
 ﻿'use client';
 
-import { useEffect, useState, useTransition, Suspense } from 'react';
+import { useCallback, useEffect, useRef, useState, useTransition, Suspense } from 'react';
+import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useApplicationActions } from '@/presentation/hooks/useApplicationActions';
 import { useSuspenseQuery } from '@/presentation/hooks/useSuspenseQuery';
 import { SuspenseFallback } from '@/presentation/components/SuspenseFallback';
-import { GetReferences } from '@/application/useCases/GetReferences';
-import { ReferenceApiRepository } from '@/infrastructure/repositories/ReferenceApiRepository';
-import { REFERENCE_STATUS, REFERENCE_CHANNEL } from '@/presentation/constants/referenceDomains';
-import { STATUS_LABELS } from '@/presentation/messages/statusLabels';
-import { CHANNEL_LABELS } from '@/presentation/constants/channels';
+import { ScrollToTop } from '@/presentation/components/ScrollToTop';
+import { ApplicationFilters } from '@/presentation/components/ApplicationFilters';
 import { listPageMessages } from '@/presentation/messages/list';
 import { commonMessages } from '@/presentation/messages/common';
 import type { CreditApplication, ListApplicationsResult } from '@/domain/entities/Application';
@@ -29,35 +27,17 @@ function resetPagination(
   setListError(null);
 }
 
-function ScrollToTop() {
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setVisible(window.scrollY > 300);
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  if (!visible) return null;
-
-  return (
-    <button
-      type="button"
-      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-      className="fixed bottom-6 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-sky-600 text-2xl text-white shadow-lg hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
-      aria-label="Volver arriba"
-    >
-      ↑
-    </button>
-  );
-}
-
 function ListContent() {
   const { list } = useApplicationActions();
-  const [status, setStatus] = useState('all');
-  const [channel, setChannel] = useState('all');
-  const [q, setQ] = useState('');
-  const [search, setSearch] = useState('');
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const { replace } = useRouter();
+  const isFirstRun = useRef(true);
+
+  const [status, setStatus] = useState(searchParams.get('status') ?? 'all');
+  const [channel, setChannel] = useState(searchParams.get('channel') ?? 'all');
+  const [q, setQ] = useState(searchParams.get('q') ?? '');
+  const [search, setSearch] = useState(searchParams.get('q') ?? '');
   const [isPending, startTransition] = useTransition();
 
   const [extraItems, setExtraItems] = useState<CreditApplication[]>([]);
@@ -65,6 +45,21 @@ function ListContent() {
   const [extraHasMore, setExtraHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [listError, setListError] = useState<string | null>(null);
+
+  const updateQuery = useCallback(
+    (nextStatus: string, nextChannel: string, nextQ: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (nextStatus === 'all') params.delete('status');
+      else params.set('status', nextStatus);
+      if (nextChannel === 'all') params.delete('channel');
+      else params.set('channel', nextChannel);
+      if (nextQ) params.set('q', nextQ);
+      else params.delete('q');
+      const qs = params.toString();
+      replace(qs ? `${pathname}?${qs}` : pathname);
+    },
+    [searchParams, pathname, replace],
+  );
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -78,10 +73,16 @@ function ListContent() {
     return () => clearTimeout(timer);
   }, [search, q, startTransition]);
 
-  const { data: references } = useSuspenseQuery(
-    'applications-list-references',
-    () => new GetReferences(new ReferenceApiRepository()).execute(),
-  );
+  useEffect(() => {
+    if (isFirstRun.current) {
+      isFirstRun.current = false;
+      return;
+    }
+    startTransition(() => {
+      resetPagination(setExtraItems, setExtraCursor, setExtraHasMore, setListError);
+      updateQuery(status, channel, q);
+    });
+  }, [status, channel, q, updateQuery]);
 
   const { data: page, error: pageError } = useSuspenseQuery(
     `applications-list-initial-${status}-${channel}-${q}`,
@@ -99,16 +100,9 @@ function ListContent() {
   const cursor = extraCursor ?? page?.nextCursor ?? null;
   const hasMore = extraCursor !== null ? extraHasMore : (page?.hasNextPage ?? false);
 
-  const changeStatus = (value: string) =>
-    startTransition(() => {
-      resetPagination(setExtraItems, setExtraCursor, setExtraHasMore, setListError);
-      setStatus(value);
-    });
-  const changeChannel = (value: string) =>
-    startTransition(() => {
-      resetPagination(setExtraItems, setExtraCursor, setExtraHasMore, setListError);
-      setChannel(value);
-    });
+  const changeStatus = (value: string) => setStatus(value);
+  const changeChannel = (value: string) => setChannel(value);
+  const changeSearch = (value: string) => setSearch(value);
 
   const loadMore = async () => {
     if (!hasMore || loadingMore || !cursor) return;
@@ -135,78 +129,19 @@ function ListContent() {
     return <p className="mt-2 text-red-600">{pageError.message}</p>;
   }
 
-  const referencesMap = references ?? {};
-  const statusOptions = referencesMap[REFERENCE_STATUS] ?? [];
-  const channelOptions = referencesMap[REFERENCE_CHANNEL] ?? [];
-
   return (
     <main className="mx-auto max-w-5xl p-6">
       <h1 className="text-2xl font-bold text-slate-900">{listPageMessages.title}</h1>
       {isPending && <p className="mt-2 text-slate-600">{commonMessages.loading}</p>}
 
-      <div className="mt-4 flex flex-wrap gap-4">
-        <div className="flex flex-col gap-1">
-          <label htmlFor="status-filter" className="text-xs text-slate-500">
-            Estado
-          </label>
-          {statusOptions.length > 0 ? (
-            <select
-              id="status-filter"
-              value={status}
-              onChange={(e) => changeStatus(e.target.value)}
-              className="border rounded p-2"
-              aria-label={listPageMessages.allStatuses}
-            >
-              <option value="all">{listPageMessages.allStatuses}</option>
-              {statusOptions.map((code) => (
-                <option key={code} value={code}>
-                  {STATUS_LABELS[code] ?? code}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <span className="text-sm text-slate-400">No hay estados disponibles</span>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label htmlFor="channel-filter" className="text-xs text-slate-500">
-            Canal
-          </label>
-          {channelOptions.length > 0 ? (
-            <select
-              id="channel-filter"
-              value={channel}
-              onChange={(e) => changeChannel(e.target.value)}
-              className="border rounded p-2"
-              aria-label={listPageMessages.allChannels}
-            >
-              <option value="all">{listPageMessages.allChannels}</option>
-              {channelOptions.map((code) => (
-                <option key={code} value={code}>
-                  {CHANNEL_LABELS[code] ?? code}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <span className="text-sm text-slate-400">No hay canales disponibles</span>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label htmlFor="search-filter" className="text-xs text-slate-500">
-            Buscar
-          </label>
-          <input
-            id="search-filter"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={listPageMessages.searchPlaceholder}
-            className="border rounded p-2"
-            aria-label={listPageMessages.searchPlaceholder}
-          />
-        </div>
-      </div>
+      <ApplicationFilters
+        status={status}
+        channel={channel}
+        search={search}
+        onStatusChange={changeStatus}
+        onChannelChange={changeChannel}
+        onSearchChange={changeSearch}
+      />
 
       <ul className="mt-6 space-y-4">
         {items.length === 0 && (

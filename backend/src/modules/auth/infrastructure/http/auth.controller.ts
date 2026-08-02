@@ -10,7 +10,11 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
-  @ApiOperation({ summary: 'Iniciar sesión administrativa', description: 'Autentica un administrador y devuelve un JWT para acceder a los endpoints protegidos.' })
+  @ApiOperation({
+    summary: 'Iniciar sesión administrativa',
+    description:
+      'Autentica un administrador y devuelve un JWT para acceder a los endpoints protegidos.',
+  })
   @ApiOkEnvelope('Token generado')
   async login(@Body() dto: LoginDto) {
     return this.authService.login(dto);

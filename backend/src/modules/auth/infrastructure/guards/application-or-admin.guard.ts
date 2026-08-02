@@ -1,9 +1,16 @@
-﻿import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+﻿import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 const TOKEN_COOKIE = 'credit_token';
 
-function extractToken(request: { headers: { authorization?: string; cookie?: string } }): string | null {
+function extractToken(request: {
+  headers: { authorization?: string; cookie?: string };
+}): string | null {
   const auth = request.headers.authorization;
   if (auth?.startsWith('Bearer ')) {
     return auth.replace('Bearer ', '');
@@ -39,19 +46,25 @@ export class ApplicationOrAdminGuard implements CanActivate {
     }
 
     try {
-      const payload = this.jwtService.verify(token) as { sub: string; role: string };
+      const payload = this.jwtService.verify(token);
 
       if (payload.role === 'admin') {
         request.user = payload;
         return true;
       }
 
-      if (payload.role === 'application' && request.params.id && payload.sub === request.params.id) {
+      if (
+        payload.role === 'application' &&
+        request.params.id &&
+        payload.sub === request.params.id
+      ) {
         request.user = payload;
         return true;
       }
 
-      throw new UnauthorizedException('No tiene permiso para acceder a este recurso');
+      throw new UnauthorizedException(
+        'No tiene permiso para acceder a este recurso',
+      );
     } catch {
       throw new UnauthorizedException('Token inválido o expirado');
     }

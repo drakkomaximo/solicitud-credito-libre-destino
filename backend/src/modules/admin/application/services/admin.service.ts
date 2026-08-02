@@ -11,7 +11,9 @@ export class AdminService {
 
   async cleanDatabase(): Promise<{ deletedApplications: number }> {
     if (this.config.get('NODE_ENV') === 'production') {
-      throw new ForbiddenException('Este servicio no está disponible en producción');
+      throw new ForbiddenException(
+        'Este servicio no está disponible en producción',
+      );
     }
 
     const result = await this.prisma.creditApplication.deleteMany({});

@@ -36,10 +36,27 @@ describe('CreditApplicationsController', () => {
   });
 
   it('debería listar con filtros y cursor', async () => {
-    const list = { data: [{ id: '1' } as any], nextCursor: '1', hasNextPage: false, limit: 10 };
+    const list = {
+      data: [{ id: '1' } as any],
+      nextCursor: '1',
+      hasNextPage: false,
+      limit: 10,
+    };
     service.list.mockResolvedValue(list);
-    const result = await controller.list('DRAFT', 'self-service', 'Juan', 'app-1', '10');
-    expect(service.list).toHaveBeenCalledWith({ status: 'DRAFT', channel: 'self-service', q: 'Juan', cursor: 'app-1', limit: 10 });
+    const result = await controller.list(
+      'DRAFT',
+      'self-service',
+      'Juan',
+      'app-1',
+      '10',
+    );
+    expect(service.list).toHaveBeenCalledWith({
+      status: 'DRAFT',
+      channel: 'self-service',
+      q: 'Juan',
+      cursor: 'app-1',
+      limit: 10,
+    });
     expect(result.data.length).toBe(1);
   });
 

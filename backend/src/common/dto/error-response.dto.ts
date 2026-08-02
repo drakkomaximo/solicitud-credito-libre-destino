@@ -10,12 +10,21 @@ export class ErrorResponseDto {
   @ApiProperty({ description: 'Nombre del error', example: 'Bad Request' })
   error!: string;
 
-  @ApiProperty({ description: 'Mensajes descriptivos del error', example: ['El campo email es inválido'] })
+  @ApiProperty({
+    description: 'Mensajes descriptivos del error',
+    example: ['El campo email es inválido'],
+  })
   message!: string[];
 
-  @ApiProperty({ description: 'Ruta que generó el error', example: '/applications' })
+  @ApiProperty({
+    description: 'Ruta que generó el error',
+    example: '/applications',
+  })
   path!: string;
 
-  @ApiProperty({ description: 'Marca de tiempo ISO del error', example: '2026-08-01T16:30:00.000Z' })
+  @ApiProperty({
+    description: 'Marca de tiempo ISO del error',
+    example: '2026-08-01T16:30:00.000Z',
+  })
   timestamp!: string;
 }

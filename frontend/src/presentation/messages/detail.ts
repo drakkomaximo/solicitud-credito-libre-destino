@@ -2,6 +2,7 @@ export const detailMessages = {
   requestTitle: 'Solicitud de',
   status: 'Estado',
   channel: 'Canal',
+  phone: 'Teléfono',
   document: 'Documento',
   amount: 'Valor',
   term: 'Plazo',

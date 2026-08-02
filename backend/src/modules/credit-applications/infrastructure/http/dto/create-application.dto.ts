@@ -1,8 +1,17 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsIn, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsEmail,
+  IsIn,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateApplicationDto {
-  @ApiProperty({ enum: ['self-service', 'advisor'], description: 'Canal de originación' })
+  @ApiProperty({
+    enum: ['self-service', 'advisor'],
+    description: 'Canal de originación',
+  })
   @IsIn(['self-service', 'advisor'])
   @IsNotEmpty()
   channel!: string;
@@ -18,7 +27,10 @@ export class CreateApplicationDto {
   @IsString()
   documentType!: string;
 
-  @ApiProperty({ description: 'Número de documento del solicitante', example: '1234567890' })
+  @ApiProperty({
+    description: 'Número de documento del solicitante',
+    example: '1234567890',
+  })
   @IsNotEmpty()
   @IsString()
   documentNumber!: string;
@@ -33,17 +45,26 @@ export class CreateApplicationDto {
   @IsString()
   lastName!: string;
 
-  @ApiProperty({ description: 'Número de teléfono del solicitante', example: '3001234567' })
+  @ApiProperty({
+    description: 'Número de teléfono del solicitante',
+    example: '3001234567',
+  })
   @IsNotEmpty()
   @IsString()
   phone!: string;
 
-  @ApiProperty({ description: 'Correo electrónico del solicitante', example: 'juan.perez@example.com' })
+  @ApiProperty({
+    description: 'Correo electrónico del solicitante',
+    example: 'juan.perez@example.com',
+  })
   @IsNotEmpty()
   @IsEmail()
   email!: string;
 
-  @ApiProperty({ description: 'Ciudad de residencia del solicitante', example: 'Bogotá' })
+  @ApiProperty({
+    description: 'Ciudad de residencia del solicitante',
+    example: 'Bogotá',
+  })
   @IsNotEmpty()
   @IsString()
   city!: string;
