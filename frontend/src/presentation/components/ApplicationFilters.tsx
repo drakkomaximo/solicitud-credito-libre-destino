@@ -9,6 +9,7 @@ interface ApplicationFiltersProps {
   status: string;
   channel: string;
   search: string;
+  disabled?: boolean;
   onStatusChange: (value: string) => void;
   onChannelChange: (value: string) => void;
   onSearchChange: (value: string) => void;
@@ -19,6 +20,7 @@ export function ApplicationFilters({
   status,
   channel,
   search,
+  disabled = false,
   onStatusChange,
   onChannelChange,
   onSearchChange,
@@ -37,7 +39,8 @@ export function ApplicationFilters({
           id="status-filter"
           value={status}
           onChange={(e) => onStatusChange(e.target.value)}
-          className="border rounded p-2"
+          disabled={disabled}
+          className="border rounded p-2 disabled:opacity-50"
           aria-label={listPageMessages.allStatuses}
         >
           <option value="all">{listPageMessages.allStatuses}</option>
@@ -57,7 +60,8 @@ export function ApplicationFilters({
           id="channel-filter"
           value={channel}
           onChange={(e) => onChannelChange(e.target.value)}
-          className="border rounded p-2"
+          disabled={disabled}
+          className="border rounded p-2 disabled:opacity-50"
           aria-label={listPageMessages.allChannels}
         >
           <option value="all">{listPageMessages.allChannels}</option>
@@ -78,7 +82,8 @@ export function ApplicationFilters({
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder={listPageMessages.searchPlaceholder}
-          className="border rounded p-2"
+          disabled={disabled}
+          className="border rounded p-2 disabled:opacity-50"
           aria-label={listPageMessages.searchPlaceholder}
         />
       </div>
@@ -87,7 +92,8 @@ export function ApplicationFilters({
         <button
           type="button"
           onClick={onReset}
-          className="inline-flex items-center gap-2 rounded bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200"
+          disabled={disabled}
+          className="inline-flex items-center gap-2 rounded bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200 disabled:opacity-50"
           aria-label={listPageMessages.clearFilters}
         >
           <RotateCcw size={16} aria-hidden="true" />

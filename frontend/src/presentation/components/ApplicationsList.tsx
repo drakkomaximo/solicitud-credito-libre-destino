@@ -105,6 +105,8 @@ function ListContent() {
   const changeChannel = (value: string) => setChannel(value);
   const changeSearch = (value: string) => setSearch(value);
 
+  const isLoading = isPending || loadingMore;
+
   const resetFilters = () => {
     startTransition(() => {
       setStatus('all');
@@ -142,56 +144,60 @@ function ListContent() {
   return (
     <main className="mx-auto max-w-5xl p-6">
       <h1 className="text-2xl font-bold text-slate-900">{listPageMessages.title}</h1>
-      {isPending && (
-        <div className="mt-2">
-          <LoadingSpinner label={commonMessages.loading} />
-        </div>
-      )}
 
       <ApplicationFilters
         status={status}
         channel={channel}
         search={search}
+        disabled={isLoading}
         onStatusChange={changeStatus}
         onChannelChange={changeChannel}
         onSearchChange={changeSearch}
         onReset={resetFilters}
       />
 
-      <ul className="mt-6 space-y-4">
-        {items.length === 0 && (
-          <li className="text-slate-600">{listPageMessages.empty}</li>
-        )}
-        {items.map((app) => (
-          <li key={app.id} className="border rounded p-4">
-            <Link
-              href={`/applications/${app.id}`}
-              className="text-lg font-medium text-sky-700"
-            >
-              {app.firstName} {app.lastName}
-            </Link>
-            <p className="text-sm text-slate-600">
-              {app.documentType} {app.documentNumber} — {app.status}
-            </p>
-          </li>
-        ))}
-      </ul>
-      {listError && <p className="mt-4 text-red-600">{listError}</p>}
-      {hasMore && (
-        <div className="mt-6 text-center">
-          <button
-            type="button"
-            onClick={loadMore}
-            disabled={loadingMore}
-            className="inline-flex items-center gap-2 rounded bg-sky-600 px-4 py-2 text-white disabled:opacity-60"
-          >
-            {loadingMore ? (
-              <LoadingSpinner size={16} label={commonMessages.loading} className="text-white" />
-            ) : (
-              listPageMessages.loadMore
-            )}
-          </button>
+      {isPending ? (
+        <div className="mt-6">
+          <LoadingSpinner label={commonMessages.loading} />
         </div>
+      ) : (
+        <>
+          <ul className="mt-6 space-y-4">
+            {items.length === 0 && (
+              <li className="text-slate-600">{listPageMessages.empty}</li>
+            )}
+            {items.map((app) => (
+              <li key={app.id} className="border rounded p-4">
+                <Link
+                  href={`/applications/${app.id}`}
+                  className="text-lg font-medium text-sky-700"
+                >
+                  {app.firstName} {app.lastName}
+                </Link>
+                <p className="text-sm text-slate-600">
+                  {app.documentType} {app.documentNumber} — {app.status}
+                </p>
+              </li>
+            ))}
+          </ul>
+          {listError && <p className="mt-4 text-red-600">{listError}</p>}
+          {hasMore && (
+            <div className="mt-6 text-center">
+              <button
+                type="button"
+                onClick={loadMore}
+                disabled={loadingMore}
+                className="inline-flex items-center gap-2 rounded bg-sky-600 px-4 py-2 text-white disabled:opacity-60"
+              >
+                {loadingMore ? (
+                  <LoadingSpinner size={16} label={commonMessages.loading} className="text-white" />
+                ) : (
+                  listPageMessages.loadMore
+                )}
+              </button>
+            </div>
+          )}
+        </>
       )}
 
       <ScrollToTop />
