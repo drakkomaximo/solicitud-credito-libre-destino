@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
+import { layoutMessages } from "@/presentation/messages/layout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Solicitud de Crédito",
-  description: "Micrositio de solicitud digital de crédito de libre destino",
+  title: layoutMessages.pageTitle,
+  description: layoutMessages.pageDescription,
 };
 
 export default function RootLayout({
@@ -32,20 +33,20 @@ export default function RootLayout({
         <header className="border-b border-slate-200 bg-white px-6 py-4">
           <nav className="mx-auto flex max-w-5xl items-center justify-between">
             <Link href="/" className="text-lg font-bold text-slate-900">
-              CrediDigital
+              {layoutMessages.brand}
             </Link>
             <div className="flex gap-4">
               <Link
                 href="/applications/new"
                 className="text-slate-600 hover:text-slate-900"
               >
-                Nueva solicitud
+                {layoutMessages.newApplication}
               </Link>
               <Link
                 href="/applications"
                 className="text-slate-600 hover:text-slate-900"
               >
-                Solicitudes
+                {layoutMessages.applications}
               </Link>
             </div>
           </nav>

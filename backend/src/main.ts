@@ -22,7 +22,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ResponseFormatInterceptor(app.get(Reflector)));
   app.useGlobalFilters(new AllExceptionsFilter());
   const apiPrefix = process.env.API_PREFIX || 'api/v1';
-  const corsOrigin = process.env.CORS_ORIGIN || '*';
+  const corsOrigin = process.env.CORS_ORIGIN || 'http://localhost:3000';
   app.enableCors({
     origin: corsOrigin as any,
     credentials: true,

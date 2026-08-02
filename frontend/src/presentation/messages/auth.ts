@@ -1,0 +1,15 @@
+﻿export const authMessages = {
+  chooseRole: '¿Cómo quieres acceder?',
+  admin: 'Administrador',
+  client: 'Cliente',
+  username: 'Usuario',
+  password: 'Contraseña',
+  login: 'Ingresar',
+  documentNumber: 'Número de documento',
+  phone: 'Teléfono',
+  lookup: 'Consultar solicitud',
+  logout: 'Cerrar sesión',
+  loginError: 'Error de autenticación.',
+  lookupError: 'No se encontró una solicitud con esos datos.',
+  clientWelcome: 'Esta es tu solicitud',
+} as const;
