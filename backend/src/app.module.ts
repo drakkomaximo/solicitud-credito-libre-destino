@@ -8,6 +8,14 @@ import { EventsModule } from '@/modules/events/events.module';
 import { AuthModule } from '@/modules/auth/auth.module';
 
 @Module({
-  imports: [PrismaModule, HealthModule, CreditApplicationsModule, SeedModule, AdminModule, EventsModule, AuthModule],
+  imports: [
+    PrismaModule,
+    HealthModule,
+    CreditApplicationsModule,
+    SeedModule,
+    AdminModule,
+    EventsModule,
+    AuthModule,
+  ],
 })
 export class AppModule {}

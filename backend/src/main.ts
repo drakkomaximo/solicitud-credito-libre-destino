@@ -34,19 +34,33 @@ async function bootstrap() {
     .setDescription('Micrositio de solicitud de crédito de libre destino')
     .setVersion('1.0')
     .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' })
-    .addTag('Solicitudes de crédito', 'Endpoints principales del flujo de crédito libre destino (prueba original)')
-    .addTag('Admin', 'Gestión de referencias, limpieza de base de datos y tareas administrativas')
+    .addTag(
+      'Solicitudes de crédito',
+      'Endpoints principales del flujo de crédito libre destino (prueba original)',
+    )
+    .addTag(
+      'Admin',
+      'Gestión de referencias, limpieza de base de datos y tareas administrativas',
+    )
     .addTag('Dominios', 'Enumeraciones y valores de referencia versionados')
     .addTag('Seed', 'Población de datos de prueba')
     .addTag('Health', 'Health checks del servicio')
     .addTag('Auth', 'Autenticación del panel administrativo')
     .build();
   const document = SwaggerModule.createDocument(app, config, {
-    extraModels: [ErrorResponseDto, SuccessResponseDto, PaginatedResponseDto, PaginationMetaDto],
+    extraModels: [
+      ErrorResponseDto,
+      SuccessResponseDto,
+      PaginatedResponseDto,
+      PaginationMetaDto,
+    ],
   });
   (document as any)['x-tagGroups'] = [
     { name: 'Solicitudes de crédito', tags: ['Solicitudes de crédito'] },
-    { name: 'Complementarios', tags: ['Admin', 'Dominios', 'Seed', 'Health', 'Auth'] },
+    {
+      name: 'Complementarios',
+      tags: ['Admin', 'Dominios', 'Seed', 'Health', 'Auth'],
+    },
   ];
   SwaggerModule.setup(`${apiPrefix}/docs`, app, document, {
     customSiteTitle: 'Credit Applications API',

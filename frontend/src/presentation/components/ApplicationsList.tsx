@@ -1,20 +1,20 @@
 ﻿'use client';
 
-import { useState, useTransition, Suspense } from 'react';
+import { useCallback, useEffect, useRef, useState, useTransition, Suspense } from 'react';
+import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useApplicationActions } from '@/presentation/hooks/useApplicationActions';
 import { useSuspenseQuery } from '@/presentation/hooks/useSuspenseQuery';
 import { SuspenseFallback } from '@/presentation/components/SuspenseFallback';
-import { GetReferences } from '@/application/useCases/GetReferences';
-import { ReferenceApiRepository } from '@/infrastructure/repositories/ReferenceApiRepository';
-import { REFERENCE_STATUS, REFERENCE_CHANNEL } from '@/presentation/constants/referenceDomains';
-import { STATUS_LABELS } from '@/presentation/messages/statusLabels';
-import { CHANNEL_LABELS } from '@/presentation/constants/channels';
+import { ScrollToTop } from '@/presentation/components/ScrollToTop';
+import { ApplicationFilters } from '@/presentation/components/ApplicationFilters';
+import { LoadingSpinner } from '@/presentation/components/LoadingSpinner';
 import { listPageMessages } from '@/presentation/messages/list';
 import { commonMessages } from '@/presentation/messages/common';
 import type { CreditApplication, ListApplicationsResult } from '@/domain/entities/Application';
 
 const PAGE_SIZE = 10;
+const SEARCH_DEBOUNCE_MS = 500;
 
 function resetPagination(
   setExtraItems: (v: CreditApplication[]) => void,
@@ -30,9 +30,15 @@ function resetPagination(
 
 function ListContent() {
   const { list } = useApplicationActions();
-  const [status, setStatus] = useState('all');
-  const [channel, setChannel] = useState('all');
-  const [q, setQ] = useState('');
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const { replace } = useRouter();
+  const isFirstRun = useRef(true);
+
+  const [status, setStatus] = useState(searchParams.get('status') ?? 'all');
+  const [channel, setChannel] = useState(searchParams.get('channel') ?? 'all');
+  const [q, setQ] = useState(searchParams.get('q') ?? '');
+  const [search, setSearch] = useState(searchParams.get('q') ?? '');
   const [isPending, startTransition] = useTransition();
 
   const [extraItems, setExtraItems] = useState<CreditApplication[]>([]);
@@ -41,10 +47,43 @@ function ListContent() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [listError, setListError] = useState<string | null>(null);
 
-  const { data: references } = useSuspenseQuery(
-    'applications-list-references',
-    () => new GetReferences(new ReferenceApiRepository()).execute(),
+  const updateQuery = useCallback(
+    (nextStatus: string, nextChannel: string, nextQ: string) => {
+      const params = new URLSearchParams(window.location.search);
+      if (nextStatus === 'all') params.delete('status');
+      else params.set('status', nextStatus);
+      if (nextChannel === 'all') params.delete('channel');
+      else params.set('channel', nextChannel);
+      if (nextQ) params.set('q', nextQ);
+      else params.delete('q');
+      const qs = params.toString();
+      replace(qs ? `${pathname}?${qs}` : pathname);
+    },
+    [pathname, replace],
   );
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (search !== q) {
+        startTransition(() => {
+          resetPagination(setExtraItems, setExtraCursor, setExtraHasMore, setListError);
+          setQ(search);
+        });
+      }
+    }, SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timer);
+  }, [search, q, startTransition]);
+
+  useEffect(() => {
+    if (isFirstRun.current) {
+      isFirstRun.current = false;
+      return;
+    }
+    startTransition(() => {
+      resetPagination(setExtraItems, setExtraCursor, setExtraHasMore, setListError);
+      updateQuery(status, channel, q);
+    });
+  }, [status, channel, q, updateQuery]);
 
   const { data: page, error: pageError } = useSuspenseQuery(
     `applications-list-initial-${status}-${channel}-${q}`,
@@ -62,21 +101,20 @@ function ListContent() {
   const cursor = extraCursor ?? page?.nextCursor ?? null;
   const hasMore = extraCursor !== null ? extraHasMore : (page?.hasNextPage ?? false);
 
-  const changeStatus = (value: string) =>
+  const changeStatus = (value: string) => setStatus(value);
+  const changeChannel = (value: string) => setChannel(value);
+  const changeSearch = (value: string) => setSearch(value);
+
+  const isLoading = isPending || loadingMore;
+
+  const resetFilters = () => {
     startTransition(() => {
-      resetPagination(setExtraItems, setExtraCursor, setExtraHasMore, setListError);
-      setStatus(value);
+      setStatus('all');
+      setChannel('all');
+      setSearch('');
+      setQ('');
     });
-  const changeChannel = (value: string) =>
-    startTransition(() => {
-      resetPagination(setExtraItems, setExtraCursor, setExtraHasMore, setListError);
-      setChannel(value);
-    });
-  const changeQ = (value: string) =>
-    startTransition(() => {
-      resetPagination(setExtraItems, setExtraCursor, setExtraHasMore, setListError);
-      setQ(value);
-    });
+  };
 
   const loadMore = async () => {
     if (!hasMore || loadingMore || !cursor) return;
@@ -103,80 +141,66 @@ function ListContent() {
     return <p className="mt-2 text-red-600">{pageError.message}</p>;
   }
 
-  const referencesMap = references ?? {};
-  const statusOptions = referencesMap[REFERENCE_STATUS] ?? [];
-  const channelOptions = referencesMap[REFERENCE_CHANNEL] ?? [];
-
   return (
     <main className="mx-auto max-w-5xl p-6">
       <h1 className="text-2xl font-bold text-slate-900">{listPageMessages.title}</h1>
-      {isPending && <p className="mt-2 text-slate-600">{commonMessages.loading}</p>}
-      <div className="mt-4 flex flex-wrap gap-4">
-        <select
-          value={status}
-          onChange={(e) => changeStatus(e.target.value)}
-          className="border rounded p-2"
-          aria-label={listPageMessages.allStatuses}
-        >
-          <option value="all">{listPageMessages.allStatuses}</option>
-          {statusOptions.map((code) => (
-            <option key={code} value={code}>
-              {STATUS_LABELS[code] ?? code}
-            </option>
-          ))}
-        </select>
-        <select
-          value={channel}
-          onChange={(e) => changeChannel(e.target.value)}
-          className="border rounded p-2"
-          aria-label={listPageMessages.allChannels}
-        >
-          <option value="all">{listPageMessages.allChannels}</option>
-          {channelOptions.map((code) => (
-            <option key={code} value={code}>
-              {CHANNEL_LABELS[code] ?? code}
-            </option>
-          ))}
-        </select>
-        <input
-          value={q}
-          onChange={(e) => changeQ(e.target.value)}
-          placeholder={listPageMessages.searchPlaceholder}
-          className="border rounded p-2"
-          aria-label={listPageMessages.searchPlaceholder}
-        />
-      </div>
-      <ul className="mt-6 space-y-4">
-        {items.length === 0 && (
-          <li className="text-slate-600">{listPageMessages.empty}</li>
-        )}
-        {items.map((app) => (
-          <li key={app.id} className="border rounded p-4">
-            <Link
-              href={`/applications/${app.id}`}
-              className="text-lg font-medium text-sky-700"
-            >
-              {app.firstName} {app.lastName}
-            </Link>
-            <p className="text-sm text-slate-600">
-              {app.documentType} {app.documentNumber} — {app.status}
-            </p>
-          </li>
-        ))}
-      </ul>
-      {listError && <p className="mt-4 text-red-600">{listError}</p>}
-      {hasMore && (
-        <div className="mt-6 text-center">
-          <button
-            type="button"
-            onClick={loadMore}
-            disabled={loadingMore}
-            className="rounded bg-sky-600 px-4 py-2 text-white disabled:opacity-60"
-          >
-            {loadingMore ? commonMessages.loading : listPageMessages.loadMore}
-          </button>
+
+      <ApplicationFilters
+        status={status}
+        channel={channel}
+        search={search}
+        disabled={isLoading}
+        onStatusChange={changeStatus}
+        onChannelChange={changeChannel}
+        onSearchChange={changeSearch}
+        onReset={resetFilters}
+      />
+
+      {isPending ? (
+        <div className="mt-6">
+          <LoadingSpinner label={commonMessages.loading} />
         </div>
+      ) : (
+        <>
+          <ul className="mt-6 space-y-4">
+            {items.length === 0 && (
+              <li className="text-slate-600">{listPageMessages.empty}</li>
+            )}
+            {items.map((app) => (
+              <li key={app.id} className="border rounded p-4">
+                <Link
+                  href={`/applications/${app.id}`}
+                  className="text-lg font-medium text-sky-700"
+                >
+                  {app.firstName} {app.lastName}
+                </Link>
+                <p className="text-sm text-slate-600">
+                  {app.documentType} {app.documentNumber} — {app.status}
+                </p>
+              </li>
+            ))}
+          </ul>
+          {listError && <p className="mt-4 text-red-600">{listError}</p>}
+          {hasMore && (
+            <div className="mt-6 text-center">
+              <button
+                type="button"
+                onClick={loadMore}
+                disabled={loadingMore}
+                className="inline-flex items-center gap-2 rounded bg-sky-600 px-4 py-2 text-white disabled:opacity-60"
+              >
+                {loadingMore ? (
+                  <LoadingSpinner size={16} label={commonMessages.loading} className="text-white" />
+                ) : (
+                  listPageMessages.loadMore
+                )}
+              </button>
+            </div>
+          )}
+        </>
       )}
+
+      <ScrollToTop />
     </main>
   );
 }

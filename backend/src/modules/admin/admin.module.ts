@@ -8,7 +8,13 @@ import { AdminService } from '@/modules/admin/application/services/admin.service
 import { AdminController } from '@/modules/admin/infrastructure/http/admin.controller';
 
 @Module({
-  imports: [ConfigModule, PrismaModule, ReferencesModule, EventsModule, AuthModule],
+  imports: [
+    ConfigModule,
+    PrismaModule,
+    ReferencesModule,
+    EventsModule,
+    AuthModule,
+  ],
   controllers: [AdminController],
   providers: [AdminService],
 })

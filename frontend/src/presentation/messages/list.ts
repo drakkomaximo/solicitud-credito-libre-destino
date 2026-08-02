@@ -6,4 +6,5 @@ export const listPageMessages = {
   empty: 'No hay solicitudes.',
   loadError: 'Error cargando listado',
   loadMore: 'Cargar más',
+  clearFilters: 'Limpiar filtros',
 } as const;

@@ -1,4 +1,9 @@
-import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
+import {
+  CallHandler,
+  ExecutionContext,
+  Injectable,
+  NestInterceptor,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -29,7 +34,8 @@ function isCursorPaginated(data: unknown): data is CursorPaginatedShape {
   return (
     Array.isArray(candidate.data) &&
     typeof candidate.hasNextPage === 'boolean' &&
-    (typeof candidate.nextCursor === 'string' || candidate.nextCursor === null) &&
+    (typeof candidate.nextCursor === 'string' ||
+      candidate.nextCursor === null) &&
     typeof candidate.limit === 'number'
   );
 }
@@ -51,11 +57,14 @@ function getSuccessMessage(statusCode: number): string {
 export class ResponseFormatInterceptor implements NestInterceptor {
   constructor(private readonly reflector: Reflector) {}
 
-  intercept(context: ExecutionContext, next: CallHandler): Observable<StandardSuccessResponse> {
-    const noEnvelope = this.reflector.getAllAndOverride<boolean>(NO_ENVELOPE_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
+  intercept(
+    context: ExecutionContext,
+    next: CallHandler,
+  ): Observable<StandardSuccessResponse> {
+    const noEnvelope = this.reflector.getAllAndOverride<boolean>(
+      NO_ENVELOPE_KEY,
+      [context.getHandler(), context.getClass()],
+    );
 
     if (noEnvelope) {
       return next.handle() as Observable<StandardSuccessResponse>;

@@ -6,7 +6,10 @@ import type { CreateApplicationCommand } from '@/modules/credit-applications/app
 
 @Injectable()
 export class CreateApplicationUseCase {
-  constructor(@Inject('CreditApplicationRepository') private readonly repository: ICreditApplicationRepository) {}
+  constructor(
+    @Inject('CreditApplicationRepository')
+    private readonly repository: ICreditApplicationRepository,
+  ) {}
 
   async execute(command: CreateApplicationCommand): Promise<CreditApplication> {
     const now = new Date();

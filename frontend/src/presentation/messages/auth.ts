@@ -12,4 +12,5 @@
   loginError: 'Error de autenticación.',
   lookupError: 'No se encontró una solicitud con esos datos.',
   clientWelcome: 'Esta es tu solicitud',
+  loggedAs: 'Conectado como',
 } as const;

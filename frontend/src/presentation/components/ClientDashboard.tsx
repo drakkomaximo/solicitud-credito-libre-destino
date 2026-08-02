@@ -1,37 +1,19 @@
 ﻿'use client';
 
 import Link from 'next/link';
-import { useAuthActions } from '@/presentation/hooks/useAuthActions';
-import { authMessages } from '@/presentation/messages/auth';
 import { detailMessages } from '@/presentation/messages/detail';
 import { summaryLabels } from '@/presentation/messages/applicationForm';
+import { authMessages } from '@/presentation/messages/auth';
 import type { CreditApplication } from '@/domain/entities/Application';
 
 interface ClientDashboardProps {
   app: CreditApplication;
-  onLogout: () => void;
 }
 
-export function ClientDashboard({ app, onLogout }: ClientDashboardProps) {
-  const { logout } = useAuthActions();
-
-  const handleLogout = () => {
-    logout();
-    onLogout();
-  };
-
+export function ClientDashboard({ app }: ClientDashboardProps) {
   return (
     <main className="mx-auto max-w-2xl p-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-slate-900">{authMessages.clientWelcome}</h1>
-        <button
-          type="button"
-          onClick={handleLogout}
-          className="rounded border px-4 py-2"
-        >
-          {authMessages.logout}
-        </button>
-      </div>
+      <h1 className="text-2xl font-bold text-slate-900">{authMessages.clientWelcome}</h1>
       <div className="mt-4 space-y-2">
         <p>
           <strong>{detailMessages.document}:</strong> {app.documentType} {app.documentNumber}

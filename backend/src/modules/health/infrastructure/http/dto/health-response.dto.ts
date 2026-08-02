@@ -1,7 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class HealthResultDto {
-  @ApiProperty({ description: 'Estado general del health check', example: 'ok' })
+  @ApiProperty({
+    description: 'Estado general del health check',
+    example: 'ok',
+  })
   status!: string;
 
   @ApiProperty({
@@ -30,31 +33,48 @@ export class HealthResultDto {
 }
 
 export class HealthCheckResponseDto {
-  @ApiProperty({ description: 'Indica que la operación HTTP finalizó sin excepción. No confundir con el estado de salud, que vive en `data.status`.', example: true })
+  @ApiProperty({
+    description:
+      'Indica que la operación HTTP finalizó sin excepción. No confundir con el estado de salud, que vive en `data.status`.',
+    example: true,
+  })
   success!: boolean;
 
   @ApiProperty({ description: 'Código HTTP de la respuesta', example: 200 })
   statusCode!: number;
 
-  @ApiProperty({ description: 'Mensaje resumen del interceptor', example: 'Operación realizada con éxito' })
+  @ApiProperty({
+    description: 'Mensaje resumen del interceptor',
+    example: 'Operación realizada con éxito',
+  })
   message!: string;
 
-  @ApiProperty({ description: 'Resultado del health check de Terminus', type: () => HealthResultDto })
+  @ApiProperty({
+    description: 'Resultado del health check de Terminus',
+    type: () => HealthResultDto,
+  })
   data!: HealthResultDto;
 }
 
 export class HealthCheckUnhealthyResponseDto {
-  @ApiProperty({ description: 'Indica que la operación HTTP finalizó sin excepción.', example: true })
+  @ApiProperty({
+    description: 'Indica que la operación HTTP finalizó sin excepción.',
+    example: true,
+  })
   success!: boolean;
 
   @ApiProperty({ description: 'Código HTTP de la respuesta', example: 503 })
   statusCode!: number;
 
-  @ApiProperty({ description: 'Mensaje resumen del interceptor', example: 'Operación realizada con éxito' })
+  @ApiProperty({
+    description: 'Mensaje resumen del interceptor',
+    example: 'Operación realizada con éxito',
+  })
   message!: string;
 
   @ApiProperty({
-    description: 'Resultado del health check cuando al menos un indicador falla',
+    description:
+      'Resultado del health check cuando al menos un indicador falla',
     type: 'object',
     additionalProperties: true,
     example: {

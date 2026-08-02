@@ -78,6 +78,9 @@ function DetailContent({ id }: { id: string }) {
       </p>
       <p className="text-slate-700">{detailMessages.channel}: {app.channel}</p>
       <p className="text-slate-700">
+        {detailMessages.phone}: {app.phone}
+      </p>
+      <p className="text-slate-700">
         {detailMessages.document}: {app.documentType} {app.documentNumber}
       </p>
       <p className="text-slate-700">

@@ -1,6 +1,26 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { ApiOkEnvelope, ApiCreatedEnvelope, ApiPaginatedEnvelope } from '@/common/decorators/api-responses.decorator';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import {
+  ApiOkEnvelope,
+  ApiCreatedEnvelope,
+  ApiPaginatedEnvelope,
+} from '@/common/decorators/api-responses.decorator';
 import { ErrorResponseDto } from '@/common/dto/error-response.dto';
 import { AdminService } from '@/modules/admin/application/services/admin.service';
 import { ReferencesService } from '@/modules/references/application/services/references.service';
@@ -21,21 +41,52 @@ export class AdminController {
   ) {}
 
   @Post('database/clean')
-  @ApiOperation({ summary: 'Limpiar base de datos', description: 'Elimina los registros de solicitudes. Requiere token JWT de administrador. Solo disponible en ambiente local.' })
+  @ApiOperation({
+    summary: 'Limpiar base de datos',
+    description:
+      'Elimina los registros de solicitudes. Requiere token JWT de administrador. Solo disponible en ambiente local.',
+  })
   @ApiCreatedEnvelope('Base de datos limpiada')
-  @ApiResponse({ status: 403, description: 'Ambiente no permitido', type: ErrorResponseDto })
-  @ApiResponse({ status: 401, description: 'Token faltante, inválido o expirado', type: ErrorResponseDto })
+  @ApiResponse({
+    status: 403,
+    description: 'Ambiente no permitido',
+    type: ErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Token faltante, inválido o expirado',
+    type: ErrorResponseDto,
+  })
   async cleanDatabase() {
     const result = await this.adminService.cleanDatabase();
-    this.eventsService.emit({ type: 'database.cleaned', payload: { source: 'admin' } });
+    this.eventsService.emit({
+      type: 'database.cleaned',
+      payload: { source: 'admin' },
+    });
     return result;
   }
 
   @Get('references')
-  @ApiOperation({ summary: 'Listar referencias de dominio', description: 'Devuelve los valores de referencia paginados por cursor. Permite filtrar por dominio.' })
-  @ApiQuery({ name: 'domain', required: false, description: 'Dominio a filtrar' })
-  @ApiQuery({ name: 'cursor', required: false, description: 'Cursor de paginación' })
-  @ApiQuery({ name: 'limit', required: false, description: 'Cantidad de resultados (máx. 100)' })
+  @ApiOperation({
+    summary: 'Listar referencias de dominio',
+    description:
+      'Devuelve los valores de referencia paginados por cursor. Permite filtrar por dominio.',
+  })
+  @ApiQuery({
+    name: 'domain',
+    required: false,
+    description: 'Dominio a filtrar',
+  })
+  @ApiQuery({
+    name: 'cursor',
+    required: false,
+    description: 'Cursor de paginación',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Cantidad de resultados (máx. 100)',
+  })
   @ApiPaginatedEnvelope('Referencias obtenidas')
   async listReferences(
     @Query('domain') domain?: string,
@@ -50,38 +101,70 @@ export class AdminController {
   }
 
   @Get('references/:id')
-  @ApiOperation({ summary: 'Obtener una referencia por ID', description: 'Devuelve el detalle de una referencia de dominio.' })
+  @ApiOperation({
+    summary: 'Obtener una referencia por ID',
+    description: 'Devuelve el detalle de una referencia de dominio.',
+  })
   @ApiOkEnvelope('Referencia obtenida')
   async getReference(@Param('id') id: string) {
     return this.referencesService.findById(id);
   }
 
   @Post('references')
-  @ApiOperation({ summary: 'Crear una referencia de dominio', description: 'Crea un nuevo valor dentro de un dominio. El par domain+code debe ser único.' })
+  @ApiOperation({
+    summary: 'Crear una referencia de dominio',
+    description:
+      'Crea un nuevo valor dentro de un dominio. El par domain+code debe ser único.',
+  })
   @ApiBody({ type: CreateReferenceDto })
   @ApiCreatedEnvelope('Referencia creada')
   async createReference(@Body() dto: CreateReferenceDto) {
     const ref = await this.referencesService.create(dto);
-    this.eventsService.emit({ type: 'reference.created', payload: { id: ref.id, domain: ref.domain, code: ref.code } });
+    this.eventsService.emit({
+      type: 'reference.created',
+      payload: { id: ref.id, domain: ref.domain, code: ref.code },
+    });
     return ref;
   }
 
   @Patch('references/:id')
-  @ApiOperation({ summary: 'Actualizar una referencia', description: 'Permite modificar el label, la descripción o el estado activo de una referencia existente.' })
+  @ApiOperation({
+    summary: 'Actualizar una referencia',
+    description:
+      'Permite modificar el label, la descripción o el estado activo de una referencia existente.',
+  })
   @ApiBody({ type: UpdateReferenceDto })
   @ApiOkEnvelope('Referencia actualizada')
-  async updateReference(@Param('id') id: string, @Body() dto: UpdateReferenceDto) {
+  async updateReference(
+    @Param('id') id: string,
+    @Body() dto: UpdateReferenceDto,
+  ) {
     const ref = await this.referencesService.update(id, dto);
-    this.eventsService.emit({ type: 'reference.updated', payload: { id: ref.id, domain: ref.domain, code: ref.code } });
+    this.eventsService.emit({
+      type: 'reference.updated',
+      payload: { id: ref.id, domain: ref.domain, code: ref.code },
+    });
     return ref;
   }
 
   @Post('references/:id/toggle')
-  @ApiOperation({ summary: 'Activar o desactivar una referencia', description: 'Invierte el valor del campo isActive. Útil para deshabilitar valores sin borrarlos.' })
+  @ApiOperation({
+    summary: 'Activar o desactivar una referencia',
+    description:
+      'Invierte el valor del campo isActive. Útil para deshabilitar valores sin borrarlos.',
+  })
   @ApiOkEnvelope('Estado cambiado')
   async toggleReference(@Param('id') id: string) {
     const ref = await this.referencesService.toggle(id);
-    this.eventsService.emit({ type: 'reference.toggled', payload: { id: ref.id, domain: ref.domain, code: ref.code, isActive: ref.isActive } });
+    this.eventsService.emit({
+      type: 'reference.toggled',
+      payload: {
+        id: ref.id,
+        domain: ref.domain,
+        code: ref.code,
+        isActive: ref.isActive,
+      },
+    });
     return ref;
   }
 }

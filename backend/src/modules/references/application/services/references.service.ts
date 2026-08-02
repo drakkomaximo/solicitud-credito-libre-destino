@@ -64,7 +64,10 @@ export class ReferencesService {
     return ref;
   }
 
-  async getByDomain(domain: string, activeOnly = true): Promise<DomainReference[]> {
+  async getByDomain(
+    domain: string,
+    activeOnly = true,
+  ): Promise<DomainReference[]> {
     return this.prisma.domainReference.findMany({
       where: { domain, ...(activeOnly && { isActive: true }) },
       orderBy: { code: 'asc' },
@@ -91,7 +94,9 @@ export class ReferencesService {
   }
 
   async update(id: string, dto: UpdateReferenceDto): Promise<DomainReference> {
-    const exists = await this.prisma.domainReference.findUnique({ where: { id } });
+    const exists = await this.prisma.domainReference.findUnique({
+      where: { id },
+    });
     if (!exists) throw new NotFoundException('Referencia no encontrada');
     return this.prisma.domainReference.update({ where: { id }, data: dto });
   }

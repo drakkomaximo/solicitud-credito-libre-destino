@@ -7,7 +7,10 @@ export class LoginDto {
   @IsNotEmpty()
   username!: string;
 
-  @ApiProperty({ description: 'Contraseña de administrador', example: 'cambia_esto_en_produccion' })
+  @ApiProperty({
+    description: 'Contraseña de administrador',
+    example: 'cambia_esto_en_produccion',
+  })
   @IsString()
   @IsNotEmpty()
   password!: string;

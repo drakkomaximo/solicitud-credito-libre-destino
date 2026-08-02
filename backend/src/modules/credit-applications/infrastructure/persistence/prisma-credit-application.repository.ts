@@ -1,7 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
-import { CreditApplication, ApplicationEvent } from '@/modules/credit-applications/domain/entities/credit-application';
-import type { ApplicationListFilters, ApplicationListQuery, ICreditApplicationRepository } from '@/modules/credit-applications/domain/repositories/credit-application.repository';
+import {
+  CreditApplication,
+  ApplicationEvent,
+} from '@/modules/credit-applications/domain/entities/credit-application';
+import type {
+  ApplicationListFilters,
+  ApplicationListQuery,
+  ICreditApplicationRepository,
+} from '@/modules/credit-applications/domain/repositories/credit-application.repository';
 
 @Injectable()
 export class PrismaCreditApplicationRepository implements ICreditApplicationRepository {
@@ -50,7 +57,9 @@ export class PrismaCreditApplicationRepository implements ICreditApplicationRepo
     return raw ? this.toDomain(raw) : null;
   }
 
-  async findByDocumentNumber(documentNumber: string): Promise<CreditApplication[]> {
+  async findByDocumentNumber(
+    documentNumber: string,
+  ): Promise<CreditApplication[]> {
     const raw = await this.prisma.creditApplication.findMany({
       where: { documentNumber },
       orderBy: { createdAt: 'desc' },
@@ -66,15 +75,17 @@ export class PrismaCreditApplicationRepository implements ICreditApplicationRepo
     if (filters.channel) where.channel = filters.channel;
     if (filters.q) {
       where.OR = [
-        { documentNumber: { contains: filters.q } },
-        { firstName: { contains: filters.q } },
-        { lastName: { contains: filters.q } },
+        { documentNumber: { contains: filters.q, mode: 'insensitive' } },
+        { firstName: { contains: filters.q, mode: 'insensitive' } },
+        { lastName: { contains: filters.q, mode: 'insensitive' } },
       ];
     }
     return where;
   }
 
-  async findAll(query: ApplicationListQuery = {}): Promise<CreditApplication[]> {
+  async findAll(
+    query: ApplicationListQuery = {},
+  ): Promise<CreditApplication[]> {
     const limit = Math.min(query.limit ?? 10, 100);
     const where = this.buildWhere(query);
 
@@ -99,7 +110,9 @@ export class PrismaCreditApplicationRepository implements ICreditApplicationRepo
 
   async update(application: CreditApplication): Promise<void> {
     await this.prisma.$transaction([
-      this.prisma.applicationEvent.deleteMany({ where: { applicationId: application.id } }),
+      this.prisma.applicationEvent.deleteMany({
+        where: { applicationId: application.id },
+      }),
       this.prisma.creditApplication.update({
         where: { id: application.id },
         data: {
@@ -137,7 +150,9 @@ export class PrismaCreditApplicationRepository implements ICreditApplicationRepo
   private toDomain(raw: any): CreditApplication {
     return new CreditApplication({
       ...raw,
-      events: raw.events.map((e: any) => new ApplicationEvent({ type: e.type, payload: e.payload })),
+      events: raw.events.map(
+        (e: any) => new ApplicationEvent({ type: e.type, payload: e.payload }),
+      ),
     });
   }
 }

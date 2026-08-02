@@ -1,5 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsInt, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class UpdateApplicationDto {
   @ApiPropertyOptional({ description: 'Ingresos mensuales', example: 5000000 })
@@ -22,12 +28,18 @@ export class UpdateApplicationDto {
   @IsOptional()
   term?: number;
 
-  @ApiPropertyOptional({ description: 'Propósito del crédito', example: 'Viaje' })
+  @ApiPropertyOptional({
+    description: 'Propósito del crédito',
+    example: 'Viaje',
+  })
   @IsString()
   @IsOptional()
   purpose?: string;
 
-  @ApiPropertyOptional({ description: 'Autorización de datos personales', example: true })
+  @ApiPropertyOptional({
+    description: 'Autorización de datos personales',
+    example: true,
+  })
   @IsBoolean()
   @IsOptional()
   dataAuthorized?: boolean;

@@ -1,4 +1,8 @@
-import { BadRequestException, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
+import {
+  BadRequestException,
+  NotFoundException,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreditApplication } from '@/modules/credit-applications/domain/entities/credit-application';
 import type { ICreditApplicationRepository } from '@/modules/credit-applications/domain/repositories/credit-application.repository';
@@ -10,7 +14,9 @@ describe('CreditApplicationsService', () => {
   let repository: jest.Mocked<ICreditApplicationRepository>;
   let useCase: { execute: jest.Mock };
 
-  const makeApp = (overrides: Partial<CreditApplication> = {}): CreditApplication => {
+  const makeApp = (
+    overrides: Partial<CreditApplication> = {},
+  ): CreditApplication => {
     const app = new CreditApplication({
       id: 'app-1',
       channel: 'self-service',
@@ -70,23 +76,49 @@ describe('CreditApplicationsService', () => {
   it('debería listar con cursor y filtros', async () => {
     const apps = [makeApp()];
     repository.findAll.mockResolvedValue(apps);
-    const result = await service.list({ status: 'DRAFT', channel: 'self-service', q: 'Juan' });
+    const result = await service.list({
+      status: 'DRAFT',
+      channel: 'self-service',
+      q: 'Juan',
+    });
     expect(result.data).toBe(apps);
     expect(result.nextCursor).toBe('app-1');
     expect(result.hasNextPage).toBe(false);
     expect(result.limit).toBe(10);
-    expect(repository.findAll).toHaveBeenCalledWith({ status: 'DRAFT', channel: 'self-service', q: 'Juan', cursor: undefined, limit: 10 });
+    expect(repository.findAll).toHaveBeenCalledWith({
+      status: 'DRAFT',
+      channel: 'self-service',
+      q: 'Juan',
+      cursor: undefined,
+      limit: 10,
+    });
   });
 
   it('no debería actualizar si no está en DRAFT', async () => {
     repository.findById.mockResolvedValue(makeApp({ status: 'FINALIZED' }));
-    await expect(service.update('app-1', { income: 1, expenses: 0, amount: 100, term: 12, purpose: 'test', dataAuthorized: true })).rejects.toThrow(BadRequestException);
+    await expect(
+      service.update('app-1', {
+        income: 1,
+        expenses: 0,
+        amount: 100,
+        term: 12,
+        purpose: 'test',
+        dataAuthorized: true,
+      }),
+    ).rejects.toThrow(BadRequestException);
   });
 
   it('debería actualizar los datos y registrar evento', async () => {
     const app = makeApp({ status: 'DRAFT' });
     repository.findById.mockResolvedValue(app);
-    const result = await service.update('app-1', { income: 2000, expenses: 500, amount: 5000, term: 12, purpose: 'viaje', dataAuthorized: true });
+    const result = await service.update('app-1', {
+      income: 2000,
+      expenses: 500,
+      amount: 5000,
+      term: 12,
+      purpose: 'viaje',
+      dataAuthorized: true,
+    });
     expect(result.income).toBe(2000);
     expect(result.purpose).toBe('viaje');
     expect(result.events.some((e) => e.type === 'UPDATED')).toBe(true);
@@ -102,7 +134,12 @@ describe('CreditApplicationsService', () => {
   });
 
   it('debería calcular oferta aprobada', async () => {
-    const app = makeApp({ income: 5000, amount: 5000, term: 12, status: 'DRAFT' });
+    const app = makeApp({
+      income: 5000,
+      amount: 5000,
+      term: 12,
+      status: 'DRAFT',
+    });
     repository.findById.mockResolvedValue(app);
     const result = await service.simulateOffer('app-1');
     expect(result.status).toBe('approved');
@@ -113,7 +150,9 @@ describe('CreditApplicationsService', () => {
   it('debería lanzar error técnico si plazo > 120', async () => {
     const app = makeApp({ term: 150, status: 'DRAFT' });
     repository.findById.mockResolvedValue(app);
-    await expect(service.simulateOffer('app-1')).rejects.toThrow(ServiceUnavailableException);
+    await expect(service.simulateOffer('app-1')).rejects.toThrow(
+      ServiceUnavailableException,
+    );
   });
 
   it('debería finalizar a PENDING_VALIDATION', async () => {
@@ -126,20 +165,26 @@ describe('CreditApplicationsService', () => {
 
   it('no debería finalizar si no es viable', async () => {
     repository.findById.mockResolvedValue(makeApp({ status: 'NOT_VIABLE' }));
-    await expect(service.finalize('app-1')).rejects.toThrow(BadRequestException);
+    await expect(service.finalize('app-1')).rejects.toThrow(
+      BadRequestException,
+    );
   });
 
   it('debería abandonar y guardar motivo', async () => {
     const app = makeApp({ status: 'DRAFT' });
     repository.findById.mockResolvedValue(app);
-    const result = await service.abandon('app-1', { reason: 'ya no requiere crédito' });
+    const result = await service.abandon('app-1', {
+      reason: 'ya no requiere crédito',
+    });
     expect(result.status).toBe('ABANDONED');
     expect(result.events.some((e) => e.type === 'ABANDONED')).toBe(true);
   });
 
   it('no debería abandonar si ya está finalizada', async () => {
     repository.findById.mockResolvedValue(makeApp({ status: 'FINALIZED' }));
-    await expect(service.abandon('app-1', { reason: 'x' })).rejects.toThrow(BadRequestException);
+    await expect(service.abandon('app-1', { reason: 'x' })).rejects.toThrow(
+      BadRequestException,
+    );
   });
 
   it('debería retornar eventos', async () => {
