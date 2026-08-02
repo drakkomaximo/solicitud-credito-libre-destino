@@ -226,7 +226,7 @@ Swagger agrupa los endpoints en **Solicitudes de crédito** y en subgrupos dentr
 |--------|------|---------------|-------------|
 | POST | `/api/v1/applications` | Pública | Crear solicitud. Devuelve la solicitud y su token de acceso. |
 | GET | `/api/v1/applications/lookup` | Pública | Buscar una solicitud DRAFT por documento y teléfono para retomar. |
-| GET | `/api/v1/applications` | JWT admin | Listar con filtros `status`, `channel`, `q` y paginación por cursor |
+| GET | `/api/v1/applications` | JWT admin o JWT cliente | Listar con filtros `status`, `channel`, `q` y paginación por cursor. Cliente solo ve sus solicitudes. |
 | GET | `/api/v1/applications/:id` | Token de solicitud o JWT admin | Detalle |
 | PATCH | `/api/v1/applications/:id` | Token de solicitud o JWT admin | Actualizar datos complementarios (parcial: se pueden enviar solo los campos editados). |
 | POST | `/api/v1/applications/:id/simulate-offer` | Token de solicitud o JWT admin | Simular oferta |
@@ -262,7 +262,8 @@ Swagger agrupa los endpoints en **Solicitudes de crédito** y en subgrupos dentr
 
 | Método | Ruta | Autenticación | Descripción |
 |--------|------|---------------|-------------|
-| POST | `/api/v1/auth/login` | Pública | Obtener token JWT con `username` y `password` |
+| POST | `/api/v1/auth/login` | Pública | Obtener token JWT de administrador |
+| POST | `/api/v1/auth/client` | Pública | Obtener token JWT de cliente con `documentNumber` y `phone` |
 
 #### Health
 
@@ -318,10 +319,11 @@ Para que esto funcione, las consultas del frontend deben etiquetarse con `next: 
 
 ## 🔐 Autenticación
 
-El backend usa dos tipos de JWT:
+El backend usa tres tipos de JWT:
 
-1. **Token de administrador** (`/api/v1/auth/login`): para panel admin (`/api/v1/admin/*`, `/api/v1/seed`, `GET /api/v1/applications`).
-2. **Token de solicitud** (`/api/v1/applications`): se genera al crear una solicitud y permite continuar el flujo del cliente.
+1. **Token de administrador** (`/api/v1/auth/login`): para panel admin (`/api/v1/admin/*`, `/api/v1/seed`, `GET /api/v1/applications` sin restricción de propietario).
+2. **Token de cliente** (`/api/v1/auth/client`): se genera a partir de `documentNumber` y `phone`; permite listar y operar solo las solicitudes asociadas a esos datos.
+3. **Token de solicitud** (`/api/v1/applications`): se genera al crear una solicitud y permite continuar el flujo de esa solicitud en particular.
 
 ### Administrador
 

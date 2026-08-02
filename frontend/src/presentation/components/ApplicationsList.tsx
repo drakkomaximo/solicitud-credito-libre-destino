@@ -28,7 +28,7 @@ function resetPagination(
   setListError(null);
 }
 
-function ListContent() {
+function ListContent({ role }: { role: string }) {
   const { list } = useApplicationActions();
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -40,6 +40,8 @@ function ListContent() {
   const [q, setQ] = useState(searchParams.get('q') ?? '');
   const [search, setSearch] = useState(searchParams.get('q') ?? '');
   const [isPending, startTransition] = useTransition();
+
+  const prevRole = useRef(role);
 
   const [extraItems, setExtraItems] = useState<CreditApplication[]>([]);
   const [extraCursor, setExtraCursor] = useState<string | null>(null);
@@ -85,8 +87,24 @@ function ListContent() {
     });
   }, [status, channel, q, updateQuery]);
 
+  const resetFilters = useCallback(() => {
+    startTransition(() => {
+      setStatus('all');
+      setChannel('all');
+      setSearch('');
+      setQ('');
+    });
+  }, [startTransition]);
+
+  useEffect(() => {
+    if (prevRole.current !== role) {
+      resetFilters();
+      prevRole.current = role;
+    }
+  }, [role, resetFilters]);
+
   const { data: page, error: pageError } = useSuspenseQuery(
-    `applications-list-initial-${status}-${channel}-${q}`,
+    `applications-list-initial-${role}-${status}-${channel}-${q}`,
     () =>
       list.execute({
         ...(status !== 'all' && { status }),
@@ -106,15 +124,6 @@ function ListContent() {
   const changeSearch = (value: string) => setSearch(value);
 
   const isLoading = isPending || loadingMore;
-
-  const resetFilters = () => {
-    startTransition(() => {
-      setStatus('all');
-      setChannel('all');
-      setSearch('');
-      setQ('');
-    });
-  };
 
   const loadMore = async () => {
     if (!hasMore || loadingMore || !cursor) return;
@@ -205,10 +214,10 @@ function ListContent() {
   );
 }
 
-export function ApplicationsList() {
+export function ApplicationsList({ role }: { role: string }) {
   return (
     <Suspense fallback={<SuspenseFallback />}>
-      <ListContent />
+      <ListContent role={role} />
     </Suspense>
   );
 }

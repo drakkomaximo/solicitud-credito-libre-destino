@@ -5,7 +5,7 @@ import { useForm, type Resolver, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useApplicationActions } from '@/presentation/hooks/useApplicationActions';
-import { useSuspenseQuery } from '@/presentation/hooks/useSuspenseQuery';
+import { useSuspenseQuery, invalidateSuspenseQuery } from '@/presentation/hooks/useSuspenseQuery';
 import { SuspenseFallback } from '@/presentation/components/SuspenseFallback';
 import { GetReferences } from '@/application/useCases/GetReferences';
 import { ReferenceApiRepository } from '@/infrastructure/repositories/ReferenceApiRepository';
@@ -103,6 +103,7 @@ function FormContent() {
         purpose,
         dataAuthorized,
       });
+      invalidateSuspenseQuery('applications-list-');
       router.push(`/applications/${res.id}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : applicationFormLabels.connectionError);

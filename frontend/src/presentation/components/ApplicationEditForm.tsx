@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useApplicationActions } from '@/presentation/hooks/useApplicationActions';
-import { useSuspenseQuery } from '@/presentation/hooks/useSuspenseQuery';
+import { useSuspenseQuery, invalidateSuspenseQuery } from '@/presentation/hooks/useSuspenseQuery';
 import { SuspenseFallback } from '@/presentation/components/SuspenseFallback';
 import { FormField } from '@/presentation/components/forms/FormField';
 import { TextareaField } from '@/presentation/components/forms/TextareaField';
@@ -48,6 +48,9 @@ function FormContent({ id }: { id: string }) {
   const onSubmit = async (data: FormData) => {
     try {
       await save.execute(id, data);
+      invalidateSuspenseQuery('applications-list-');
+      invalidateSuspenseQuery('edit-form-');
+      invalidateSuspenseQuery('application-detail-');
       router.push(`/applications/${id}`);
     } catch (err) {
       setFormError(err instanceof Error ? err.message : applicationFormLabels.saveError);
