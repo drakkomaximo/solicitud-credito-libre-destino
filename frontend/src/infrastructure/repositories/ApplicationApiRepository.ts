@@ -1,4 +1,4 @@
-import { ApplicationEvent, CreditApplication, CreateApplicationInput, ListApplicationsResult } from '@/domain/entities/Application';
+﻿import { ApplicationEvent, CreditApplication, CreateApplicationInput, ListApplicationsResult } from '@/domain/entities/Application';
 import { ApplicationRepository } from '@/domain/repositories/ApplicationRepository';
 import { TokenStorage } from '@/domain/repositories/TokenStorage';
 import { httpClient } from '../api/HttpClient';
@@ -49,12 +49,24 @@ export class ApplicationApiRepository implements ApplicationRepository {
     if (filters?.cursor) params.set('cursor', filters.cursor);
     if (filters?.limit) params.set('limit', String(filters.limit));
     const query = params.toString();
-    return httpClient<ListApplicationsResult>(
+    const response = await httpClient<CreditApplication[]>(
       `/applications${query ? `?${query}` : ''}`,
       {
         headers: this.authHeaders(),
+        raw: true,
       },
     );
+    const meta = response.meta ?? {
+      limit: filters?.limit ?? 10,
+      nextCursor: null,
+      hasNextPage: false,
+    };
+    return {
+      data: response.data,
+      nextCursor: meta.nextCursor,
+      hasNextPage: meta.hasNextPage,
+      limit: meta.limit,
+    };
   }
 
   async lookup(input: {
