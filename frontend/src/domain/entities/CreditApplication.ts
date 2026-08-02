@@ -1,9 +1,4 @@
-export interface ApplicationEvent {
-  id: string;
-  type: string;
-  payload?: any;
-  occurredAt: string;
-}
+import type { ApplicationEvent } from './ApplicationEvent';
 
 export interface CreditApplication {
   id: string;
@@ -25,5 +20,6 @@ export interface CreditApplication {
   status: string;
   createdAt: string;
   updatedAt: string;
-  events: ApplicationEvent[];
+  accessToken?: string;
+  events?: ApplicationEvent[];
 }
