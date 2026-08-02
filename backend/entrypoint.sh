@@ -18,6 +18,10 @@ fi
 
 echo "DATABASE_URL esta configurado correctamente."
 
+# Si una migración previa quedó marcada como fallida, la marca como rolled back
+# para permitir que migrate deploy la vuelva a aplicar en una base limpia.
+./node_modules/.bin/prisma migrate resolve --rolled-back "20260801043235_add_domain_reference" || true
+
 # Aplica migraciones y arranca el servidor
 ./node_modules/.bin/prisma migrate deploy
 node dist/main
