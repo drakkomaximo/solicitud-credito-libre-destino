@@ -82,8 +82,8 @@ export function ApplicationFilters({
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder={listPageMessages.searchPlaceholder}
-          disabled={disabled}
-          className="border rounded p-2 disabled:opacity-50"
+          readOnly={disabled}
+          className={`border rounded p-2 ${disabled ? 'opacity-50' : ''}`}
           aria-label={listPageMessages.searchPlaceholder}
         />
       </div>
