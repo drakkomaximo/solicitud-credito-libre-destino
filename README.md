@@ -1,8 +1,10 @@
-# Solicitud Digital de Crédito de Libre Destino
+# 🚀 Solicitud Digital de Crédito de Libre Destino
 
 Micrositio de originación digital de crédito de libre destino con backend en NestJS (arquitectura hexagonal, TDD) y frontend en Next.js.
 
-## Estructura
+> 🏗️ **Estructura del proyecto:** `backend/` contiene la API NestJS y `frontend/` la aplicación Next.js. Próximo foco de trabajo: desarrollo del frontend.
+
+## 📁 Estructura
 
 ```
 .
@@ -12,19 +14,19 @@ Micrositio de originación digital de crédito de libre destino con backend en N
 └── README.md
 ```
 
-## Tecnologías
+## 🛠️ Tecnologías
 
 - **Backend:** NestJS 11, TypeScript 5.7, Prisma 5, PostgreSQL, Bun, Jest, `@nestjs/swagger`, `@nestjs/terminus`.
 - **Frontend:** Next.js 16, React 19, TypeScript, Tailwind CSS 4, React Hook Form, Zod, Lucide icons, Bun.
 - **Infraestructura:** Docker, Docker Compose, PostgreSQL 16.
 
-## Requisitos
+## ⚙️ Requisitos
 
 - Bun 1.3+
 - Docker Desktop (para PostgreSQL)
 - Node.js 20+ (como fallback)
 
-## Configuración
+## 🔧 Configuración
 
 ### Entorno
 
@@ -75,7 +77,7 @@ bun run dev
 
 > Ajusta `src/lib/api.ts` si el backend corre en otro puerto.
 
-## Arquitectura del backend
+## 🏛️ Arquitectura del backend
 
 El backend sigue una arquitectura hexagonal y modular bajo `src/modules/`:
 
@@ -89,7 +91,7 @@ El backend sigue una arquitectura hexagonal y modular bajo `src/modules/`:
 - `health/` — health checks con Terminus/Prisma.
 - `prisma/` — módulo y cliente de Prisma.
 
-## Contratos API
+## 📡 Contratos API
 
 ### Solicitudes de crédito
 
@@ -146,7 +148,7 @@ curl -X POST http://localhost:3000/api/v1/applications \
   }'
 ```
 
-## Decisiones de arquitectura
+## 🧠 Decisiones de arquitectura
 
 - **Backend-first:** se construyó primero el API NestJS con arquitectura hexagonal y pruebas TDD antes del frontend.
 - **Módulos por bounded context:** `credit-applications`, `references`, `admin`, `seed` y `health` viven bajo `src/modules/`.
@@ -163,7 +165,7 @@ curl -X POST http://localhost:3000/api/v1/applications \
 - **Frontend App Router:** usa server/client components; formularios con `react-hook-form` y validación con Zod.
 - **Bun:** gestor de paquetes para backend y frontend.
 
-## Despliegue a producción
+## 🚀 Despliegue a producción
 
 El backend se empaqueta como imagen Docker y puede desplegarse en cualquier servicio de contenedores. La configuración de producción mantiene las variables de entorno fuera de la imagen y deja listo el punto de entrada para Azure, Railway, Render, etc.
 
@@ -202,7 +204,7 @@ El contenedor aplica migraciones automáticamente y expone el backend en el puer
 
 El proyecto queda **configurado** para Azure, pero no requiere un despliegue real en la nube para la prueba.
 
-## Uso de inteligencia artificial
+## 🤖 Uso de inteligencia artificial
 
 Este proyecto fue desarrollado con asistencia de un agente de código (Cascade, modelo SWE-1.6 de Cognition), integrado en el IDE del desarrollador, bajo un flujo de pair programming iterativo.
 
@@ -227,7 +229,42 @@ Este proyecto fue desarrollado con asistencia de un agente de código (Cascade, 
 5. **Verificación:** `bun run build`, revisión de Swagger y commits frecuentes para mantener el repo sincronizado.
 6. **Documentación:** el `README` global y el del `backend` se actualizaron en cada iteración para reflejar el estado actual.
 
-## Supuestos y limitaciones
+## 🔒 Políticas del repositorio
+
+> 🛡️ **Calidad y trazabilidad:** la rama `main` está protegida y todos los commits deben estar firmados para garantizar la integridad del historial.
+
+### Protección de la rama `main`
+
+Configuración recomendada en GitHub (`Settings → Branches → Add rule`):
+
+| Opción | Recomendación |
+|--------|---------------|
+| **Branch name pattern** | `main` |
+| **Protect matching branches** | ✅ Activar |
+| **Require a pull request before merging** | ✅ Obligatorio |
+| **Do not allow bypassing the above settings** | ✅ Aplicar a administradores |
+| **Require signed commits** | ✅ Obligatorio |
+| **Allow force pushes** | ❌ Desactivar |
+| **Allow deletions** | ❌ Desactivar |
+
+Opcionales según el flujo:
+
+- **Require status checks to pass before merging:** activar si hay GitHub Actions de `build`/`test`.
+- **Require linear history:** recomendado para mantener un historial limpio sin merge commits.
+
+### Commits firmados
+
+Se usa firma SSH con la llave `ed25519` del equipo. La configuración global de Git es:
+
+```bash
+git config --global gpg.format ssh
+git config --global user.signingkey "C:/Users/<tu-usuario>/.ssh/<tu-nombre-de-archivo>_id_ed25519.pub"
+git config --global commit.gpgsign true
+```
+
+> 📌 **Nota:** si la llave aún no está registrada como *Signing key* en GitHub, agrégala en `Settings → SSH and GPG keys`. A partir de esa configuración, todos los commits nuevos se mostrarán como `Verified`.
+
+## 🛡️ Supuestos y limitaciones
 
 - La simulación de oferta es una lógica interna de ejemplo; en producción se conectaría al motor de scoring/riesgo correspondiente.
 - Docker Desktop debe estar corriendo para levantar PostgreSQL; si no está disponible, el backend no iniciará por la conexión a Prisma.
