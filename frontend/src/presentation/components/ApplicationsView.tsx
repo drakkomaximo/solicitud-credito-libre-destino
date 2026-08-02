@@ -2,21 +2,19 @@
 
 import { useState, useMemo } from 'react';
 import { ApplicationsList } from './ApplicationsList';
-import { ClientDashboard } from './ClientDashboard';
 import { LoginForm } from './LoginForm';
 import { CookieTokenStorage } from '@/infrastructure/storage/CookieTokenStorage';
 import { useAuthActions } from '@/presentation/hooks/useAuthActions';
 import { authMessages } from '@/presentation/messages/auth';
-import type { CreditApplication } from '@/domain/entities/Application';
 
-function parseRole(token: string | null): 'admin' | 'application' | null {
+function parseRole(token: string | null): 'admin' | 'application' | 'client' | null {
   if (!token) return null;
   try {
     const payload = token.split('.')[1];
     if (!payload) return null;
     const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
     const { role } = JSON.parse(decoded) as { role?: string };
-    if (role === 'admin' || role === 'application') return role;
+    if (role === 'admin' || role === 'application' || role === 'client') return role;
     return null;
   } catch {
     return null;
@@ -27,7 +25,7 @@ function RoleHeader({
   role,
   onLogout,
 }: {
-  role: 'admin' | 'application';
+  role: 'admin' | 'application' | 'client';
   onLogout: () => void;
 }) {
   const label = role === 'admin' ? authMessages.admin : authMessages.client;
@@ -49,7 +47,6 @@ function RoleHeader({
 
 export function ApplicationsView() {
   const [, forceRender] = useState(0);
-  const [clientApp, setClientApp] = useState<CreditApplication | null>(null);
   const { logout } = useAuthActions();
 
   const storage = useMemo(() => new CookieTokenStorage(), []);
@@ -60,7 +57,6 @@ export function ApplicationsView() {
 
   const handleLogout = () => {
     logout();
-    setClientApp(null);
     handleAuthChange();
   };
 
@@ -68,10 +64,7 @@ export function ApplicationsView() {
     return (
       <LoginForm
         onAdminLogin={handleAuthChange}
-        onClientLookup={(app) => {
-          setClientApp(app);
-          handleAuthChange();
-        }}
+        onClientLogin={handleAuthChange}
       />
     );
   }
@@ -79,15 +72,11 @@ export function ApplicationsView() {
   return (
     <>
       <RoleHeader role={role} onLogout={handleLogout} />
-      {role === 'admin' && <ApplicationsList />}
-      {role === 'application' && clientApp && <ClientDashboard app={clientApp} />}
-      {role === 'application' && !clientApp && (
+      {(role === 'admin' || role === 'client') && <ApplicationsList />}
+      {role === 'application' && (
         <LoginForm
           onAdminLogin={handleAuthChange}
-          onClientLookup={(app) => {
-            setClientApp(app);
-            handleAuthChange();
-          }}
+          onClientLogin={handleAuthChange}
         />
       )}
     </>

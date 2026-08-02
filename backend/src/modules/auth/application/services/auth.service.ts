@@ -43,4 +43,14 @@ export class AuthService {
     const payload = { sub: applicationId, role: 'application' };
     return this.jwtService.sign(payload);
   }
+
+  generateClientToken(documentNumber: string, phone: string): string {
+    const payload = {
+      sub: documentNumber,
+      role: 'client',
+      documentNumber,
+      phone,
+    };
+    return this.jwtService.sign(payload);
+  }
 }

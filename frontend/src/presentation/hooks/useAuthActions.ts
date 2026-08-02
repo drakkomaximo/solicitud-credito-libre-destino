@@ -12,6 +12,8 @@ export function useAuthActions() {
     const appRepository = new ApplicationApiRepository(tokenStorage);
     return {
       login: new Login(authRepository),
+      clientLogin: (input: { documentNumber: string; phone: string }) =>
+        authRepository.clientLogin(input),
       lookup: new LookupApplication(appRepository),
       logout: () => tokenStorage.clearToken(),
     };

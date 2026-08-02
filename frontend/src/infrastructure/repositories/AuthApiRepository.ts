@@ -6,6 +6,11 @@ export interface LoginInput {
   password: string;
 }
 
+export interface ClientLoginInput {
+  documentNumber: string;
+  phone: string;
+}
+
 export interface LoginResult {
   accessToken: string;
 }
@@ -15,6 +20,17 @@ export class AuthApiRepository {
 
   async login(input: LoginInput): Promise<LoginResult> {
     const result = await httpClient<LoginResult>('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+    if (result.accessToken) {
+      this.tokenStorage.saveToken(result.accessToken);
+    }
+    return result;
+  }
+
+  async clientLogin(input: ClientLoginInput): Promise<LoginResult> {
+    const result = await httpClient<LoginResult>('/auth/client', {
       method: 'POST',
       body: JSON.stringify(input),
     });

@@ -8,6 +8,7 @@ import { CreditApplication } from '@/modules/credit-applications/domain/entities
 import type { ICreditApplicationRepository } from '@/modules/credit-applications/domain/repositories/credit-application.repository';
 import { CreateApplicationUseCase } from '@/modules/credit-applications/application/use-cases/create-application/create-application.use-case';
 import { CreditApplicationsService } from '@/modules/credit-applications/application/services/credit-applications.service';
+import { ReferencesService } from '@/modules/references/application/services/references.service';
 
 describe('CreditApplicationsService', () => {
   let service: CreditApplicationsService;
@@ -49,6 +50,13 @@ describe('CreditApplicationsService', () => {
         CreditApplicationsService,
         { provide: 'CreditApplicationRepository', useValue: repository },
         { provide: CreateApplicationUseCase, useValue: useCase },
+        {
+          provide: ReferencesService,
+          useValue: {
+            getByDomain: jest.fn().mockResolvedValue([{ code: '12' }]),
+            getById: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
