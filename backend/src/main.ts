@@ -21,8 +21,9 @@ async function bootstrap() {
   );
   app.useGlobalInterceptors(new ResponseFormatInterceptor(app.get(Reflector)));
   app.useGlobalFilters(new AllExceptionsFilter());
+  const apiPrefix = process.env.API_PREFIX || 'api/v1';
   app.enableCors();
-  app.setGlobalPrefix('api/v1');
+  app.setGlobalPrefix(apiPrefix);
 
   const config = new DocumentBuilder()
     .setTitle('Credit Applications API')
@@ -43,7 +44,7 @@ async function bootstrap() {
     { name: 'Solicitudes de crédito', tags: ['Solicitudes de crédito'] },
     { name: 'Complementarios', tags: ['Admin', 'Dominios', 'Seed', 'Health', 'Auth'] },
   ];
-  SwaggerModule.setup('api/v1/docs', app, document, {
+  SwaggerModule.setup(`${apiPrefix}/docs`, app, document, {
     customSiteTitle: 'Credit Applications API',
   });
 
