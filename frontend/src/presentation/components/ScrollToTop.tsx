@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { ChevronUp } from 'lucide-react';
 
 interface ScrollToTopProps {
   threshold?: number;
@@ -28,7 +29,7 @@ export function ScrollToTop({
       className={className}
       aria-label="Volver arriba"
     >
-      ↑
+      <ChevronUp size={28} aria-hidden="true" />
     </button>
   );
 }

@@ -1,9 +1,10 @@
 import { commonMessages } from '@/presentation/messages/common';
+import { LoadingSpinner } from '@/presentation/components/LoadingSpinner';
 
 export function SuspenseFallback() {
   return (
-    <div className="p-6 text-center text-slate-600">
-      {commonMessages.loading}
+    <div className="p-6 text-center">
+      <LoadingSpinner label={commonMessages.loading} />
     </div>
   );
 }

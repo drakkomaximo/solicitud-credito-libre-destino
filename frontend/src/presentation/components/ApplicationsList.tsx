@@ -8,6 +8,7 @@ import { useSuspenseQuery } from '@/presentation/hooks/useSuspenseQuery';
 import { SuspenseFallback } from '@/presentation/components/SuspenseFallback';
 import { ScrollToTop } from '@/presentation/components/ScrollToTop';
 import { ApplicationFilters } from '@/presentation/components/ApplicationFilters';
+import { LoadingSpinner } from '@/presentation/components/LoadingSpinner';
 import { listPageMessages } from '@/presentation/messages/list';
 import { commonMessages } from '@/presentation/messages/common';
 import type { CreditApplication, ListApplicationsResult } from '@/domain/entities/Application';
@@ -104,6 +105,15 @@ function ListContent() {
   const changeChannel = (value: string) => setChannel(value);
   const changeSearch = (value: string) => setSearch(value);
 
+  const resetFilters = () => {
+    startTransition(() => {
+      setStatus('all');
+      setChannel('all');
+      setSearch('');
+      setQ('');
+    });
+  };
+
   const loadMore = async () => {
     if (!hasMore || loadingMore || !cursor) return;
     setLoadingMore(true);
@@ -132,7 +142,11 @@ function ListContent() {
   return (
     <main className="mx-auto max-w-5xl p-6">
       <h1 className="text-2xl font-bold text-slate-900">{listPageMessages.title}</h1>
-      {isPending && <p className="mt-2 text-slate-600">{commonMessages.loading}</p>}
+      {isPending && (
+        <div className="mt-2">
+          <LoadingSpinner label={commonMessages.loading} />
+        </div>
+      )}
 
       <ApplicationFilters
         status={status}
@@ -141,6 +155,7 @@ function ListContent() {
         onStatusChange={changeStatus}
         onChannelChange={changeChannel}
         onSearchChange={changeSearch}
+        onReset={resetFilters}
       />
 
       <ul className="mt-6 space-y-4">
@@ -168,9 +183,13 @@ function ListContent() {
             type="button"
             onClick={loadMore}
             disabled={loadingMore}
-            className="rounded bg-sky-600 px-4 py-2 text-white disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded bg-sky-600 px-4 py-2 text-white disabled:opacity-60"
           >
-            {loadingMore ? commonMessages.loading : listPageMessages.loadMore}
+            {loadingMore ? (
+              <LoadingSpinner size={16} label={commonMessages.loading} className="text-white" />
+            ) : (
+              listPageMessages.loadMore
+            )}
           </button>
         </div>
       )}
