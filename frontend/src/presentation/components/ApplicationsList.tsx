@@ -48,7 +48,7 @@ function ListContent() {
 
   const updateQuery = useCallback(
     (nextStatus: string, nextChannel: string, nextQ: string) => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(window.location.search);
       if (nextStatus === 'all') params.delete('status');
       else params.set('status', nextStatus);
       if (nextChannel === 'all') params.delete('channel');
@@ -58,7 +58,7 @@ function ListContent() {
       const qs = params.toString();
       replace(qs ? `${pathname}?${qs}` : pathname);
     },
-    [searchParams, pathname, replace],
+    [pathname, replace],
   );
 
   useEffect(() => {
