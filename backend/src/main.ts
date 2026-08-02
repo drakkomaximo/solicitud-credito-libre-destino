@@ -43,7 +43,9 @@ async function bootstrap() {
     { name: 'Solicitudes de crédito', tags: ['Solicitudes de crédito'] },
     { name: 'Complementarios', tags: ['Admin', 'Dominios', 'Seed', 'Health', 'Auth'] },
   ];
-  SwaggerModule.setup('docs', app, document);
+  SwaggerModule.setup('api/v1/docs', app, document, {
+    customSiteTitle: 'Credit Applications API',
+  });
 
   await app.listen(process.env.PORT ?? 3000);
 }
