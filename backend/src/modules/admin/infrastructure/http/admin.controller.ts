@@ -100,6 +100,17 @@ export class AdminController {
     });
   }
 
+  @Get('advisors')
+  @ApiOperation({
+    summary: 'Listar asesores activos',
+    description:
+      'Devuelve el catálogo de asesores activos. El asesor ingresa su código; este endpoint es solo para consulta administrativa.',
+  })
+  @ApiOkEnvelope('Asesores obtenidos')
+  async listAdvisors() {
+    return this.referencesService.getByDomain('advisor');
+  }
+
   @Get('references/:id')
   @ApiOperation({
     summary: 'Obtener una referencia por ID',

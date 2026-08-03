@@ -3,8 +3,8 @@ import {
   IsEmail,
   IsIn,
   IsNotEmpty,
-  IsOptional,
   IsString,
+  ValidateIf,
 } from 'class-validator';
 
 export class CreateApplicationDto {
@@ -16,8 +16,13 @@ export class CreateApplicationDto {
   @IsNotEmpty()
   channel!: string;
 
-  @ApiPropertyOptional({ description: 'Identificador del asesor' })
-  @IsOptional()
+  @ApiPropertyOptional({
+    description:
+      'Identificador del asesor (requerido cuando el canal es asistido)',
+    example: 'JGarciaM-4821',
+  })
+  @ValidateIf((o: CreateApplicationDto) => o.channel === 'advisor')
+  @IsNotEmpty({ message: 'El asesor es requerido para el canal asistido' })
   @IsString()
   advisorId?: string;
 

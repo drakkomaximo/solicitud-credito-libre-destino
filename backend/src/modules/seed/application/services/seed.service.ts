@@ -9,6 +9,14 @@ import {
 } from '@/modules/credit-applications/domain/credit-application.enums';
 import type { CreateApplicationCommand } from '@/modules/credit-applications/application/use-cases/create-application/create-application.command';
 
+const ADVISORS = [
+  { code: 'JGarciaM-4821', label: 'Juan García Mendoza' },
+  { code: 'MLopezP-7392', label: 'María López Pérez' },
+  { code: 'CRiosS-1234', label: 'Carlos Ríos Salazar' },
+  { code: 'AMartinezV-5678', label: 'Ana Martínez Vega' },
+  { code: 'LTorresH-9012', label: 'Luis Torres Herrera' },
+];
+
 const DEFAULT_APPLICATIONS: CreateApplicationCommand[] = [
   {
     channel: 'self-service',
@@ -22,7 +30,7 @@ const DEFAULT_APPLICATIONS: CreateApplicationCommand[] = [
   },
   {
     channel: 'advisor',
-    advisorId: 'ADV-001',
+    advisorId: 'JGarciaM-4821',
     documentType: 'CC',
     documentNumber: '1000000002',
     firstName: 'Carlos',
@@ -43,7 +51,7 @@ const DEFAULT_APPLICATIONS: CreateApplicationCommand[] = [
   },
   {
     channel: 'advisor',
-    advisorId: 'ADV-002',
+    advisorId: 'MLopezP-7392',
     documentType: 'CC',
     documentNumber: '1000000004',
     firstName: 'Pedro',
@@ -64,7 +72,7 @@ const DEFAULT_APPLICATIONS: CreateApplicationCommand[] = [
   },
   {
     channel: 'advisor',
-    advisorId: 'ADV-003',
+    advisorId: 'CRiosS-1234',
     documentType: 'PA',
     documentNumber: '1000000006',
     firstName: 'Luis',
@@ -85,7 +93,7 @@ const DEFAULT_APPLICATIONS: CreateApplicationCommand[] = [
   },
   {
     channel: 'advisor',
-    advisorId: 'ADV-004',
+    advisorId: 'AMartinezV-5678',
     documentType: 'CE',
     documentNumber: '1000000008',
     firstName: 'Jorge',
@@ -106,7 +114,7 @@ const DEFAULT_APPLICATIONS: CreateApplicationCommand[] = [
   },
   {
     channel: 'advisor',
-    advisorId: 'ADV-005',
+    advisorId: 'LTorresH-9012',
     documentType: 'CC',
     documentNumber: '1000000010',
     firstName: 'Andrés',
@@ -127,7 +135,7 @@ const DEFAULT_APPLICATIONS: CreateApplicationCommand[] = [
   },
   {
     channel: 'advisor',
-    advisorId: 'ADV-006',
+    advisorId: 'JGarciaM-4821',
     documentType: 'CC',
     documentNumber: '1000000012',
     firstName: 'Ricardo',
@@ -148,7 +156,7 @@ const DEFAULT_APPLICATIONS: CreateApplicationCommand[] = [
   },
   {
     channel: 'advisor',
-    advisorId: 'ADV-007',
+    advisorId: 'MLopezP-7392',
     documentType: 'CC',
     documentNumber: '1000000014',
     firstName: 'Felipe',
@@ -169,7 +177,7 @@ const DEFAULT_APPLICATIONS: CreateApplicationCommand[] = [
   },
   {
     channel: 'advisor',
-    advisorId: 'ADV-008',
+    advisorId: 'CRiosS-1234',
     documentType: 'PA',
     documentNumber: '1000000016',
     firstName: 'Diego',
@@ -190,7 +198,7 @@ const DEFAULT_APPLICATIONS: CreateApplicationCommand[] = [
   },
   {
     channel: 'advisor',
-    advisorId: 'ADV-009',
+    advisorId: 'AMartinezV-5678',
     documentType: 'CE',
     documentNumber: '1000000018',
     firstName: 'Sebastián',
@@ -211,7 +219,7 @@ const DEFAULT_APPLICATIONS: CreateApplicationCommand[] = [
   },
   {
     channel: 'advisor',
-    advisorId: 'ADV-010',
+    advisorId: 'LTorresH-9012',
     documentType: 'CC',
     documentNumber: '1000000020',
     firstName: 'Mateo',
@@ -232,7 +240,7 @@ const DEFAULT_APPLICATIONS: CreateApplicationCommand[] = [
   },
   {
     channel: 'advisor',
-    advisorId: 'ADV-011',
+    advisorId: 'JGarciaM-4821',
     documentType: 'CC',
     documentNumber: '1000000022',
     firstName: 'Tomás',
@@ -259,11 +267,19 @@ export class SeedService {
         description: `Valor ${code} del dominio ${domain}`,
       }));
 
+    const advisors = ADVISORS.map(({ code, label }) => ({
+      domain: 'advisor',
+      code,
+      label,
+      description: `Asesor ${label}`,
+    }));
+
     const refs = [
       ...map('application-status', ApplicationStatus),
       ...map('application-channel', ApplicationChannel),
       ...map('document-type', DocumentType),
       ...map('credit-term', CreditTerm),
+      ...advisors,
     ];
 
     for (const ref of refs) {

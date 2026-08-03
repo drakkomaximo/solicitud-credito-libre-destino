@@ -1,6 +1,7 @@
 export const applicationFormLabels = {
   channel: 'Canal',
   advisorId: 'Asesor',
+  advisorIdPlaceholder: 'Ej: JGarciaM-4821',
   documentType: 'Tipo documento',
   documentNumber: 'Número documento',
   firstName: 'Nombres',
@@ -33,15 +34,19 @@ export const applicationFormLabels = {
 
 export const summaryLabels = {
   channel: 'Canal',
+  advisor: 'Asesor',
   document: 'Documento',
   name: 'Nombre',
+  phone: 'Celular',
   email: 'Correo',
+  city: 'Ciudad',
   income: 'Ingresos',
   expenses: 'Egresos',
   amount: 'Valor',
   term: 'Plazo',
   termSuffix: 'meses',
   purpose: 'Destino',
+  dataAuthorized: 'Autorización de datos',
 } as const;
 
 export const applicationFormErrors = {

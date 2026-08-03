@@ -37,6 +37,11 @@ frontend/src/
 - **cliente**: inicia con documento y teléfono; ve únicamente sus solicitudes.
 - **solicitud** (token de aplicación): permite continuar una solicitud sin sesión.
 
+## 🚧 Limitaciones conocidas
+
+- **Formato de teléfono:** se asume que todos los celulares son colombianos. El frontend normaliza el número a 10 dígitos antes de enviarlo, eliminando caracteres no numéricos y el prefijo `57` si existe. El soporte para otros indicativos de país requeriría un selector de región.
+- **Canal asistido:** para el canal `advisor` el cliente escribe el código del asesor. El backend valida que exista en el catálogo; el frontend no expone el listado para evitar suplantaciones.
+
 ## ✅ Comandos
 
 ```bash

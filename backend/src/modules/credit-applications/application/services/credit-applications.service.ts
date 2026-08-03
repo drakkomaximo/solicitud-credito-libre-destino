@@ -62,9 +62,22 @@ export class CreditApplicationsService {
     }
   }
 
+  private async validateAdvisor(advisorId?: string): Promise<void> {
+    if (!advisorId) return;
+    const advisors = await this.referencesService.getByDomain('advisor');
+    if (!advisors.some((a) => a.code === advisorId)) {
+      throw new BadRequestException(
+        `El asesor ${advisorId} no existe o no está activo`,
+      );
+    }
+  }
+
   async create(command: CreateApplicationCommand): Promise<CreditApplication> {
     if (command.phone) {
       command.phone = normalizePhone(command.phone);
+    }
+    if (command.channel === 'advisor') {
+      await this.validateAdvisor(command.advisorId);
     }
     return this.createApplicationUseCase.execute(command);
   }
