@@ -44,14 +44,9 @@ export class AdminController {
   @ApiOperation({
     summary: 'Limpiar base de datos',
     description:
-      'Elimina los registros de solicitudes. Requiere token JWT de administrador. Solo disponible en ambiente local.',
+      'Elimina los registros de solicitudes. Requiere token JWT de administrador. Está habilitado en cualquier entorno por facilidad de modificación de la información, pero en condiciones normales no debería usarse fuera de pruebas.',
   })
   @ApiCreatedEnvelope('Base de datos limpiada')
-  @ApiResponse({
-    status: 403,
-    description: 'Ambiente no permitido',
-    type: ErrorResponseDto,
-  })
   @ApiResponse({
     status: 401,
     description: 'Token faltante, inválido o expirado',

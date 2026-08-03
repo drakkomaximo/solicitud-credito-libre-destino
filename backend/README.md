@@ -240,7 +240,7 @@ Swagger agrupa los endpoints en **Solicitudes de crédito** y en subgrupos dentr
 
 | Método | Ruta | Autenticación | Descripción |
 |--------|------|---------------|-------------|
-| POST | `/api/v1/admin/database/clean` | JWT admin | Limpiar la base de datos (solo local) |
+| POST | `/api/v1/admin/database/clean` | JWT admin | Limpiar la base de datos (habilitado en cualquier entorno por facilidad; usar solo en pruebas) |
 | GET | `/api/v1/admin/references` | JWT admin | Listar referencias de dominio (opcionalmente filtrar por `?domain=`) |
 | POST | `/api/v1/admin/references` | JWT admin | Crear una referencia de dominio |
 | PATCH | `/api/v1/admin/references/:id` | JWT admin | Actualizar label/descripción/estado de una referencia |
@@ -483,4 +483,5 @@ Esta implementación se mantuvo deliberadamente mínima para cumplir el alcance 
 - **Pruebas E2E y unitarias:** hay cobertura básica pero faltan casos de guardia JWT, auth y flujos edge.
 - **Soft delete y archivado:** `DELETE` o limpieza de base de datos es física. En producción debería ser lógica.
 - **Notificaciones SSE persistentes:** los eventos se mantienen en memoria; en producción conviene usar Redis o cola para múltiples instancias.
+- **Limpieza de base de datos habilitada globalmente:** `POST /api/v1/admin/database/clean` ya no está restringido al ambiente local. Está activo por facilidad para modificar la información durante el ejercicio, pero en condiciones normales no debería estar disponible en producción. Estrategias futuras: protegerlo con un feature flag (`ENABLE_CLEAN_DATABASE`), permitir ejecución solo desde una IP/VPN, exigir un segundo factor de autenticación, requerir una palabra de paso de emergencia almacenada en un secret manager, o hacer borrado lógico en lugar de físico.
 - **Protección adicional de catálogos públicos:** `GET /api/v1/applications/enums` es público para que el formulario inicial del frontend pueda cargar tipos de documento, plazos y canales. Si se requiere endurecer su acceso, se puede agregar un guard por `X-Api-Key` con clave compartida en variables de entorno del backend y del frontend (Server Actions), manteniendo el endpoint funcional sin exponer la clave en el bundle del cliente.
