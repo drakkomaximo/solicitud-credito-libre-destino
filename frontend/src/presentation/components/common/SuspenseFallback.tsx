@@ -1,5 +1,5 @@
 import { commonMessages } from '@/presentation/messages/common';
-import { LoadingSpinner } from '@/presentation/components/LoadingSpinner';
+import { LoadingSpinner } from './LoadingSpinner';
 
 export function SuspenseFallback() {
   return (
