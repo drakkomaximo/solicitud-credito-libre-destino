@@ -191,6 +191,26 @@ describe('CreditApplicationsService', () => {
     );
   });
 
+  it('no debería finalizar si se editó después de la última simulación aprobada', async () => {
+    const app = makeApp({ status: 'DRAFT' });
+    app.recordEvent('SIMULATED', { result: 'approved' });
+    app.recordEvent('UPDATED');
+    repository.findById.mockResolvedValue(app);
+    await expect(service.finalize('app-1')).rejects.toThrow(
+      BadRequestException,
+    );
+  });
+
+  it('debería finalizar si se re-simuló aprobada después de editar', async () => {
+    const app = makeApp({ status: 'DRAFT' });
+    app.recordEvent('SIMULATED', { result: 'approved' });
+    app.recordEvent('UPDATED');
+    app.recordEvent('SIMULATED', { result: 'approved' });
+    repository.findById.mockResolvedValue(app);
+    const result = await service.finalize('app-1');
+    expect(result.status).toBe('PENDING_VALIDATION');
+  });
+
   it('debería abandonar y guardar motivo', async () => {
     const app = makeApp({ status: 'DRAFT' });
     repository.findById.mockResolvedValue(app);
@@ -204,6 +224,30 @@ describe('CreditApplicationsService', () => {
   it('no debería abandonar si ya está finalizada', async () => {
     repository.findById.mockResolvedValue(makeApp({ status: 'FINALIZED' }));
     await expect(service.abandon('app-1', { reason: 'x' })).rejects.toThrow(
+      BadRequestException,
+    );
+  });
+
+  it('debería aprobar una solicitud en PENDING_VALIDATION', async () => {
+    const app = makeApp({ status: 'PENDING_VALIDATION' });
+    repository.findById.mockResolvedValue(app);
+    const result = await service.decide('app-1', 'APPROVED');
+    expect(result.status).toBe('APPROVED');
+    expect(result.events.some((e) => e.type === 'DECIDED')).toBe(true);
+  });
+
+  it('debería rechazar una solicitud con motivo', async () => {
+    const app = makeApp({ status: 'PENDING_VALIDATION' });
+    repository.findById.mockResolvedValue(app);
+    const result = await service.decide('app-1', 'REJECTED', 'capacidad insuficiente');
+    expect(result.status).toBe('REJECTED');
+    const decided = result.events.find((e) => e.type === 'DECIDED');
+    expect(decided?.payload?.reason).toBe('capacidad insuficiente');
+  });
+
+  it('no debería decidir si no está en PENDING_VALIDATION', async () => {
+    repository.findById.mockResolvedValue(makeApp({ status: 'DRAFT' }));
+    await expect(service.decide('app-1', 'APPROVED')).rejects.toThrow(
       BadRequestException,
     );
   });

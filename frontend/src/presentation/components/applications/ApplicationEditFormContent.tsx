@@ -28,28 +28,30 @@ export function ApplicationEditFormContent({ id }: { id: string }) {
     register,
     handleSubmit,
     control,
+    reset,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(editApplicationSchema) as Resolver<FormData>,
-    defaultValues: app
-      ? {
-          income: app.income,
-          expenses: app.expenses,
-          amount: app.amount,
-          term: app.term,
-          purpose: app.purpose,
-          dataAuthorized: app.dataAuthorized,
-        }
-      : undefined,
+    mode: 'onChange',
   });
 
   const watched = useWatch({ control });
 
   useEffect(() => {
-    if (app && app.status !== 'DRAFT') {
+    if (!app) return;
+    if (app.status !== 'DRAFT') {
       router.replace(`/applications/${id}`);
+      return;
     }
-  }, [app, id, router]);
+    reset({
+      income: app.income,
+      expenses: app.expenses,
+      amount: app.amount,
+      term: app.term,
+      purpose: app.purpose,
+      dataAuthorized: app.dataAuthorized,
+    });
+  }, [app, id, router, reset]);
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -129,13 +131,22 @@ export function ApplicationEditFormContent({ id }: { id: string }) {
           error={errors.dataAuthorized}
           registration={register('dataAuthorized')}
         />
-        <button
-          type="submit"
-          className="rounded bg-sky-600 px-4 py-2 text-white"
-          disabled={save.isPending}
-        >
-          {applicationFormLabels.save}
-        </button>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => router.replace(`/applications/${id}`)}
+            className="rounded border px-4 py-2 hover:bg-slate-100"
+          >
+            {applicationFormLabels.cancel}
+          </button>
+          <button
+            type="submit"
+            className="rounded bg-sky-600 px-4 py-2 text-white disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={save.isPending || !watched.dataAuthorized}
+          >
+            {applicationFormLabels.save}
+          </button>
+        </div>
       </form>
     </main>
   );

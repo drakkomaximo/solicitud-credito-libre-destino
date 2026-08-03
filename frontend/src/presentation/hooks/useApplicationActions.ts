@@ -7,6 +7,7 @@ import { SaveDraft } from '@/application/useCases/SaveDraft';
 import { SimulateOffer } from '@/application/useCases/SimulateOffer';
 import { FinalizeApplication } from '@/application/useCases/FinalizeApplication';
 import { AbandonApplication } from '@/application/useCases/AbandonApplication';
+import { DecideApplication } from '@/application/useCases/DecideApplication';
 import { ApplicationApiRepository } from '@/infrastructure/repositories/ApplicationApiRepository';
 import { CookieTokenStorage } from '@/infrastructure/storage/CookieTokenStorage';
 
@@ -23,6 +24,7 @@ export function useApplicationActions() {
       simulate: new SimulateOffer(repository),
       finalize: new FinalizeApplication(repository),
       abandon: new AbandonApplication(repository),
+      decide: new DecideApplication(repository),
     };
   }, []);
 }

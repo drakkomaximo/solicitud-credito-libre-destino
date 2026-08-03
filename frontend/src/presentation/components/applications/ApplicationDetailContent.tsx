@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useApplicationDetail } from '@/presentation/hooks/useApplicationQueries';
@@ -9,15 +9,27 @@ import { useAlert } from '@/presentation/hooks/useAlert';
 import { detailMessages } from '@/presentation/messages/detail';
 import { commonMessages } from '@/presentation/messages/common';
 import { formatCOP } from '@/presentation/utils/formatCOP';
+import { parseRole } from '@/presentation/utils/parseRole';
 import { LoadingSpinner } from '@/presentation/components/common/LoadingSpinner';
+import { StatusBadge } from '@/presentation/components/common/StatusBadge';
+import { CHANNEL_LABELS } from '@/presentation/constants/channels';
+import { eventLabel } from '@/presentation/messages/statusLabels';
+import { CookieTokenStorage } from '@/infrastructure/storage/CookieTokenStorage';
 
 export function ApplicationDetailContent({ id }: { id: string }) {
   const router = useRouter();
   const { data, isPending, error } = useApplicationDetail(id);
-  const { simulate, finalize, abandon, isPending: isMutating } = useApplicationMutations();
-  const { success, error: showError, confirm, confirmDanger } = useAlert();
+  const {
+    simulate,
+    finalize,
+    abandon,
+    decide,
+    isPending: isMutating,
+  } = useApplicationMutations();
+  const { success, error: showError, confirm, confirmDanger, confirmWithReason } = useAlert();
   const [simulation, setSimulation] = useState<{ amount: number; term: number; status: string } | null>(null);
   const [reason, setReason] = useState('');
+  const role = useMemo(() => parseRole(new CookieTokenStorage().getToken()), []);
 
   if (isPending) {
     return <LoadingSpinner label={commonMessages.loading} />;
@@ -33,9 +45,13 @@ export function ApplicationDetailContent({ id }: { id: string }) {
     return <p className="p-6 text-slate-600">{detailMessages.loadError}</p>;
   }
 
-  const hasApprovedSimulation = events.some(
-    (e) => e.type === 'SIMULATED' && (e.payload as { result?: string } | undefined)?.result === 'approved',
-  );
+  const eventTypes = events.map((e) => e.type);
+  const lastSimulationIndex = eventTypes.lastIndexOf('SIMULATED');
+  const lastUpdateIndex = eventTypes.lastIndexOf('UPDATED');
+  const lastSimulation = lastSimulationIndex >= 0 ? events[lastSimulationIndex] : undefined;
+  const canFinalize =
+    (lastSimulation?.payload as { result?: string } | undefined)?.result === 'approved' &&
+    lastUpdateIndex < lastSimulationIndex;
 
   const handleSimulate = async () => {
     try {
@@ -82,9 +98,44 @@ export function ApplicationDetailContent({ id }: { id: string }) {
     }
   };
 
+  const handleApprove = async () => {
+    const confirmed = await confirm({
+      title: 'Aprobar solicitud',
+      text: '¿Confirmas la aprobación final de esta solicitud?',
+      confirmButtonText: 'Aprobar',
+    });
+    if (!confirmed) return;
+    try {
+      await decide.mutateAsync({ id, decision: 'APPROVED' });
+      success(detailMessages.approveSuccess);
+    } catch (err) {
+      showError(err instanceof Error ? err.message : detailMessages.decisionError);
+    }
+  };
+
+  const handleReject = async () => {
+    const rejectReason = await confirmWithReason({
+      title: 'Rechazar solicitud',
+      text: '¿Confirmas el rechazo definitivo de esta solicitud?',
+      inputLabel: detailMessages.rejectReasonLabel,
+      confirmButtonText: 'Rechazar',
+    });
+    if (rejectReason === null) return;
+    try {
+      await decide.mutateAsync({
+        id,
+        decision: 'REJECTED',
+        reason: rejectReason,
+      });
+      success(detailMessages.rejectSuccess);
+    } catch (err) {
+      showError(err instanceof Error ? err.message : detailMessages.decisionError);
+    }
+  };
+
   return (
     <main className="mx-auto max-w-3xl p-6">
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-4">
         <button
           type="button"
           onClick={() => router.back()}
@@ -96,66 +147,153 @@ export function ApplicationDetailContent({ id }: { id: string }) {
         <h1 className="text-2xl font-bold text-slate-900">
           {detailMessages.requestTitle} {app.firstName} {app.lastName}
         </h1>
+        <StatusBadge status={app.status} />
       </div>
-      <p className="mt-2 text-slate-700">
-        {detailMessages.status}: <span className="font-semibold">{app.status}</span>
-      </p>
-      <p className="text-slate-700">{detailMessages.channel}: {app.channel}</p>
-      <p className="text-slate-700">
-        {detailMessages.phone}: {app.phone}
-      </p>
-      <p className="text-slate-700">
-        {detailMessages.document}: {app.documentType} {app.documentNumber}
-      </p>
-      <p className="text-slate-700">
-        {detailMessages.amount}: {formatCOP(app.amount)} — {detailMessages.term}: {app.term} {detailMessages.termSuffix}
-      </p>
+
+      <section className="mt-6 rounded-lg border bg-white p-4 shadow-sm">
+        <h2 className="text-lg font-semibold text-slate-900">
+          {detailMessages.personalSection}
+        </h2>
+        <dl className="mt-3 grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2">
+          <div>
+            <dt className="text-sm text-slate-500">{detailMessages.document}</dt>
+            <dd className="font-medium text-slate-800">
+              {app.documentType} {app.documentNumber}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-sm text-slate-500">{detailMessages.phone}</dt>
+            <dd className="font-medium text-slate-800">{app.phone}</dd>
+          </div>
+          <div>
+            <dt className="text-sm text-slate-500">{detailMessages.email}</dt>
+            <dd className="font-medium text-slate-800">{app.email}</dd>
+          </div>
+          <div>
+            <dt className="text-sm text-slate-500">{detailMessages.city}</dt>
+            <dd className="font-medium text-slate-800">{app.city}</dd>
+          </div>
+          <div>
+            <dt className="text-sm text-slate-500">{detailMessages.channel}</dt>
+            <dd className="font-medium text-slate-800">
+              {CHANNEL_LABELS[app.channel as keyof typeof CHANNEL_LABELS] ?? app.channel}
+            </dd>
+          </div>
+          {app.advisorId && (
+            <div>
+              <dt className="text-sm text-slate-500">{detailMessages.advisor}</dt>
+              <dd className="font-medium text-slate-800">{app.advisorId}</dd>
+            </div>
+          )}
+        </dl>
+      </section>
+
+      <section className="mt-4 rounded-lg border bg-white p-4 shadow-sm">
+        <h2 className="text-lg font-semibold text-slate-900">
+          {detailMessages.financialSection}
+        </h2>
+        <dl className="mt-3 grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2">
+          <div>
+            <dt className="text-sm text-slate-500">{detailMessages.amount}</dt>
+            <dd className="font-medium text-slate-800">{formatCOP(app.amount)}</dd>
+          </div>
+          <div>
+            <dt className="text-sm text-slate-500">{detailMessages.term}</dt>
+            <dd className="font-medium text-slate-800">
+              {app.term} {detailMessages.termSuffix}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-sm text-slate-500">{detailMessages.income}</dt>
+            <dd className="font-medium text-slate-800">{formatCOP(app.income)}</dd>
+          </div>
+          <div>
+            <dt className="text-sm text-slate-500">{detailMessages.expenses}</dt>
+            <dd className="font-medium text-slate-800">{formatCOP(app.expenses)}</dd>
+          </div>
+          {app.purpose && (
+            <div className="sm:col-span-2">
+              <dt className="text-sm text-slate-500">{detailMessages.purpose}</dt>
+              <dd className="font-medium text-slate-800">{app.purpose}</dd>
+            </div>
+          )}
+        </dl>
+      </section>
 
       {app.status === 'DRAFT' && (
-        <div className="mt-6 flex flex-wrap items-center gap-3">
-          <Link
-            href={`/applications/${id}/edit`}
-            className="rounded bg-sky-600 px-4 py-2 text-white"
-          >
-            {detailMessages.edit}
-          </Link>
-          <button
-            onClick={handleSimulate}
-            className="rounded bg-emerald-600 px-4 py-2 text-white"
-            disabled={isMutating}
-          >
-            {detailMessages.simulate}
-          </button>
-          {hasApprovedSimulation && (
+        <section className="mt-4 rounded-lg border bg-white p-4 shadow-sm">
+          <h2 className="text-lg font-semibold text-slate-900">
+            {detailMessages.actionsSection}
+          </h2>
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <Link
+              href={`/applications/${id}/edit`}
+              className="rounded bg-sky-600 px-4 py-2 text-white"
+            >
+              {detailMessages.edit}
+            </Link>
             <button
-              onClick={handleFinalize}
-              className="rounded bg-blue-600 px-4 py-2 text-white"
+              onClick={handleSimulate}
+              className="rounded bg-emerald-600 px-4 py-2 text-white disabled:opacity-50"
               disabled={isMutating}
             >
-              {detailMessages.finalize}
+              {detailMessages.simulate}
             </button>
-          )}
-          <div className="flex items-center gap-2">
-            <input
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              placeholder={detailMessages.reasonPlaceholder}
-              className="border rounded p-2"
-              aria-label={detailMessages.reasonPlaceholder}
-            />
+            {canFinalize && (
+              <button
+                onClick={handleFinalize}
+                className="rounded bg-blue-600 px-4 py-2 text-white disabled:opacity-50"
+                disabled={isMutating}
+              >
+                {detailMessages.finalize}
+              </button>
+            )}
+            <div className="flex items-center gap-2">
+              <input
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder={detailMessages.reasonPlaceholder}
+                className="border rounded p-2"
+                aria-label={detailMessages.reasonPlaceholder}
+              />
+              <button
+                onClick={handleAbandon}
+                className="rounded bg-red-600 px-4 py-2 text-white disabled:opacity-50"
+                disabled={isMutating}
+              >
+                {detailMessages.abandon}
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {role === 'admin' && app.status === 'PENDING_VALIDATION' && (
+        <section className="mt-4 rounded-lg border bg-white p-4 shadow-sm">
+          <h2 className="text-lg font-semibold text-slate-900">
+            {detailMessages.actionsSection}
+          </h2>
+          <div className="mt-3 flex flex-wrap items-center gap-3">
             <button
-              onClick={handleAbandon}
-              className="rounded bg-red-600 px-4 py-2 text-white"
+              onClick={handleApprove}
+              className="rounded bg-emerald-600 px-4 py-2 text-white disabled:opacity-50"
               disabled={isMutating}
             >
-              {detailMessages.abandon}
+              {detailMessages.approve}
+            </button>
+            <button
+              onClick={handleReject}
+              className="rounded bg-red-600 px-4 py-2 text-white disabled:opacity-50"
+              disabled={isMutating}
+            >
+              {detailMessages.reject}
             </button>
           </div>
-        </div>
+        </section>
       )}
 
       {simulation && (
-        <div className="mt-4 p-4 border rounded bg-slate-50">
+        <div className="mt-4 rounded-lg border bg-slate-50 p-4">
           <p className="font-semibold">{detailMessages.simulationTitle}: {simulation.status}</p>
           {simulation.amount && (
             <p>{detailMessages.requestedValue}: {formatCOP(simulation.amount)} — {detailMessages.term}: {simulation.term} {detailMessages.termSuffix}</p>
@@ -166,10 +304,10 @@ export function ApplicationDetailContent({ id }: { id: string }) {
       <h2 className="mt-8 text-xl font-bold text-slate-900">{detailMessages.traceability}</h2>
       <ul className="mt-2 space-y-2">
         {events.map((e) => (
-          <li key={e.id} className="border rounded p-2">
-            <p className="font-medium">{e.type}</p>
+          <li key={e.id} className="rounded-lg border bg-white p-3 shadow-sm">
+            <p className="font-medium text-slate-800">{eventLabel(e.type)}</p>
             <p className="text-sm text-slate-500">
-              {new Date(e.occurredAt).toLocaleString()}
+              {new Date(e.occurredAt).toLocaleString('es-CO')}
             </p>
           </li>
         ))}

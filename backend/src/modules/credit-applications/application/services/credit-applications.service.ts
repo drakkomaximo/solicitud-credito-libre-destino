@@ -211,12 +211,24 @@ export class CreditApplicationsService {
         'Solo se puede finalizar una solicitud en estado DRAFT',
       );
     }
-    const lastSimulation = [...application.events]
-      .reverse()
-      .find((e) => e.type === 'SIMULATED');
+    const lastSimulationIndex = application.events
+      .map((e) => e.type)
+      .lastIndexOf('SIMULATED');
+    const lastSimulation =
+      lastSimulationIndex >= 0
+        ? application.events[lastSimulationIndex]
+        : undefined;
     if (!lastSimulation || lastSimulation.payload?.result !== 'approved') {
       throw new BadRequestException(
         'Debe simular la oferta y que sea viable antes de finalizar',
+      );
+    }
+    const lastUpdateIndex = application.events
+      .map((e) => e.type)
+      .lastIndexOf('UPDATED');
+    if (lastUpdateIndex > lastSimulationIndex) {
+      throw new BadRequestException(
+        'La solicitud fue modificada después de la última simulación. Debe simular nuevamente antes de finalizar',
       );
     }
     application.status = 'PENDING_VALIDATION';
@@ -240,6 +252,23 @@ export class CreditApplicationsService {
     }
     application.status = 'ABANDONED';
     application.recordEvent('ABANDONED', { reason: command.reason });
+    await this.repository.update(application);
+    return application;
+  }
+
+  async decide(
+    id: string,
+    decision: 'APPROVED' | 'REJECTED',
+    reason?: string,
+  ): Promise<CreditApplication> {
+    const application = await this.getById(id);
+    if (application.status !== 'PENDING_VALIDATION') {
+      throw new BadRequestException(
+        'Solo se puede decidir una solicitud en estado PENDING_VALIDATION',
+      );
+    }
+    application.status = decision;
+    application.recordEvent('DECIDED', { decision, reason: reason ?? null });
     await this.repository.update(application);
     return application;
   }

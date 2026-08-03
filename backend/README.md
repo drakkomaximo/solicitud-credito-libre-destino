@@ -230,7 +230,7 @@ Swagger agrupa los endpoints en **Solicitudes de crédito** y en subgrupos dentr
 | GET | `/api/v1/applications/:id` | Token de solicitud o JWT admin | Detalle |
 | PATCH | `/api/v1/applications/:id` | Token de solicitud o JWT admin | Actualizar datos complementarios (parcial: se pueden enviar solo los campos editados). |
 | POST | `/api/v1/applications/:id/simulate-offer` | Token de solicitud o JWT admin | Simular oferta |
-| POST | `/api/v1/applications/:id/finalize` | Token de solicitud o JWT admin | Enviar a validación |
+| POST | `/api/v1/applications/:id/finalize` | Token de solicitud o JWT admin | Enviar a validación. Requiere que la última simulación sea aprobada y posterior a la última edición. |
 | POST | `/api/v1/applications/:id/abandon` | Token de solicitud o JWT admin | Abandonar |
 | GET | `/api/v1/applications/:id/events` | Token de solicitud o JWT admin | Trazabilidad |
 
@@ -241,6 +241,7 @@ Swagger agrupa los endpoints en **Solicitudes de crédito** y en subgrupos dentr
 | Método | Ruta | Autenticación | Descripción |
 |--------|------|---------------|-------------|
 | POST | `/api/v1/admin/database/clean` | JWT admin | Limpiar la base de datos (habilitado en cualquier entorno por facilidad; usar solo en pruebas) |
+| PATCH | `/api/v1/admin/applications/:id/decision` | JWT admin | Aprobar o rechazar una solicitud en `PENDING_VALIDATION` (`{ decision: 'APPROVED' | 'REJECTED', reason? }`) |
 | GET | `/api/v1/admin/references` | JWT admin | Listar referencias de dominio (opcionalmente filtrar por `?domain=`) |
 | POST | `/api/v1/admin/references` | JWT admin | Crear una referencia de dominio |
 | PATCH | `/api/v1/admin/references/:id` | JWT admin | Actualizar label/descripción/estado de una referencia |
@@ -478,6 +479,8 @@ Esta implementación se mantuvo deliberadamente mínima para cumplir el alcance 
 - **Indicativo de país en teléfono:** el sistema asume celulares colombianos y normaliza cualquier entrada a 10 dígitos, removiendo el prefijo `57` si existe. Para soportar múltiples países se requiere un selector de indicativo o detección del prefijo internacional.
 - **Catálogo de asesores:** los asesores se gestionan como referencias de dominio (`domain=advisor`). El canal asistido valida que el `advisorId` exista y esté activo. Admin consulta la lista en `GET /api/v1/admin/advisors` y crea/modifica asesores a través de `GET/POST/PATCH /api/v1/admin/references`.
 - **Autorización por roles:** actualmente solo existe un rol `admin`. Se podría agregar `advisor` y permisos específicos.
+- **Decisión final de solicitudes:** la transición desde `PENDING_VALIDATION` a `APPROVED`/`REJECTED` la realiza manualmente un administrador con `PATCH /api/v1/admin/applications/:id/decision`. En un escenario real este paso lo daría un analista de crédito o un motor de decisión automático (buró, score, historial), con rol dedicado y auditoría del decisor.
+- **Motor de simulación simple:** la regla de viabilidad (`amount <= income * 3`) es determinística y puede descubrirse por prueba y error. Se permite reintentar la simulación deliberadamente (el objetivo del micrositio es lograr solicitudes viables); en producción se mitigaría con variables no visibles al usuario, límite de simulaciones por solicitud y mensajes de rechazo genéricos. Adicionalmente, `finalize` exige que la última simulación aprobada sea posterior a la última edición de datos, evitando finalizar con datos distintos a los simulados.
 - **Rate limiting:** ningún endpoint tiene límites de peticiones. `POST /api/v1/applications` y `/api/v1/auth/login` deberían tener throttling.
 - **Logs de auditoría:** aunque `events` traza cambios internos, no hay logs de auditoría de qué usuario/admin realizó cada cambio.
 - **Pruebas E2E y unitarias:** hay cobertura básica pero faltan casos de guardia JWT, auth y flujos edge.

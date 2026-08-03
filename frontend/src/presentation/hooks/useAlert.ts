@@ -62,5 +62,29 @@ export function useAlert() {
     return result.isConfirmed;
   };
 
-  return { success, error, warning, confirm, confirmDanger };
+  const confirmWithReason = async (options: {
+    title: string;
+    text: string;
+    inputLabel: string;
+    confirmButtonText?: string;
+    cancelButtonText?: string;
+  }): Promise<string | null> => {
+    const result = await ReactSwal.fire({
+      title: options.title,
+      text: options.text,
+      icon: 'warning',
+      input: 'text',
+      inputLabel: options.inputLabel,
+      inputValidator: (value) => (!value?.trim() ? options.inputLabel : null),
+      showCancelButton: true,
+      confirmButtonColor: '#dc2626',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: options.confirmButtonText ?? 'Confirmar',
+      cancelButtonText: options.cancelButtonText ?? 'Cancelar',
+    });
+    if (!result.isConfirmed) return null;
+    return (result.value as string).trim();
+  };
+
+  return { success, error, warning, confirm, confirmDanger, confirmWithReason };
 }

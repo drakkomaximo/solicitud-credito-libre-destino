@@ -10,4 +10,5 @@ export interface ApplicationRepository {
   simulateOffer(id: string): Promise<CreditApplication>;
   finalize(id: string): Promise<CreditApplication>;
   abandon(id: string, reason: string): Promise<CreditApplication>;
+  decide(id: string, decision: 'APPROVED' | 'REJECTED', reason?: string): Promise<CreditApplication>;
 }
