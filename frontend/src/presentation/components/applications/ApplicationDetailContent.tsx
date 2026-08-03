@@ -1,27 +1,27 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useApplicationActions } from '@/presentation/hooks/useApplicationActions';
-import { useSuspenseQuery } from '@/presentation/hooks/useSuspenseQuery';
+import { useApplicationDetail } from '@/presentation/hooks/useApplicationQueries';
+import { useApplicationMutations } from '@/presentation/hooks/useApplicationMutations';
+import { useAlert } from '@/presentation/hooks/useAlert';
 import { detailMessages } from '@/presentation/messages/detail';
+import { commonMessages } from '@/presentation/messages/common';
 import { formatCOP } from '@/presentation/utils/formatCOP';
+import { LoadingSpinner } from '@/presentation/components/common/LoadingSpinner';
 
 export function ApplicationDetailContent({ id }: { id: string }) {
   const router = useRouter();
-  const { get, getEvents, simulate, finalize, abandon } = useApplicationActions();
-  const [refreshKey, setRefreshKey] = useState(0);
-  const [isPending, startTransition] = useTransition();
+  const { data, isPending, error } = useApplicationDetail(id);
+  const { simulate, finalize, abandon, isPending: isMutating } = useApplicationMutations();
+  const { success, error: showError, confirm, confirmDanger } = useAlert();
   const [simulation, setSimulation] = useState<{ amount: number; term: number; status: string } | null>(null);
   const [reason, setReason] = useState('');
-  const [message, setMessage] = useState('');
 
-  const { data, error } = useSuspenseQuery(
-    `application-detail-${id}-${refreshKey}`,
-    () =>
-      Promise.all([get.execute(id), getEvents.execute(id)]).then(([app, events]) => ({ app, events })),
-  );
+  if (isPending) {
+    return <LoadingSpinner label={commonMessages.loading} />;
+  }
 
   if (error) {
     return <p className="p-6 text-red-600">{error.message}</p>;
@@ -30,47 +30,55 @@ export function ApplicationDetailContent({ id }: { id: string }) {
   const app = data?.app;
   const events = data?.events ?? [];
   if (!app) {
-    return <p className="p-6 text-slate-600">{detailMessages.loading}</p>;
+    return <p className="p-6 text-slate-600">{detailMessages.loadError}</p>;
   }
 
   const hasApprovedSimulation = events.some(
     (e) => e.type === 'SIMULATED' && (e.payload as { result?: string } | undefined)?.result === 'approved',
   );
 
-  const refresh = () => startTransition(() => setRefreshKey((k) => k + 1));
-
   const handleSimulate = async () => {
     try {
-      const res = await simulate.execute(id);
+      const res = await simulate.mutateAsync(id);
       setSimulation(res);
-      refresh();
+      success('Simulación realizada');
     } catch (err) {
-      setMessage(err instanceof Error ? err.message : detailMessages.simulationError);
+      showError(err instanceof Error ? err.message : detailMessages.simulationError);
     }
   };
 
   const handleFinalize = async () => {
+    const confirmed = await confirm({
+      title: 'Finalizar solicitud',
+      text: '¿Enviar la solicitud a validación? Una vez finalizada no podrá editarla.',
+    });
+    if (!confirmed) return;
     try {
-      await finalize.execute(id);
-      setMessage(detailMessages.finalizeSuccess);
-      refresh();
+      await finalize.mutateAsync(id);
+      success(detailMessages.finalizeSuccess);
+      router.replace(`/applications/${id}`);
     } catch (err) {
-      setMessage(err instanceof Error ? err.message : detailMessages.finalizeError);
+      showError(err instanceof Error ? err.message : detailMessages.finalizeError);
     }
   };
 
   const handleAbandon = async () => {
     if (!reason) {
-      setMessage(detailMessages.missingReason);
+      showError(detailMessages.missingReason);
       return;
     }
+    const confirmed = await confirmDanger({
+      title: 'Abandonar solicitud',
+      text: '¿Confirmas que deseas abandonar esta solicitud?',
+    });
+    if (!confirmed) return;
     try {
-      await abandon.execute(id, reason);
-      setMessage(detailMessages.abandonSuccess);
+      await abandon.mutateAsync({ id, reason });
+      success(detailMessages.abandonSuccess);
       setReason('');
-      refresh();
+      router.replace(`/applications/${id}`);
     } catch (err) {
-      setMessage(err instanceof Error ? err.message : detailMessages.abandonError);
+      showError(err instanceof Error ? err.message : detailMessages.abandonError);
     }
   };
 
@@ -114,7 +122,7 @@ export function ApplicationDetailContent({ id }: { id: string }) {
           <button
             onClick={handleSimulate}
             className="rounded bg-emerald-600 px-4 py-2 text-white"
-            disabled={isPending}
+            disabled={isMutating}
           >
             {detailMessages.simulate}
           </button>
@@ -122,7 +130,7 @@ export function ApplicationDetailContent({ id }: { id: string }) {
             <button
               onClick={handleFinalize}
               className="rounded bg-blue-600 px-4 py-2 text-white"
-              disabled={isPending}
+              disabled={isMutating}
             >
               {detailMessages.finalize}
             </button>
@@ -138,15 +146,13 @@ export function ApplicationDetailContent({ id }: { id: string }) {
             <button
               onClick={handleAbandon}
               className="rounded bg-red-600 px-4 py-2 text-white"
-              disabled={isPending}
+              disabled={isMutating}
             >
               {detailMessages.abandon}
             </button>
           </div>
         </div>
       )}
-
-      {message && <p className="mt-4 text-green-600">{message}</p>}
 
       {simulation && (
         <div className="mt-4 p-4 border rounded bg-slate-50">

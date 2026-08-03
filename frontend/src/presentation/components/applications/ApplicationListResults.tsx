@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useApplicationActions } from '@/presentation/hooks/useApplicationActions';
-import { useSuspenseQuery } from '@/presentation/hooks/useSuspenseQuery';
+import { useApplicationList } from '@/presentation/hooks/useApplicationQueries';
 import { LoadingSpinner } from '@/presentation/components/common/LoadingSpinner';
 import { ScrollToTop } from '@/presentation/components/common/ScrollToTop';
 import { listPageMessages } from '@/presentation/messages/list';
@@ -36,6 +36,12 @@ export function ApplicationListResults({
   q: string;
 }) {
   const { list } = useApplicationActions();
+  const { data: page, isPending, error: pageError } = useApplicationList({
+    role,
+    status,
+    channel,
+    q,
+  });
   const [extraItems, setExtraItems] = useState<CreditApplication[]>([]);
   const [extraCursor, setExtraCursor] = useState<string | null>(null);
   const [extraHasMore, setExtraHasMore] = useState(false);
@@ -46,16 +52,9 @@ export function ApplicationListResults({
     resetPagination(setExtraItems, setExtraCursor, setExtraHasMore, setListError);
   }, [role, status, channel, q]);
 
-  const { data: page, error: pageError } = useSuspenseQuery(
-    `applications-list-initial-${role}-${status}-${channel}-${q}`,
-    () =>
-      list.execute({
-        ...(status !== 'all' && { status }),
-        ...(channel !== 'all' && { channel }),
-        ...(q && { q }),
-        limit: PAGE_SIZE,
-      }),
-  );
+  if (isPending) {
+    return <LoadingSpinner label={commonMessages.loading} />;
+  }
 
   if (pageError) {
     return <p className="mt-2 text-red-600">{pageError.message}</p>;

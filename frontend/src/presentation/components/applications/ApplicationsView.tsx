@@ -8,10 +8,11 @@ import { parseRole } from '@/presentation/utils/parseRole';
 import { CookieTokenStorage } from '@/infrastructure/storage/CookieTokenStorage';
 import { useAuthActions } from '@/presentation/hooks/useAuthActions';
 import { setOnUnauthorized } from '@/infrastructure/api/HttpClient';
-import { clearAllSuspenseQueries } from '@/presentation/hooks/useSuspenseQuery';
+import { useQueryClient } from '@tanstack/react-query';
 
 export function ApplicationsView() {
   const [, forceRender] = useState(0);
+  const queryClient = useQueryClient();
   const { logout } = useAuthActions();
 
   const storage = useMemo(() => new CookieTokenStorage(), []);
@@ -22,18 +23,18 @@ export function ApplicationsView() {
 
   const handleLogout = useCallback(() => {
     logout();
-    clearAllSuspenseQueries();
+    queryClient.clear();
     handleAuthChange();
-  }, [logout, handleAuthChange]);
+  }, [logout, handleAuthChange, queryClient]);
 
   useEffect(() => {
     setOnUnauthorized(() => {
       logout();
-      clearAllSuspenseQueries();
+      queryClient.clear();
       handleAuthChange();
     });
     return () => setOnUnauthorized(() => {});
-  }, [logout, handleAuthChange]);
+  }, [logout, handleAuthChange, queryClient]);
 
   if (!token || !role) {
     return (
