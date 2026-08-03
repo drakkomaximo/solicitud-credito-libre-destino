@@ -158,8 +158,7 @@ export class CreditApplicationsService {
       application.amount > application.income * 3 ||
       application.amount <= 0
     ) {
-      application.status = 'NOT_VIABLE';
-      application.recordEvent('SIMULATED');
+      application.recordEvent('SIMULATED', { result: 'not-viable' });
       await this.repository.update(application);
       return {
         status: 'not-viable',
@@ -172,7 +171,12 @@ export class CreditApplicationsService {
       (application.amount * rate) / (1 - Math.pow(1 + rate, -application.term));
     const totalPayment = monthlyPayment * application.term;
 
-    application.recordEvent('SIMULATED');
+    application.recordEvent('SIMULATED', {
+      result: 'approved',
+      monthlyPayment: Math.round(monthlyPayment),
+      totalPayment: Math.round(totalPayment),
+      interestRate: rate,
+    });
     await this.repository.update(application);
     return {
       status: 'approved',
@@ -184,12 +188,17 @@ export class CreditApplicationsService {
 
   async finalize(id: string): Promise<CreditApplication> {
     const application = await this.getById(id);
-    if (
-      application.status === 'NOT_VIABLE' ||
-      application.status === 'ABANDONED'
-    ) {
+    if (application.status !== 'DRAFT') {
       throw new BadRequestException(
-        'No se puede finalizar una solicitud en este estado',
+        'Solo se puede finalizar una solicitud en estado DRAFT',
+      );
+    }
+    const lastSimulation = [...application.events]
+      .reverse()
+      .find((e) => e.type === 'SIMULATED');
+    if (!lastSimulation || lastSimulation.payload?.result !== 'approved') {
+      throw new BadRequestException(
+        'Debe simular la oferta y que sea viable antes de finalizar',
       );
     }
     application.status = 'PENDING_VALIDATION';

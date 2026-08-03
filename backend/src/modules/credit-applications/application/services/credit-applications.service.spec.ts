@@ -138,7 +138,8 @@ describe('CreditApplicationsService', () => {
     repository.findById.mockResolvedValue(app);
     const result = await service.simulateOffer('app-1');
     expect(result.status).toBe('not-viable');
-    expect(app.status).toBe('NOT_VIABLE');
+    expect(app.status).toBe('DRAFT');
+    expect(app.events.some((e) => e.type === 'SIMULATED' && e.payload?.result === 'not-viable')).toBe(true);
   });
 
   it('debería calcular oferta aprobada', async () => {
@@ -165,14 +166,17 @@ describe('CreditApplicationsService', () => {
 
   it('debería finalizar a PENDING_VALIDATION', async () => {
     const app = makeApp({ status: 'DRAFT' });
+    app.recordEvent('SIMULATED', { result: 'approved', monthlyPayment: 100, totalPayment: 1200, interestRate: 0.015 });
     repository.findById.mockResolvedValue(app);
     const result = await service.finalize('app-1');
     expect(result.status).toBe('PENDING_VALIDATION');
     expect(result.events.some((e) => e.type === 'FINALIZED')).toBe(true);
   });
 
-  it('no debería finalizar si no es viable', async () => {
-    repository.findById.mockResolvedValue(makeApp({ status: 'NOT_VIABLE' }));
+  it('no debería finalizar si no fue simulada aprobada', async () => {
+    const app = makeApp({ status: 'DRAFT' });
+    app.recordEvent('SIMULATED', { result: 'not-viable' });
+    repository.findById.mockResolvedValue(app);
     await expect(service.finalize('app-1')).rejects.toThrow(
       BadRequestException,
     );
