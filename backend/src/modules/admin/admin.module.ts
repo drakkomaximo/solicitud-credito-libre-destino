@@ -4,6 +4,7 @@ import { PrismaModule } from '@/prisma/prisma.module';
 import { ReferencesModule } from '@/modules/references/references.module';
 import { EventsModule } from '@/modules/events/events.module';
 import { AuthModule } from '@/modules/auth/auth.module';
+import { CreditApplicationsModule } from '@/modules/credit-applications/credit-applications.module';
 import { AdminService } from '@/modules/admin/application/services/admin.service';
 import { AdminController } from '@/modules/admin/infrastructure/http/admin.controller';
 
@@ -14,6 +15,7 @@ import { AdminController } from '@/modules/admin/infrastructure/http/admin.contr
     ReferencesModule,
     EventsModule,
     AuthModule,
+    CreditApplicationsModule,
   ],
   controllers: [AdminController],
   providers: [AdminService],

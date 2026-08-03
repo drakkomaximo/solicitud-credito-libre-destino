@@ -6,7 +6,7 @@ import type { EditApplicationFormData } from '@/presentation/validation/editAppl
 
 export function useApplicationMutations() {
   const queryClient = useQueryClient();
-  const { create, save, simulate, finalize, abandon } = useApplicationActions();
+  const { create, save, simulate, finalize, abandon, decide } = useApplicationActions();
 
   const createMutation = useMutation({
     mutationFn: (input: CreateApplicationInput) => create.execute(input),
@@ -74,17 +74,39 @@ export function useApplicationMutations() {
     },
   });
 
+  const decideMutation = useMutation({
+    mutationFn: ({
+      id,
+      decision,
+      reason,
+    }: {
+      id: string;
+      decision: 'APPROVED' | 'REJECTED';
+      reason?: string;
+    }) => decide.execute(id, decision, reason),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.applications.all(),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.applications.detail(variables.id),
+      });
+    },
+  });
+
   return {
     create: createMutation,
     save: saveMutation,
     simulate: simulateMutation,
     finalize: finalizeMutation,
     abandon: abandonMutation,
+    decide: decideMutation,
     isPending:
       createMutation.isPending ||
       saveMutation.isPending ||
       simulateMutation.isPending ||
       finalizeMutation.isPending ||
-      abandonMutation.isPending,
+      abandonMutation.isPending ||
+      decideMutation.isPending,
   };
 }

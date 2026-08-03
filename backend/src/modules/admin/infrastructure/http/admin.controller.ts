@@ -25,9 +25,11 @@ import { ErrorResponseDto } from '@/common/dto/error-response.dto';
 import { AdminService } from '@/modules/admin/application/services/admin.service';
 import { ReferencesService } from '@/modules/references/application/services/references.service';
 import { EventsService } from '@/modules/events/application/services/events.service';
+import { CreditApplicationsService } from '@/modules/credit-applications/application/services/credit-applications.service';
 import { JwtAuthGuard } from '@/modules/auth/infrastructure/guards/jwt-auth.guard';
 import { CreateReferenceDto } from './dto/create-reference.dto';
 import { UpdateReferenceDto } from './dto/update-reference.dto';
+import { DecideApplicationDto } from './dto/decide-application.dto';
 
 @ApiBearerAuth()
 @ApiTags('Admin')
@@ -38,6 +40,7 @@ export class AdminController {
     private readonly adminService: AdminService,
     private readonly referencesService: ReferencesService,
     private readonly eventsService: EventsService,
+    private readonly creditApplicationsService: CreditApplicationsService,
   ) {}
 
   @Post('database/clean')
@@ -59,6 +62,35 @@ export class AdminController {
       payload: { source: 'admin' },
     });
     return result;
+  }
+
+  @Patch('applications/:id/decision')
+  @ApiOperation({
+    summary: 'Aprobar o rechazar una solicitud',
+    description:
+      'Transición final desde PENDING_VALIDATION a APPROVED o REJECTED. Solo administradores. Registra el evento DECIDED con el motivo.',
+  })
+  @ApiBody({ type: DecideApplicationDto })
+  @ApiOkEnvelope('Decisión registrada')
+  @ApiResponse({
+    status: 400,
+    description: 'La solicitud no está en estado PENDING_VALIDATION',
+    type: ErrorResponseDto,
+  })
+  async decideApplication(
+    @Param('id') id: string,
+    @Body() dto: DecideApplicationDto,
+  ) {
+    const application = await this.creditApplicationsService.decide(
+      id,
+      dto.decision,
+      dto.reason,
+    );
+    this.eventsService.emit({
+      type: 'application.decided',
+      payload: { id: application.id, decision: dto.decision },
+    });
+    return application;
   }
 
   @Get('references')

@@ -18,7 +18,9 @@ export const newApplicationSchema = z
     amount: z.coerce.number().min(0, applicationFormErrors.positiveNumber),
     term: z.coerce.number().int().min(1, applicationFormErrors.minTerm),
     purpose: z.string().min(1, applicationFormErrors.required),
-    dataAuthorized: z.boolean(),
+    dataAuthorized: z.boolean().refine((value) => value === true, {
+      message: applicationFormErrors.required,
+    }),
   })
   .superRefine((data, ctx) => {
     if (data.channel === CHANNEL_ADVISOR && !data.advisorId?.trim()) {

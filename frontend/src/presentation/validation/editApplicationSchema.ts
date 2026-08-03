@@ -7,7 +7,9 @@ export const editApplicationSchema = z.object({
   amount: z.coerce.number().min(0, applicationFormErrors.positiveNumber),
   term: z.coerce.number().int().min(1, applicationFormErrors.minTerm),
   purpose: z.string().min(1, applicationFormErrors.required),
-  dataAuthorized: z.boolean(),
+  dataAuthorized: z.boolean().refine((value) => value === true, {
+    message: applicationFormErrors.required,
+  }),
 });
 
 export type EditApplicationFormData = z.infer<typeof editApplicationSchema>;

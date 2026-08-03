@@ -20,6 +20,7 @@ export const applicationFormLabels = {
   back: 'Atrás',
   create: 'Crear solicitud',
   save: 'Guardar cambios',
+  cancel: 'Cancelar',
   newTitle: 'Nueva solicitud',
   editTitle: 'Complementar solicitud',
   reviewTitle: 'Resumen',

@@ -120,4 +120,16 @@ export class ApplicationApiRepository implements ApplicationRepository {
       headers: this.authHeaders(),
     });
   }
+
+  async decide(
+    id: string,
+    decision: 'APPROVED' | 'REJECTED',
+    reason?: string,
+  ): Promise<CreditApplication> {
+    return httpClient<CreditApplication>(`/admin/applications/${id}/decision`, {
+      method: 'PATCH',
+      body: JSON.stringify({ decision, ...(reason ? { reason } : {}) }),
+      headers: this.authHeaders(),
+    });
+  }
 }

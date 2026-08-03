@@ -14,6 +14,7 @@ import { LoadingSpinner } from '@/presentation/components/common/LoadingSpinner'
 import type { CreateApplicationInput } from '@/domain/entities/Application';
 import { newApplicationSchema, type NewApplicationFormData } from '@/presentation/validation/newApplicationSchema';
 import { applicationFormLabels } from '@/presentation/messages/applicationForm';
+import { CHANNEL_ADVISOR } from '@/presentation/constants/channels';
 import { normalizePhone } from '@/presentation/utils/normalizePhone';
 
 type FormData = NewApplicationFormData;
@@ -33,8 +34,11 @@ export function ApplicationNewFormContent() {
     trigger,
   } = useForm<FormData>({
     resolver: zodResolver(newApplicationSchema) as Resolver<FormData>,
+    mode: 'onChange',
+    shouldUnregister: false,
     defaultValues: {
       channel: 'self-service',
+      advisorId: '',
       income: 0,
       expenses: 0,
       amount: 0,
@@ -47,9 +51,8 @@ export function ApplicationNewFormContent() {
 
   const next = async () => {
     if (step === 1) {
-      const ok = await trigger([
+      const fieldsOk = await trigger([
         'channel',
-        'advisorId',
         'documentType',
         'documentNumber',
         'firstName',
@@ -58,7 +61,12 @@ export function ApplicationNewFormContent() {
         'email',
         'city',
       ]);
-      if (ok) setStep(2);
+      const advisorOk =
+        watched.channel !== CHANNEL_ADVISOR || Boolean(watched.advisorId?.trim());
+      if (!advisorOk) {
+        await trigger('advisorId');
+      }
+      if (fieldsOk && advisorOk) setStep(2);
     } else if (step === 2) {
       const ok = await trigger([
         'income',
@@ -148,7 +156,8 @@ export function ApplicationNewFormContent() {
             <button
               type="button"
               onClick={next}
-              className="rounded bg-sky-600 px-4 py-2 text-white"
+              className="rounded bg-sky-600 px-4 py-2 text-white disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={step === 2 && !watched.dataAuthorized}
             >
               {applicationFormLabels.next}
             </button>
@@ -156,8 +165,8 @@ export function ApplicationNewFormContent() {
           {step === 3 && (
             <button
               type="submit"
-              className="rounded bg-sky-600 px-4 py-2 text-white"
-              disabled={isMutating}
+              className="rounded bg-sky-600 px-4 py-2 text-white disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={isMutating || !watched.dataAuthorized}
             >
               {applicationFormLabels.create}
             </button>
