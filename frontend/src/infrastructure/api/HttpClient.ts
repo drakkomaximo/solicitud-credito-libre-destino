@@ -1,5 +1,12 @@
 ﻿import { ApiError } from '@/domain/errors/ApiError';
 
+type UnauthorizedCallback = () => void;
+let onUnauthorized: UnauthorizedCallback | null = null;
+
+export function setOnUnauthorized(callback: UnauthorizedCallback): void {
+  onUnauthorized = callback;
+}
+
 declare const process: { env: Record<string, string | undefined> };
 
 const getApiBase = () => process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
@@ -45,6 +52,9 @@ export async function httpClient<T>(
       payload?.errors?.map((e: { message: string }) => e.message).join(', ') ||
       payload?.message ||
       res.statusText;
+    if (res.status === 401 && onUnauthorized) {
+      onUnauthorized();
+    }
     throw new ApiError(res.status, details);
   }
 
