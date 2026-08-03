@@ -4,13 +4,13 @@ import { useState } from 'react';
 import { useForm, type Resolver, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import { useApplicationActions } from '@/presentation/hooks/useApplicationActions';
-import { useSuspenseQuery, invalidateSuspenseQuery } from '@/presentation/hooks/useSuspenseQuery';
-import { GetReferences } from '@/application/useCases/GetReferences';
-import { ReferenceApiRepository } from '@/infrastructure/repositories/ReferenceApiRepository';
+import { useReferences } from '@/presentation/hooks/useApplicationQueries';
+import { useApplicationMutations } from '@/presentation/hooks/useApplicationMutations';
+import { useAlert } from '@/presentation/hooks/useAlert';
 import { ApplicationNewFormStep1 } from './new-form/ApplicationNewFormStep1';
 import { ApplicationNewFormStep2 } from './new-form/ApplicationNewFormStep2';
 import { ApplicationNewFormStep3 } from './new-form/ApplicationNewFormStep3';
+import { LoadingSpinner } from '@/presentation/components/common/LoadingSpinner';
 import type { CreateApplicationInput } from '@/domain/entities/Application';
 import { newApplicationSchema, type NewApplicationFormData } from '@/presentation/validation/newApplicationSchema';
 import { applicationFormLabels } from '@/presentation/messages/applicationForm';
@@ -20,16 +20,10 @@ type FormData = NewApplicationFormData;
 
 export function ApplicationNewFormContent() {
   const [step, setStep] = useState(1);
-  const [error, setError] = useState('');
   const router = useRouter();
-  const { create, save } = useApplicationActions();
-
-  const { data, error: refsError } = useSuspenseQuery(
-    'new-form-references',
-    () => new GetReferences(new ReferenceApiRepository()).execute(),
-  );
-
-  const references = data ?? {};
+  const { data: references, isPending: isRefsPending, error: refsError } = useReferences();
+  const { create, save, isPending: isMutating } = useApplicationMutations();
+  const { success, error: showError } = useAlert();
 
   const {
     register,
@@ -92,25 +86,25 @@ export function ApplicationNewFormContent() {
     (basic as NewApplicationFormData).phone = normalizePhone(basic.phone);
 
     try {
-      const res = await create.execute(basic as unknown as CreateApplicationInput);
+      const res = await create.mutateAsync(basic as unknown as CreateApplicationInput);
       if (!res.id) {
-        setError(applicationFormLabels.createError);
+        showError(applicationFormLabels.createError);
         return;
       }
-      await save.execute(res.id, {
-        income,
-        expenses,
-        amount,
-        term,
-        purpose,
-        dataAuthorized,
+      await save.mutateAsync({
+        id: res.id,
+        data: { income, expenses, amount, term, purpose, dataAuthorized },
       });
-      invalidateSuspenseQuery('applications-list-');
-      router.push(`/applications/${res.id}`);
+      success('Solicitud creada');
+      router.replace(`/applications/${res.id}`);
     } catch (e) {
-      setError(e instanceof Error ? e.message : applicationFormLabels.connectionError);
+      showError(e instanceof Error ? e.message : applicationFormLabels.connectionError);
     }
   };
+
+  if (isRefsPending) {
+    return <LoadingSpinner label={applicationFormLabels.loadingReferences} />;
+  }
 
   if (refsError) {
     return <p className="mt-2 text-red-600">{refsError.message}</p>;
@@ -119,13 +113,12 @@ export function ApplicationNewFormContent() {
   return (
     <main className="mx-auto max-w-2xl p-6">
       <h1 className="text-2xl font-bold text-slate-900">{applicationFormLabels.newTitle}</h1>
-      {error && <p className="mt-2 text-red-600">{error}</p>}
       <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
         {step === 1 && (
           <ApplicationNewFormStep1
             register={register}
             errors={errors}
-            references={references}
+            references={references ?? {}}
             watchedChannel={watched.channel ?? 'self-service'}
           />
         )}
@@ -134,7 +127,7 @@ export function ApplicationNewFormContent() {
           <ApplicationNewFormStep2
             register={register}
             errors={errors}
-            references={references}
+            references={references ?? {}}
             watched={watched}
           />
         )}
@@ -164,6 +157,7 @@ export function ApplicationNewFormContent() {
             <button
               type="submit"
               className="rounded bg-sky-600 px-4 py-2 text-white"
+              disabled={isMutating}
             >
               {applicationFormLabels.create}
             </button>

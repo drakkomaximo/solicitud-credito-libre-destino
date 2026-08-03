@@ -1,27 +1,28 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { useForm, useWatch, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { useApplicationActions } from '@/presentation/hooks/useApplicationActions';
-import { useSuspenseQuery, invalidateSuspenseQuery } from '@/presentation/hooks/useSuspenseQuery';
+import { useApplicationEdit } from '@/presentation/hooks/useApplicationQueries';
+import { useApplicationMutations } from '@/presentation/hooks/useApplicationMutations';
+import { useAlert } from '@/presentation/hooks/useAlert';
 import { FormField } from '@/presentation/components/forms/FormField';
 import { TextareaField } from '@/presentation/components/forms/TextareaField';
 import { CheckboxField } from '@/presentation/components/forms/CheckboxField';
+import { LoadingSpinner } from '@/presentation/components/common/LoadingSpinner';
 import { formatCOP } from '@/presentation/utils/formatCOP';
 import { editApplicationSchema, type EditApplicationFormData } from '@/presentation/validation/editApplicationSchema';
 import { applicationFormLabels } from '@/presentation/messages/applicationForm';
+import { commonMessages } from '@/presentation/messages/common';
 
 type FormData = EditApplicationFormData;
 
 export function ApplicationEditFormContent({ id }: { id: string }) {
   const router = useRouter();
-  const { get, save } = useApplicationActions();
-  const [formError, setFormError] = useState('');
-
-  const { data: app, error } = useSuspenseQuery(`edit-form-${id}`, () => get.execute(id));
+  const { data: app, isPending, error } = useApplicationEdit(id);
+  const { save } = useApplicationMutations();
+  const { success, error: showError } = useAlert();
 
   const {
     register,
@@ -44,17 +45,25 @@ export function ApplicationEditFormContent({ id }: { id: string }) {
 
   const watched = useWatch({ control });
 
+  useEffect(() => {
+    if (app && app.status !== 'DRAFT') {
+      router.replace(`/applications/${id}`);
+    }
+  }, [app, id, router]);
+
   const onSubmit = async (data: FormData) => {
     try {
-      await save.execute(id, data);
-      invalidateSuspenseQuery('applications-list-');
-      invalidateSuspenseQuery('edit-form-');
-      invalidateSuspenseQuery('application-detail-');
-      router.push(`/applications/${id}`);
+      await save.mutateAsync({ id, data });
+      success('Cambios guardados');
+      router.replace(`/applications/${id}`);
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : applicationFormLabels.saveError);
+      showError(err instanceof Error ? err.message : applicationFormLabels.saveError);
     }
   };
+
+  if (isPending) {
+    return <LoadingSpinner label={commonMessages.loading} />;
+  }
 
   if (error) {
     return <p className="mt-2 text-red-600">{error.message}</p>;
@@ -69,12 +78,6 @@ export function ApplicationEditFormContent({ id }: { id: string }) {
       <main className="mx-auto max-w-2xl p-6">
         <h1 className="text-2xl font-bold text-slate-900">{applicationFormLabels.editTitle}</h1>
         <p className="mt-2 text-red-600">{applicationFormLabels.editNotAllowed}</p>
-        <Link
-          href={`/applications/${id}`}
-          className="mt-4 inline-block rounded border px-4 py-2"
-        >
-          {applicationFormLabels.back}
-        </Link>
       </main>
     );
   }
@@ -82,7 +85,6 @@ export function ApplicationEditFormContent({ id }: { id: string }) {
   return (
     <main className="mx-auto max-w-2xl p-6">
       <h1 className="text-2xl font-bold text-slate-900">{applicationFormLabels.editTitle}</h1>
-      {formError && <p className="mt-2 text-red-600">{formError}</p>}
       <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
         <FormField
           id="income"
@@ -130,6 +132,7 @@ export function ApplicationEditFormContent({ id }: { id: string }) {
         <button
           type="submit"
           className="rounded bg-sky-600 px-4 py-2 text-white"
+          disabled={save.isPending}
         >
           {applicationFormLabels.save}
         </button>
