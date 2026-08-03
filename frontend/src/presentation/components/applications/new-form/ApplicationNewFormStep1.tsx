@@ -43,6 +43,7 @@ export function ApplicationNewFormStep1({
         <FormField
           id="advisorId"
           label={applicationFormLabels.advisorId}
+          placeholder={applicationFormLabels.advisorIdPlaceholder}
           registration={register('advisorId')}
           error={errors.advisorId}
         />

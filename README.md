@@ -272,3 +272,4 @@ git config --global commit.gpgsign true
 - No se incluyen logos ni imágenes alusivas a entidades financieras reales.
 - El seed deja la base en un estado inicial determinístico y está pensado solo para desarrollo.
 - El token de solicitud es básico (no revocable ni rotativo); el flujo de recuperación por documento/teléfono es funcional pero no verifica identidad con OTP.
+- El canal asistido valida el `advisorId` contra un catálogo de asesores. No se exponen los códigos al público; el asesor debe conocer su código.

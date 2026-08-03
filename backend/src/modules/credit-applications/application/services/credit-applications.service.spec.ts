@@ -139,7 +139,11 @@ describe('CreditApplicationsService', () => {
     const result = await service.simulateOffer('app-1');
     expect(result.status).toBe('not-viable');
     expect(app.status).toBe('DRAFT');
-    expect(app.events.some((e) => e.type === 'SIMULATED' && e.payload?.result === 'not-viable')).toBe(true);
+    expect(
+      app.events.some(
+        (e) => e.type === 'SIMULATED' && e.payload?.result === 'not-viable',
+      ),
+    ).toBe(true);
   });
 
   it('debería calcular oferta aprobada', async () => {
@@ -166,7 +170,12 @@ describe('CreditApplicationsService', () => {
 
   it('debería finalizar a PENDING_VALIDATION', async () => {
     const app = makeApp({ status: 'DRAFT' });
-    app.recordEvent('SIMULATED', { result: 'approved', monthlyPayment: 100, totalPayment: 1200, interestRate: 0.015 });
+    app.recordEvent('SIMULATED', {
+      result: 'approved',
+      monthlyPayment: 100,
+      totalPayment: 1200,
+      interestRate: 0.015,
+    });
     repository.findById.mockResolvedValue(app);
     const result = await service.finalize('app-1');
     expect(result.status).toBe('PENDING_VALIDATION');

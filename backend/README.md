@@ -475,6 +475,8 @@ Listados como `GET /api/v1/applications` o `GET /api/v1/admin/references` devuel
 Esta implementación se mantuvo deliberadamente mínima para cumplir el alcance del ejercicio. Por tiempo y complejidad se dejaron fuera los siguientes puntos, listados como trabajo futuro:
 
 - **Token de solicitud básico:** aunque `GET /api/v1/applications/:id` y las mutaciones ahora requieren el token generado al crear, ese token no es revocable ni rotable. El flujo de recuperación por documento/teléfono (`GET /api/v1/applications/lookup`) es funcional pero no verifica identidad de forma robusta; en producción debería incluir OTP o autenticación, expiración corta, revocación y asociación a sesión/dispositivo.
+- **Indicativo de país en teléfono:** el sistema asume celulares colombianos y normaliza cualquier entrada a 10 dígitos, removiendo el prefijo `57` si existe. Para soportar múltiples países se requiere un selector de indicativo o detección del prefijo internacional.
+- **Catálogo de asesores:** los asesores se gestionan como referencias de dominio (`domain=advisor`). El canal asistido valida que el `advisorId` exista y esté activo. Admin consulta la lista en `GET /api/v1/admin/advisors` y crea/modifica asesores a través de `GET/POST/PATCH /api/v1/admin/references`.
 - **Autorización por roles:** actualmente solo existe un rol `admin`. Se podría agregar `advisor` y permisos específicos.
 - **Rate limiting:** ningún endpoint tiene límites de peticiones. `POST /api/v1/applications` y `/api/v1/auth/login` deberían tener throttling.
 - **Logs de auditoría:** aunque `events` traza cambios internos, no hay logs de auditoría de qué usuario/admin realizó cada cambio.
