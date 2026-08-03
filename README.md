@@ -272,3 +272,4 @@ git config --global commit.gpgsign true
 - No se incluyen logos ni imágenes alusivas a entidades financieras reales.
 - El seed deja la base en un estado inicial determinístico y está pensado solo para desarrollo.
 - El token de solicitud es básico (no revocable ni rotativo); el flujo de recuperación por documento/teléfono es funcional pero no verifica identidad con OTP.
+- **Indicativo de país en teléfono:** se asume que todos los números celulares son colombianos (10 dígitos). El sistema normaliza eliminando caracteres no numéricos y el prefijo `57` si está presente. Para soportar otros países se requiere un selector de indicativo o detección del prefijo internacional.
