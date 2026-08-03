@@ -273,3 +273,4 @@ git config --global commit.gpgsign true
 - El seed deja la base en un estado inicial determinístico y está pensado solo para desarrollo.
 - El token de solicitud es básico (no revocable ni rotativo); el flujo de recuperación por documento/teléfono es funcional pero no verifica identidad con OTP.
 - El canal asistido valida el `advisorId` contra un catálogo de asesores. No se exponen los códigos al público; el asesor debe conocer su código.
+- **Indicativo de país en teléfono:** se asume que todos los números celulares son colombianos (10 dígitos). El sistema normaliza eliminando caracteres no numéricos y el prefijo `57` si está presente. Para soportar otros países se requiere un selector de indicativo o detección del prefijo internacional.

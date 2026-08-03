@@ -49,3 +49,7 @@ bun run lint        # ESLint
 bun run build       # build de producción
 bun test            # pruebas unitarias
 ```
+
+## 🚧 Limitaciones conocidas
+
+- **Formato de teléfono:** se asume que todos los celulares son colombianos. El frontend normaliza el número a 10 dígitos antes de enviarlo, eliminando caracteres no numéricos y el prefijo `57` si existe. El soporte para otros indicativos de país requeriría un selector de región.
