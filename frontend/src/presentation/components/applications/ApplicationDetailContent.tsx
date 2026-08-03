@@ -33,6 +33,10 @@ export function ApplicationDetailContent({ id }: { id: string }) {
     return <p className="p-6 text-slate-600">{detailMessages.loading}</p>;
   }
 
+  const hasApprovedSimulation = events.some(
+    (e) => e.type === 'SIMULATED' && (e.payload as { result?: string } | undefined)?.result === 'approved',
+  );
+
   const refresh = () => startTransition(() => setRefreshKey((k) => k + 1));
 
   const handleSimulate = async () => {
@@ -114,13 +118,15 @@ export function ApplicationDetailContent({ id }: { id: string }) {
           >
             {detailMessages.simulate}
           </button>
-          <button
-            onClick={handleFinalize}
-            className="rounded bg-blue-600 px-4 py-2 text-white"
-            disabled={isPending}
-          >
-            {detailMessages.finalize}
-          </button>
+          {hasApprovedSimulation && (
+            <button
+              onClick={handleFinalize}
+              className="rounded bg-blue-600 px-4 py-2 text-white"
+              disabled={isPending}
+            >
+              {detailMessages.finalize}
+            </button>
+          )}
           <div className="flex items-center gap-2">
             <input
               value={reason}

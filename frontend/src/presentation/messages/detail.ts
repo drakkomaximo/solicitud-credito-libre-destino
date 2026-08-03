@@ -9,7 +9,7 @@ export const detailMessages = {
   termSuffix: 'meses',
   edit: 'Editar',
   simulate: 'Simular oferta',
-  finalize: 'Finalizar',
+  finalize: 'Finalizar y enviar a validación',
   abandon: 'Abandonar',
   reasonPlaceholder: 'Motivo',
   missingReason: 'Indica el motivo de abandono.',
