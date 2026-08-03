@@ -14,6 +14,7 @@ import { ApplicationNewFormStep3 } from './new-form/ApplicationNewFormStep3';
 import type { CreateApplicationInput } from '@/domain/entities/Application';
 import { newApplicationSchema, type NewApplicationFormData } from '@/presentation/validation/newApplicationSchema';
 import { applicationFormLabels } from '@/presentation/messages/applicationForm';
+import { normalizePhone } from '@/presentation/utils/normalizePhone';
 
 type FormData = NewApplicationFormData;
 
@@ -87,6 +88,8 @@ export function ApplicationNewFormContent() {
       dataAuthorized,
       ...basic
     } = data;
+
+    (basic as NewApplicationFormData).phone = normalizePhone(basic.phone);
 
     try {
       const res = await create.execute(basic as unknown as CreateApplicationInput);
