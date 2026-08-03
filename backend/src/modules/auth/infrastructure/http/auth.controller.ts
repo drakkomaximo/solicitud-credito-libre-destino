@@ -1,5 +1,5 @@
 import { Body, Controller, Post } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiOkEnvelope } from '@/common/decorators/api-responses.decorator';
 import { AuthService } from '@/modules/auth/application/services/auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -25,8 +25,9 @@ export class AuthController {
   @ApiOperation({
     summary: 'Iniciar sesión de cliente',
     description:
-      'Genera un JWT para un cliente a partir de su documento y teléfono, permitiendo consultar sus solicitudes.',
+      'Genera un JWT para un cliente a partir de su número de documento y teléfono celular. Con ese token el cliente puede consultar sus solicitudes asociadas.',
   })
+  @ApiBody({ type: ClientLoginDto })
   @ApiOkEnvelope('Token generado')
   async clientLogin(@Body() dto: ClientLoginDto) {
     const accessToken = this.authService.generateClientToken(

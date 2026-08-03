@@ -45,7 +45,7 @@ async function bootstrap() {
     .addTag('Dominios', 'Enumeraciones y valores de referencia versionados')
     .addTag('Seed', 'Población de datos de prueba')
     .addTag('Health', 'Health checks del servicio')
-    .addTag('Auth', 'Autenticación del panel administrativo')
+    .addTag('Auth', 'Autenticación para administradores y clientes')
     .build();
   const document = SwaggerModule.createDocument(app, config, {
     extraModels: [
