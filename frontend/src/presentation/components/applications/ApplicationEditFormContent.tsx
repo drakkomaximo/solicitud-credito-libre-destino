@@ -1,13 +1,12 @@
 'use client';
 
-import { Suspense, useState } from 'react';
+import { useState } from 'react';
 import { useForm, useWatch, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useApplicationActions } from '@/presentation/hooks/useApplicationActions';
 import { useSuspenseQuery, invalidateSuspenseQuery } from '@/presentation/hooks/useSuspenseQuery';
-import { SuspenseFallback } from '@/presentation/components/SuspenseFallback';
 import { FormField } from '@/presentation/components/forms/FormField';
 import { TextareaField } from '@/presentation/components/forms/TextareaField';
 import { CheckboxField } from '@/presentation/components/forms/CheckboxField';
@@ -17,7 +16,7 @@ import { applicationFormLabels } from '@/presentation/messages/applicationForm';
 
 type FormData = EditApplicationFormData;
 
-function FormContent({ id }: { id: string }) {
+export function ApplicationEditFormContent({ id }: { id: string }) {
   const router = useRouter();
   const { get, save } = useApplicationActions();
   const [formError, setFormError] = useState('');
@@ -136,13 +135,5 @@ function FormContent({ id }: { id: string }) {
         </button>
       </form>
     </main>
-  );
-}
-
-export function ApplicationEditForm({ id }: { id: string }) {
-  return (
-    <Suspense fallback={<SuspenseFallback />}>
-      <FormContent id={id} />
-    </Suspense>
   );
 }

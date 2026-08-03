@@ -1,24 +1,23 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState } from 'react';
 import { useForm, type Resolver, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useApplicationActions } from '@/presentation/hooks/useApplicationActions';
 import { useSuspenseQuery, invalidateSuspenseQuery } from '@/presentation/hooks/useSuspenseQuery';
-import { SuspenseFallback } from '@/presentation/components/SuspenseFallback';
 import { GetReferences } from '@/application/useCases/GetReferences';
 import { ReferenceApiRepository } from '@/infrastructure/repositories/ReferenceApiRepository';
-import { ApplicationNewFormStep1 } from '@/presentation/components/new-application-form/ApplicationNewFormStep1';
-import { ApplicationNewFormStep2 } from '@/presentation/components/new-application-form/ApplicationNewFormStep2';
-import { ApplicationNewFormStep3 } from '@/presentation/components/new-application-form/ApplicationNewFormStep3';
+import { ApplicationNewFormStep1 } from './new-form/ApplicationNewFormStep1';
+import { ApplicationNewFormStep2 } from './new-form/ApplicationNewFormStep2';
+import { ApplicationNewFormStep3 } from './new-form/ApplicationNewFormStep3';
 import type { CreateApplicationInput } from '@/domain/entities/Application';
 import { newApplicationSchema, type NewApplicationFormData } from '@/presentation/validation/newApplicationSchema';
 import { applicationFormLabels } from '@/presentation/messages/applicationForm';
 
 type FormData = NewApplicationFormData;
 
-function FormContent() {
+export function ApplicationNewFormContent() {
   const [step, setStep] = useState(1);
   const [error, setError] = useState('');
   const router = useRouter();
@@ -169,13 +168,5 @@ function FormContent() {
         </div>
       </form>
     </main>
-  );
-}
-
-export function ApplicationNewForm() {
-  return (
-    <Suspense fallback={<SuspenseFallback />}>
-      <FormContent />
-    </Suspense>
   );
 }

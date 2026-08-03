@@ -1,4 +1,4 @@
-import { ApplicationEditForm } from '@/presentation/components/ApplicationEditForm';
+import { ApplicationEditForm } from '@/presentation/components/applications/ApplicationEditForm';
 
 interface PageProps {
   params: Promise<{ id: string }>;

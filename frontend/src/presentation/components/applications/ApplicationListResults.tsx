@@ -1,20 +1,16 @@
-﻿'use client';
+'use client';
 
-import { useCallback, useEffect, useRef, useState, useTransition, Suspense } from 'react';
-import { useSearchParams, usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useApplicationActions } from '@/presentation/hooks/useApplicationActions';
 import { useSuspenseQuery } from '@/presentation/hooks/useSuspenseQuery';
-import { SuspenseFallback } from '@/presentation/components/SuspenseFallback';
-import { ScrollToTop } from '@/presentation/components/ScrollToTop';
-import { ApplicationFilters } from '@/presentation/components/ApplicationFilters';
-import { LoadingSpinner } from '@/presentation/components/LoadingSpinner';
+import { LoadingSpinner } from '@/presentation/components/common/LoadingSpinner';
+import { ScrollToTop } from '@/presentation/components/common/ScrollToTop';
 import { listPageMessages } from '@/presentation/messages/list';
 import { commonMessages } from '@/presentation/messages/common';
 import type { CreditApplication, ListApplicationsResult } from '@/domain/entities/Application';
 
 const PAGE_SIZE = 10;
-const SEARCH_DEBOUNCE_MS = 500;
 
 function resetPagination(
   setExtraItems: (v: CreditApplication[]) => void,
@@ -28,7 +24,7 @@ function resetPagination(
   setListError(null);
 }
 
-function ListResults({
+export function ApplicationListResults({
   role,
   status,
   channel,
@@ -128,101 +124,5 @@ function ListResults({
       )}
       <ScrollToTop />
     </>
-  );
-}
-
-export function ApplicationsList({ role }: { role: string }) {
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const { replace } = useRouter();
-  const isFirstRun = useRef(true);
-  const prevRole = useRef(role);
-  const [isPending, startTransition] = useTransition();
-
-  const [status, setStatus] = useState(searchParams.get('status') ?? 'all');
-  const [channel, setChannel] = useState(searchParams.get('channel') ?? 'all');
-  const [q, setQ] = useState(searchParams.get('q') ?? '');
-  const [search, setSearch] = useState(searchParams.get('q') ?? '');
-
-  const updateQuery = useCallback(
-    (nextStatus: string, nextChannel: string, nextQ: string) => {
-      const params = new URLSearchParams(window.location.search);
-      if (nextStatus === 'all') params.delete('status');
-      else params.set('status', nextStatus);
-      if (nextChannel === 'all') params.delete('channel');
-      else params.set('channel', nextChannel);
-      if (nextQ) params.set('q', nextQ);
-      else params.delete('q');
-      const qs = params.toString();
-      replace(qs ? `${pathname}?${qs}` : pathname);
-    },
-    [pathname, replace],
-  );
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (search !== q) {
-        startTransition(() => {
-          setQ(search);
-        });
-      }
-    }, SEARCH_DEBOUNCE_MS);
-    return () => clearTimeout(timer);
-  }, [search, q, startTransition]);
-
-  useEffect(() => {
-    if (isFirstRun.current) {
-      isFirstRun.current = false;
-      return;
-    }
-    updateQuery(status, channel, q);
-  }, [status, channel, q, updateQuery]);
-
-  const resetFilters = useCallback(() => {
-    startTransition(() => {
-      setStatus('all');
-      setChannel('all');
-      setSearch('');
-      setQ('');
-    });
-  }, [startTransition]);
-
-  useEffect(() => {
-    if (prevRole.current !== role) {
-      resetFilters();
-      prevRole.current = role;
-    }
-  }, [role, resetFilters]);
-
-  const changeStatus = (value: string) => startTransition(() => setStatus(value));
-  const changeChannel = (value: string) => startTransition(() => setChannel(value));
-  const changeSearch = (value: string) => setSearch(value);
-
-  return (
-    <main className="mx-auto max-w-5xl p-6">
-      <h1 className="text-2xl font-bold text-slate-900">{listPageMessages.title}</h1>
-
-      <ApplicationFilters
-        status={status}
-        channel={channel}
-        search={search}
-        disabled={isPending}
-        onStatusChange={changeStatus}
-        onChannelChange={changeChannel}
-        onSearchChange={changeSearch}
-        onReset={resetFilters}
-      />
-
-      <div className="relative mt-6">
-        {isPending && (
-          <div className="absolute inset-0 z-10 flex items-start justify-center bg-white/80 pt-10">
-            <LoadingSpinner label={commonMessages.loading} />
-          </div>
-        )}
-        <Suspense fallback={<SuspenseFallback />}>
-          <ListResults role={role} status={status} channel={channel} q={q} />
-        </Suspense>
-      </div>
-    </main>
   );
 }
