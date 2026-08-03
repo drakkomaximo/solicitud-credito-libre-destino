@@ -1,15 +1,14 @@
 'use client';
 
-import { useState, useTransition, Suspense } from 'react';
+import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useApplicationActions } from '@/presentation/hooks/useApplicationActions';
 import { useSuspenseQuery } from '@/presentation/hooks/useSuspenseQuery';
-import { SuspenseFallback } from '@/presentation/components/SuspenseFallback';
 import { detailMessages } from '@/presentation/messages/detail';
 import { formatCOP } from '@/presentation/utils/formatCOP';
 
-function DetailContent({ id }: { id: string }) {
+export function ApplicationDetailContent({ id }: { id: string }) {
   const router = useRouter();
   const { get, getEvents, simulate, finalize, abandon } = useApplicationActions();
   const [refreshKey, setRefreshKey] = useState(0);
@@ -170,13 +169,5 @@ function DetailContent({ id }: { id: string }) {
         ))}
       </ul>
     </main>
-  );
-}
-
-export function ApplicationDetail({ id }: { id: string }) {
-  return (
-    <Suspense fallback={<SuspenseFallback />}>
-      <DetailContent id={id} />
-    </Suspense>
   );
 }
