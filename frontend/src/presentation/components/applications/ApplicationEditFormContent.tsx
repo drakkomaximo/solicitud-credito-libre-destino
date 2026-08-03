@@ -86,8 +86,10 @@ export function ApplicationEditFormContent({ id }: { id: string }) {
 
   return (
     <main className="mx-auto max-w-2xl p-6">
-      <h1 className="text-2xl font-bold text-slate-900">{applicationFormLabels.editTitle}</h1>
-      <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
+      <div className="rounded-2xl border border-slate-100 bg-white p-8 shadow-lg">
+        <h1 className="text-3xl font-bold text-slate-900">{applicationFormLabels.editTitle}</h1>
+        <p className="mt-2 text-slate-500">{applicationFormLabels.editDescription}</p>
+        <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-5">
         <FormField
           id="income"
           label={applicationFormLabels.income}
@@ -131,23 +133,24 @@ export function ApplicationEditFormContent({ id }: { id: string }) {
           error={errors.dataAuthorized}
           registration={register('dataAuthorized')}
         />
-        <div className="flex gap-2">
+        <div className="mt-8 flex gap-3">
           <button
             type="button"
             onClick={() => router.replace(`/applications/${id}`)}
-            className="rounded border px-4 py-2 hover:bg-slate-100"
+            className="rounded-xl border border-slate-300 px-5 py-2.5 font-medium text-slate-700 transition hover:bg-slate-50"
           >
             {applicationFormLabels.cancel}
           </button>
           <button
             type="submit"
-            className="rounded bg-sky-600 px-4 py-2 text-white disabled:cursor-not-allowed disabled:opacity-50"
+            className="ml-auto rounded-xl bg-sky-600 px-5 py-2.5 font-semibold text-white shadow-md shadow-sky-100 transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
             disabled={save.isPending || !watched.dataAuthorized}
           >
             {applicationFormLabels.save}
           </button>
         </div>
-      </form>
+        </form>
+      </div>
     </main>
   );
 }
