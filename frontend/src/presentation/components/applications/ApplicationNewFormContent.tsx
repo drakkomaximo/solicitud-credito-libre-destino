@@ -120,8 +120,20 @@ export function ApplicationNewFormContent() {
 
   return (
     <main className="mx-auto max-w-2xl p-6">
-      <h1 className="text-2xl font-bold text-slate-900">{applicationFormLabels.newTitle}</h1>
-      <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
+      <div className="rounded-2xl border border-slate-100 bg-white p-8 shadow-lg">
+        <h1 className="text-3xl font-bold text-slate-900">{applicationFormLabels.newTitle}</h1>
+        <div className="mt-4 flex items-center gap-2">
+          {[1, 2, 3].map((s) => (
+            <div
+              key={s}
+              className={`h-2 flex-1 rounded-full ${s <= step ? 'bg-sky-600' : 'bg-slate-200'}`}
+            />
+          ))}
+        </div>
+        <p className="mt-2 text-right text-sm text-slate-500">
+          Paso {step} de 3
+        </p>
+        <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
         {step === 1 && (
           <ApplicationNewFormStep1
             register={register}
@@ -142,12 +154,12 @@ export function ApplicationNewFormContent() {
 
         {step === 3 && <ApplicationNewFormStep3 watched={watched} />}
 
-        <div className="flex gap-2">
+        <div className="mt-8 flex gap-3">
           {step > 1 && (
             <button
               type="button"
               onClick={() => setStep(step - 1)}
-              className="rounded border px-4 py-2"
+              className="rounded-xl border border-slate-300 px-5 py-2.5 font-medium text-slate-700 transition hover:bg-slate-50"
             >
               {applicationFormLabels.back}
             </button>
@@ -156,7 +168,7 @@ export function ApplicationNewFormContent() {
             <button
               type="button"
               onClick={next}
-              className="rounded bg-sky-600 px-4 py-2 text-white disabled:cursor-not-allowed disabled:opacity-50"
+              className="ml-auto rounded-xl bg-sky-600 px-5 py-2.5 font-semibold text-white shadow-md shadow-sky-100 transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={step === 2 && !watched.dataAuthorized}
             >
               {applicationFormLabels.next}
@@ -165,14 +177,15 @@ export function ApplicationNewFormContent() {
           {step === 3 && (
             <button
               type="submit"
-              className="rounded bg-sky-600 px-4 py-2 text-white disabled:cursor-not-allowed disabled:opacity-50"
+              className="ml-auto rounded-xl bg-emerald-600 px-5 py-2.5 font-semibold text-white shadow-md shadow-emerald-100 transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={isMutating || !watched.dataAuthorized}
             >
               {applicationFormLabels.create}
             </button>
           )}
         </div>
-      </form>
+        </form>
+      </div>
     </main>
   );
 }

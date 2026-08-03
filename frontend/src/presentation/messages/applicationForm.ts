@@ -23,6 +23,7 @@ export const applicationFormLabels = {
   cancel: 'Cancelar',
   newTitle: 'Nueva solicitud',
   editTitle: 'Complementar solicitud',
+  editDescription: 'Modifica los datos financieros y autoriza el tratamiento de la información.',
   reviewTitle: 'Resumen',
   reviewDescription: 'Revisa la información antes de enviar.',
   loadingReferences: 'Cargando catálogos...',

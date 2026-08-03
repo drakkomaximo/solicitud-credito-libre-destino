@@ -9,6 +9,7 @@ import { ScrollToTop } from '@/presentation/components/common/ScrollToTop';
 import { StatusBadge } from '@/presentation/components/common/StatusBadge';
 import { listPageMessages } from '@/presentation/messages/list';
 import { commonMessages } from '@/presentation/messages/common';
+import { formatCOP } from '@/presentation/utils/formatCOP';
 import type { CreditApplication, ListApplicationsResult } from '@/domain/entities/Application';
 
 const PAGE_SIZE = 10;
@@ -92,18 +93,21 @@ export function ApplicationListResults({
       <ul className="mt-6 space-y-4">
         {items.length === 0 && <li className="text-slate-600">{listPageMessages.empty}</li>}
         {items.map((app) => (
-          <li key={app.id} className="rounded-lg border bg-white p-4 shadow-sm">
+          <li key={app.id} className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition hover:shadow-md">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <Link
                 href={`/applications/${app.id}`}
-                className="text-lg font-medium text-sky-700"
+                className="text-lg font-semibold text-sky-700 hover:underline"
               >
                 {app.firstName} {app.lastName}
               </Link>
               <StatusBadge status={app.status} />
             </div>
-            <p className="text-sm text-slate-600">
+            <p className="mt-1 text-sm text-slate-600">
               {app.documentType} {app.documentNumber}
+            </p>
+            <p className="mt-2 text-sm font-medium text-slate-700">
+              {formatCOP(app.amount)} · {app.term} meses
             </p>
           </li>
         ))}

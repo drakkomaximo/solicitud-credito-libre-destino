@@ -27,9 +27,47 @@ export function ApplicationDetailContent({ id }: { id: string }) {
     isPending: isMutating,
   } = useApplicationMutations();
   const { success, error: showError, confirm, confirmDanger, confirmWithReason } = useAlert();
-  const [simulation, setSimulation] = useState<{ amount: number; term: number; status: string } | null>(null);
   const [reason, setReason] = useState('');
+  const [liveSimulation, setLiveSimulation] = useState<
+    | {
+        status: 'approved' | 'not-viable';
+        monthlyPayment?: number;
+        totalPayment?: number;
+        interestRate?: number;
+        message?: string;
+      }
+    | undefined
+  >(undefined);
   const role = useMemo(() => parseRole(new CookieTokenStorage().getToken()), []);
+
+  const events = useMemo(() => data?.events ?? [], [data]);
+  const app = data?.app;
+
+  const simulation = useMemo(() => {
+    if (liveSimulation) return liveSimulation;
+    const lastSimulation = events.findLast((e) => e.type === 'SIMULATED');
+    const payload = lastSimulation?.payload as
+      | { result: 'approved' | 'not-viable'; monthlyPayment?: number; totalPayment?: number; interestRate?: number; message?: string }
+      | undefined;
+    if (!payload) return null;
+    return {
+      status: payload.result,
+      monthlyPayment: payload.monthlyPayment,
+      totalPayment: payload.totalPayment,
+      interestRate: payload.interestRate,
+      message: payload.message,
+    };
+  }, [events, liveSimulation]);
+
+  const canFinalize = useMemo(() => {
+    const lastSimulationIndex = events.findLastIndex((e) => e.type === 'SIMULATED');
+    const lastUpdateIndex = events.findLastIndex((e) => e.type === 'UPDATED');
+    const lastSimulation = lastSimulationIndex >= 0 ? events[lastSimulationIndex] : undefined;
+    return (
+      (lastSimulation?.payload as { result?: string } | undefined)?.result === 'approved' &&
+      lastUpdateIndex < lastSimulationIndex
+    );
+  }, [events]);
 
   if (isPending) {
     return <LoadingSpinner label={commonMessages.loading} />;
@@ -39,25 +77,27 @@ export function ApplicationDetailContent({ id }: { id: string }) {
     return <p className="p-6 text-red-600">{error.message}</p>;
   }
 
-  const app = data?.app;
-  const events = data?.events ?? [];
   if (!app) {
     return <p className="p-6 text-slate-600">{detailMessages.loadError}</p>;
   }
 
-  const eventTypes = events.map((e) => e.type);
-  const lastSimulationIndex = eventTypes.lastIndexOf('SIMULATED');
-  const lastUpdateIndex = eventTypes.lastIndexOf('UPDATED');
-  const lastSimulation = lastSimulationIndex >= 0 ? events[lastSimulationIndex] : undefined;
-  const canFinalize =
-    (lastSimulation?.payload as { result?: string } | undefined)?.result === 'approved' &&
-    lastUpdateIndex < lastSimulationIndex;
-
   const handleSimulate = async () => {
     try {
       const res = await simulate.mutateAsync(id);
-      setSimulation(res);
-      success('Simulación realizada');
+      const simulatedEvent = res.events?.findLast((e) => e.type === 'SIMULATED');
+      const payload = simulatedEvent?.payload as
+        | { result: 'approved' | 'not-viable'; monthlyPayment?: number; totalPayment?: number; interestRate?: number; message?: string }
+        | undefined;
+      if (payload) {
+        setLiveSimulation({
+          status: payload.result,
+          monthlyPayment: payload.monthlyPayment,
+          totalPayment: payload.totalPayment,
+          interestRate: payload.interestRate,
+          message: payload.message,
+        });
+      }
+      success(detailMessages.simulationSuccess);
     } catch (err) {
       showError(err instanceof Error ? err.message : detailMessages.simulationError);
     }
@@ -134,24 +174,30 @@ export function ApplicationDetailContent({ id }: { id: string }) {
   };
 
   return (
-    <main className="mx-auto max-w-3xl p-6">
-      <div className="flex flex-wrap items-center gap-4">
+    <main className="relative mx-auto max-w-3xl p-6">
+      {isMutating && (
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-start rounded-lg bg-white/80 pt-20 backdrop-blur-sm">
+          <LoadingSpinner label={commonMessages.loading} />
+        </div>
+      )}
+      <div className={`${isMutating ? 'pointer-events-none opacity-50' : ''} transition-opacity`}>
+        <div className="flex flex-wrap items-center gap-4">
         <button
           type="button"
           onClick={() => router.back()}
-          className="rounded border px-3 py-1 text-sm hover:bg-slate-100"
+          className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
           aria-label={detailMessages.back}
         >
           {detailMessages.back}
         </button>
-        <h1 className="text-2xl font-bold text-slate-900">
+        <h1 className="text-3xl font-extrabold text-slate-900">
           {detailMessages.requestTitle} {app.firstName} {app.lastName}
         </h1>
         <StatusBadge status={app.status} />
       </div>
 
-      <section className="mt-6 rounded-lg border bg-white p-4 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-900">
+      <section className="mt-6 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+        <h2 className="text-xl font-bold text-slate-900">
           {detailMessages.personalSection}
         </h2>
         <dl className="mt-3 grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2">
@@ -188,8 +234,8 @@ export function ApplicationDetailContent({ id }: { id: string }) {
         </dl>
       </section>
 
-      <section className="mt-4 rounded-lg border bg-white p-4 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-900">
+      <section className="mt-4 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+        <h2 className="text-xl font-bold text-slate-900">
           {detailMessages.financialSection}
         </h2>
         <dl className="mt-3 grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2">
@@ -221,20 +267,20 @@ export function ApplicationDetailContent({ id }: { id: string }) {
       </section>
 
       {app.status === 'DRAFT' && (
-        <section className="mt-4 rounded-lg border bg-white p-4 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-900">
+        <section className="mt-4 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+          <h2 className="text-xl font-bold text-slate-900">
             {detailMessages.actionsSection}
           </h2>
-          <div className="mt-3 flex flex-wrap items-center gap-3">
+          <div className="mt-4 flex flex-wrap items-center gap-3">
             <Link
               href={`/applications/${id}/edit`}
-              className="rounded bg-sky-600 px-4 py-2 text-white"
+              className="rounded-xl bg-sky-600 px-5 py-2.5 font-semibold text-white shadow-md shadow-sky-100 transition hover:-translate-y-0.5 hover:bg-sky-700"
             >
               {detailMessages.edit}
             </Link>
             <button
               onClick={handleSimulate}
-              className="rounded bg-emerald-600 px-4 py-2 text-white disabled:opacity-50"
+              className="rounded-xl bg-emerald-600 px-5 py-2.5 font-semibold text-white shadow-md shadow-emerald-100 transition hover:-translate-y-0.5 hover:bg-emerald-700 disabled:opacity-50"
               disabled={isMutating}
             >
               {detailMessages.simulate}
@@ -242,7 +288,7 @@ export function ApplicationDetailContent({ id }: { id: string }) {
             {canFinalize && (
               <button
                 onClick={handleFinalize}
-                className="rounded bg-blue-600 px-4 py-2 text-white disabled:opacity-50"
+                className="rounded-xl bg-blue-600 px-5 py-2.5 font-semibold text-white shadow-md shadow-blue-100 transition hover:-translate-y-0.5 hover:bg-blue-700 disabled:opacity-50"
                 disabled={isMutating}
               >
                 {detailMessages.finalize}
@@ -253,12 +299,13 @@ export function ApplicationDetailContent({ id }: { id: string }) {
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 placeholder={detailMessages.reasonPlaceholder}
-                className="border rounded p-2"
+                className="rounded-xl border border-slate-300 p-2.5 text-sm"
+                disabled={isMutating}
                 aria-label={detailMessages.reasonPlaceholder}
               />
               <button
                 onClick={handleAbandon}
-                className="rounded bg-red-600 px-4 py-2 text-white disabled:opacity-50"
+                className="rounded-xl bg-red-600 px-5 py-2.5 font-semibold text-white shadow-md shadow-red-100 transition hover:-translate-y-0.5 hover:bg-red-700 disabled:opacity-50"
                 disabled={isMutating}
               >
                 {detailMessages.abandon}
@@ -269,21 +316,22 @@ export function ApplicationDetailContent({ id }: { id: string }) {
       )}
 
       {role === 'admin' && app.status === 'PENDING_VALIDATION' && (
-        <section className="mt-4 rounded-lg border bg-white p-4 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-900">
-            {detailMessages.actionsSection}
+        <section className="mt-4 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+          <h2 className="text-xl font-bold text-slate-900">
+            Decisión del administrador
           </h2>
-          <div className="mt-3 flex flex-wrap items-center gap-3">
+          <p className="text-sm text-slate-600">Aprueba o rechaza esta solicitud. El rechazo requiere un motivo.</p>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
             <button
               onClick={handleApprove}
-              className="rounded bg-emerald-600 px-4 py-2 text-white disabled:opacity-50"
+              className="rounded-xl bg-emerald-600 px-5 py-2.5 font-semibold text-white shadow-md shadow-emerald-100 transition hover:-translate-y-0.5 hover:bg-emerald-700 disabled:opacity-50"
               disabled={isMutating}
             >
               {detailMessages.approve}
             </button>
             <button
               onClick={handleReject}
-              className="rounded bg-red-600 px-4 py-2 text-white disabled:opacity-50"
+              className="rounded-xl bg-red-600 px-5 py-2.5 font-semibold text-white shadow-md shadow-red-100 transition hover:-translate-y-0.5 hover:bg-red-700 disabled:opacity-50"
               disabled={isMutating}
             >
               {detailMessages.reject}
@@ -293,25 +341,47 @@ export function ApplicationDetailContent({ id }: { id: string }) {
       )}
 
       {simulation && (
-        <div className="mt-4 rounded-lg border bg-slate-50 p-4">
-          <p className="font-semibold">{detailMessages.simulationTitle}: {simulation.status}</p>
-          {simulation.amount && (
-            <p>{detailMessages.requestedValue}: {formatCOP(simulation.amount)} — {detailMessages.term}: {simulation.term} {detailMessages.termSuffix}</p>
+        <section className={`mt-4 rounded-2xl border p-6 shadow-sm ${simulation.status === 'approved' ? 'border-emerald-100 bg-emerald-50' : 'border-orange-100 bg-orange-50'}`}>
+          <h2 className="text-xl font-bold text-slate-900">
+            {detailMessages.simulationTitle}
+          </h2>
+          <p className="mt-2 font-semibold">
+            {simulation.status === 'approved' ? detailMessages.simulationViable : detailMessages.simulationNotViable}
+          </p>
+          {simulation.status === 'approved' && (
+            <dl className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <div className="rounded-xl bg-white p-3 shadow-sm">
+                <dt className="text-xs text-slate-500">{detailMessages.monthlyPayment}</dt>
+                <dd className="text-lg font-semibold text-emerald-700">{formatCOP(simulation.monthlyPayment ?? 0)}</dd>
+              </div>
+              <div className="rounded-xl bg-white p-3 shadow-sm">
+                <dt className="text-xs text-slate-500">{detailMessages.totalPayment}</dt>
+                <dd className="text-lg font-semibold text-emerald-700">{formatCOP(simulation.totalPayment ?? 0)}</dd>
+              </div>
+              <div className="rounded-xl bg-white p-3 shadow-sm">
+                <dt className="text-xs text-slate-500">{detailMessages.interestRate}</dt>
+                <dd className="text-lg font-semibold text-emerald-700">{(simulation.interestRate ?? 0) * 100}% EA</dd>
+              </div>
+            </dl>
           )}
-        </div>
+          {simulation.status === 'not-viable' && (
+            <p className="mt-2 text-orange-800">{simulation.message ?? detailMessages.recommendationNotViable}</p>
+          )}
+        </section>
       )}
 
       <h2 className="mt-8 text-xl font-bold text-slate-900">{detailMessages.traceability}</h2>
-      <ul className="mt-2 space-y-2">
+      <ul className="mt-4 space-y-3">
         {events.map((e) => (
-          <li key={e.id} className="rounded-lg border bg-white p-3 shadow-sm">
-            <p className="font-medium text-slate-800">{eventLabel(e.type)}</p>
+          <li key={e.id} className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+            <p className="font-semibold text-slate-800">{eventLabel(e.type)}</p>
             <p className="text-sm text-slate-500">
               {new Date(e.occurredAt).toLocaleString('es-CO')}
             </p>
           </li>
         ))}
       </ul>
+      </div>
     </main>
   );
 }
