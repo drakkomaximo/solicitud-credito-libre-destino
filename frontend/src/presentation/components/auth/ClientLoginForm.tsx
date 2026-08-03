@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useAuthActions } from '@/presentation/hooks/useAuthActions';
 import { authMessages } from '@/presentation/messages/auth';
+import { normalizePhone } from '@/presentation/utils/normalizePhone';
 
 interface ClientLoginFormProps {
   onClientLogin: () => void;
@@ -20,7 +21,7 @@ export function ClientLoginForm({ onClientLogin }: ClientLoginFormProps) {
     setError('');
     setLoading(true);
     try {
-      await clientLogin({ documentNumber, phone });
+      await clientLogin({ documentNumber, phone: normalizePhone(phone) });
       onClientLogin();
     } catch (err) {
       setError(err instanceof Error ? err.message : authMessages.lookupError);

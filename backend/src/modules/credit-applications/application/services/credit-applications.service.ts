@@ -13,6 +13,7 @@ import type {
 } from '@/modules/credit-applications/domain/repositories/credit-application.repository';
 import { CreateApplicationUseCase } from '@/modules/credit-applications/application/use-cases/create-application/create-application.use-case';
 import { ReferencesService } from '@/modules/references/application/services/references.service';
+import { normalizePhone } from '@/common/utils/normalize-phone';
 import type { CreateApplicationCommand } from '@/modules/credit-applications/application/use-cases/create-application/create-application.command';
 
 export interface ListApplicationsQuery extends ApplicationListQuery {}
@@ -62,6 +63,9 @@ export class CreditApplicationsService {
   }
 
   async create(command: CreateApplicationCommand): Promise<CreditApplication> {
+    if (command.phone) {
+      command.phone = normalizePhone(command.phone);
+    }
     return this.createApplicationUseCase.execute(command);
   }
 
@@ -132,10 +136,11 @@ export class CreditApplicationsService {
     documentNumber: string,
     phone: string,
   ): Promise<CreditApplication | null> {
+    const normalizedPhone = normalizePhone(phone);
     const applications =
       await this.repository.findByDocumentNumber(documentNumber);
     const draft = applications
-      .filter((a) => a.status === 'DRAFT' && a.phone === phone)
+      .filter((a) => a.status === 'DRAFT' && a.phone === normalizedPhone)
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
     return draft ?? null;
   }
