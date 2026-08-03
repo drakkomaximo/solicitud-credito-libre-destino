@@ -14,6 +14,10 @@ export function invalidateSuspenseQuery(prefix: string): void {
   }
 }
 
+export function clearAllSuspenseQueries(): void {
+  promiseCache.clear();
+}
+
 export function useSuspenseQuery<T>(
   queryKey: string,
   fetcher: () => Promise<T>,

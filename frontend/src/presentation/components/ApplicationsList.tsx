@@ -28,80 +28,27 @@ function resetPagination(
   setListError(null);
 }
 
-function ListContent({ role }: { role: string }) {
+function ListResults({
+  role,
+  status,
+  channel,
+  q,
+}: {
+  role: string;
+  status: string;
+  channel: string;
+  q: string;
+}) {
   const { list } = useApplicationActions();
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const { replace } = useRouter();
-  const isFirstRun = useRef(true);
-
-  const [status, setStatus] = useState(searchParams.get('status') ?? 'all');
-  const [channel, setChannel] = useState(searchParams.get('channel') ?? 'all');
-  const [q, setQ] = useState(searchParams.get('q') ?? '');
-  const [search, setSearch] = useState(searchParams.get('q') ?? '');
-  const [isPending, startTransition] = useTransition();
-
-  const prevRole = useRef(role);
-
   const [extraItems, setExtraItems] = useState<CreditApplication[]>([]);
   const [extraCursor, setExtraCursor] = useState<string | null>(null);
   const [extraHasMore, setExtraHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [listError, setListError] = useState<string | null>(null);
 
-  const updateQuery = useCallback(
-    (nextStatus: string, nextChannel: string, nextQ: string) => {
-      const params = new URLSearchParams(window.location.search);
-      if (nextStatus === 'all') params.delete('status');
-      else params.set('status', nextStatus);
-      if (nextChannel === 'all') params.delete('channel');
-      else params.set('channel', nextChannel);
-      if (nextQ) params.set('q', nextQ);
-      else params.delete('q');
-      const qs = params.toString();
-      replace(qs ? `${pathname}?${qs}` : pathname);
-    },
-    [pathname, replace],
-  );
-
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (search !== q) {
-        startTransition(() => {
-          resetPagination(setExtraItems, setExtraCursor, setExtraHasMore, setListError);
-          setQ(search);
-        });
-      }
-    }, SEARCH_DEBOUNCE_MS);
-    return () => clearTimeout(timer);
-  }, [search, q, startTransition]);
-
-  useEffect(() => {
-    if (isFirstRun.current) {
-      isFirstRun.current = false;
-      return;
-    }
-    startTransition(() => {
-      resetPagination(setExtraItems, setExtraCursor, setExtraHasMore, setListError);
-      updateQuery(status, channel, q);
-    });
-  }, [status, channel, q, updateQuery]);
-
-  const resetFilters = useCallback(() => {
-    startTransition(() => {
-      setStatus('all');
-      setChannel('all');
-      setSearch('');
-      setQ('');
-    });
-  }, [startTransition]);
-
-  useEffect(() => {
-    if (prevRole.current !== role) {
-      resetFilters();
-      prevRole.current = role;
-    }
-  }, [role, resetFilters]);
+    resetPagination(setExtraItems, setExtraCursor, setExtraHasMore, setListError);
+  }, [role, status, channel, q]);
 
   const { data: page, error: pageError } = useSuspenseQuery(
     `applications-list-initial-${role}-${status}-${channel}-${q}`,
@@ -114,16 +61,14 @@ function ListContent({ role }: { role: string }) {
       }),
   );
 
+  if (pageError) {
+    return <p className="mt-2 text-red-600">{pageError.message}</p>;
+  }
+
   const initialItems = page?.data ?? [];
   const items = [...initialItems, ...extraItems];
   const cursor = extraCursor ?? page?.nextCursor ?? null;
   const hasMore = extraCursor !== null ? extraHasMore : (page?.hasNextPage ?? false);
-
-  const changeStatus = (value: string) => setStatus(value);
-  const changeChannel = (value: string) => setChannel(value);
-  const changeSearch = (value: string) => setSearch(value);
-
-  const isLoading = isPending || loadingMore;
 
   const loadMore = async () => {
     if (!hasMore || loadingMore || !cursor) return;
@@ -146,9 +91,112 @@ function ListContent({ role }: { role: string }) {
     }
   };
 
-  if (pageError) {
-    return <p className="mt-2 text-red-600">{pageError.message}</p>;
-  }
+  return (
+    <>
+      <ul className="mt-6 space-y-4">
+        {items.length === 0 && <li className="text-slate-600">{listPageMessages.empty}</li>}
+        {items.map((app) => (
+          <li key={app.id} className="border rounded p-4">
+            <Link
+              href={`/applications/${app.id}`}
+              className="text-lg font-medium text-sky-700"
+            >
+              {app.firstName} {app.lastName}
+            </Link>
+            <p className="text-sm text-slate-600">
+              {app.documentType} {app.documentNumber} - {app.status}
+            </p>
+          </li>
+        ))}
+      </ul>
+      {listError && <p className="mt-4 text-red-600">{listError}</p>}
+      {hasMore && (
+        <div className="mt-6 text-center">
+          <button
+            type="button"
+            onClick={loadMore}
+            disabled={loadingMore}
+            className="inline-flex items-center gap-2 rounded bg-sky-600 px-4 py-2 text-white disabled:opacity-60"
+          >
+            {loadingMore ? (
+              <LoadingSpinner size={16} label={commonMessages.loading} className="text-white" />
+            ) : (
+              listPageMessages.loadMore
+            )}
+          </button>
+        </div>
+      )}
+      <ScrollToTop />
+    </>
+  );
+}
+
+export function ApplicationsList({ role }: { role: string }) {
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const { replace } = useRouter();
+  const isFirstRun = useRef(true);
+  const prevRole = useRef(role);
+  const [isPending, startTransition] = useTransition();
+
+  const [status, setStatus] = useState(searchParams.get('status') ?? 'all');
+  const [channel, setChannel] = useState(searchParams.get('channel') ?? 'all');
+  const [q, setQ] = useState(searchParams.get('q') ?? '');
+  const [search, setSearch] = useState(searchParams.get('q') ?? '');
+
+  const updateQuery = useCallback(
+    (nextStatus: string, nextChannel: string, nextQ: string) => {
+      const params = new URLSearchParams(window.location.search);
+      if (nextStatus === 'all') params.delete('status');
+      else params.set('status', nextStatus);
+      if (nextChannel === 'all') params.delete('channel');
+      else params.set('channel', nextChannel);
+      if (nextQ) params.set('q', nextQ);
+      else params.delete('q');
+      const qs = params.toString();
+      replace(qs ? `${pathname}?${qs}` : pathname);
+    },
+    [pathname, replace],
+  );
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (search !== q) {
+        startTransition(() => {
+          setQ(search);
+        });
+      }
+    }, SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timer);
+  }, [search, q, startTransition]);
+
+  useEffect(() => {
+    if (isFirstRun.current) {
+      isFirstRun.current = false;
+      return;
+    }
+    updateQuery(status, channel, q);
+  }, [status, channel, q, updateQuery]);
+
+  const resetFilters = useCallback(() => {
+    startTransition(() => {
+      setStatus('all');
+      setChannel('all');
+      setSearch('');
+      setQ('');
+    });
+  }, [startTransition]);
+
+  useEffect(() => {
+    if (prevRole.current !== role) {
+      resetFilters();
+      prevRole.current = role;
+    }
+  }, [role, resetFilters]);
+
+  const changeStatus = (value: string) => startTransition(() => setStatus(value));
+  const changeChannel = (value: string) => startTransition(() => setChannel(value));
+  const changeSearch = (value: string) => setSearch(value);
 
   return (
     <main className="mx-auto max-w-5xl p-6">
@@ -158,66 +206,23 @@ function ListContent({ role }: { role: string }) {
         status={status}
         channel={channel}
         search={search}
-        disabled={isLoading}
+        disabled={isPending}
         onStatusChange={changeStatus}
         onChannelChange={changeChannel}
         onSearchChange={changeSearch}
         onReset={resetFilters}
       />
 
-      {isPending ? (
-        <div className="mt-6">
-          <LoadingSpinner label={commonMessages.loading} />
-        </div>
-      ) : (
-        <>
-          <ul className="mt-6 space-y-4">
-            {items.length === 0 && (
-              <li className="text-slate-600">{listPageMessages.empty}</li>
-            )}
-            {items.map((app) => (
-              <li key={app.id} className="border rounded p-4">
-                <Link
-                  href={`/applications/${app.id}`}
-                  className="text-lg font-medium text-sky-700"
-                >
-                  {app.firstName} {app.lastName}
-                </Link>
-                <p className="text-sm text-slate-600">
-                  {app.documentType} {app.documentNumber} — {app.status}
-                </p>
-              </li>
-            ))}
-          </ul>
-          {listError && <p className="mt-4 text-red-600">{listError}</p>}
-          {hasMore && (
-            <div className="mt-6 text-center">
-              <button
-                type="button"
-                onClick={loadMore}
-                disabled={loadingMore}
-                className="inline-flex items-center gap-2 rounded bg-sky-600 px-4 py-2 text-white disabled:opacity-60"
-              >
-                {loadingMore ? (
-                  <LoadingSpinner size={16} label={commonMessages.loading} className="text-white" />
-                ) : (
-                  listPageMessages.loadMore
-                )}
-              </button>
-            </div>
-          )}
-        </>
-      )}
-
-      <ScrollToTop />
+      <div className="relative mt-6">
+        {isPending && (
+          <div className="absolute inset-0 z-10 flex items-start justify-center bg-white/80 pt-10">
+            <LoadingSpinner label={commonMessages.loading} />
+          </div>
+        )}
+        <Suspense fallback={<SuspenseFallback />}>
+          <ListResults role={role} status={status} channel={channel} q={q} />
+        </Suspense>
+      </div>
     </main>
-  );
-}
-
-export function ApplicationsList({ role }: { role: string }) {
-  return (
-    <Suspense fallback={<SuspenseFallback />}>
-      <ListContent role={role} />
-    </Suspense>
   );
 }
