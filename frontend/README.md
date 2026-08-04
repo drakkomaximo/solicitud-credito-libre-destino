@@ -56,7 +56,7 @@ frontend/src/
 - **cliente**: inicia con documento y teléfono; ve únicamente sus solicitudes.
 - **solicitud** (token de aplicación): permite continuar una solicitud sin sesión.
 
-## � Estado actual
+## 🚀 Estado actual
 
 Se completó el rediseño de la interfaz y la usabilidad del micrositio:
 
