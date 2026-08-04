@@ -9,6 +9,10 @@ Aplicación Next.js del micrositio de originación digital. Consume la API del b
 - TypeScript
 - Tailwind CSS 4
 - React Hook Form + Zod
+- Framer Motion
+- Lucide React
+- SweetAlert2
+- TanStack Query
 - Bun
 
 ## 🚀 Ejecución
