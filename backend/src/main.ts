@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
@@ -11,6 +12,13 @@ import { PaginationMetaDto } from '@/common/dto/pagination-meta.dto';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  (app as any).use((req: any, res: any, next: any) => {
+    const requestId = req.headers['x-request-id'] || randomUUID();
+    req.requestId = requestId;
+    res.setHeader('x-request-id', requestId);
+    next();
+  });
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -39,6 +47,8 @@ async function bootstrap() {
   app.enableCors({
     origin,
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-request-id'],
   });
   app.setGlobalPrefix(apiPrefix);
 
