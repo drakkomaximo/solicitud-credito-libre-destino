@@ -25,8 +25,10 @@ export function ApplicationDetailContent({ id }: { id: string }) {
     finalize,
     abandon,
     decide,
-    isPending: isMutating,
   } = useApplicationMutations();
+
+  const isSimulating = simulate.isPending;
+  const isActionPending = finalize.isPending || abandon.isPending || decide.isPending;
   const { success, error: showError, confirm, confirmDanger, confirmWithReason } = useAlert();
   const [reason, setReason] = useState('');
   const [liveSimulation, setLiveSimulation] = useState<
@@ -176,12 +178,14 @@ export function ApplicationDetailContent({ id }: { id: string }) {
 
   return (
     <main className="relative mx-auto max-w-3xl p-6">
-      {isMutating && (
-        <div className="absolute inset-0 z-50 flex flex-col items-center justify-start rounded-lg bg-white/80 pt-20 backdrop-blur-sm">
-          <LoadingSpinner label={commonMessages.loading} />
-        </div>
-      )}
-      <FadeIn className={`${isMutating ? 'pointer-events-none opacity-50' : ''} transition-opacity`}>
+      <div
+        className={`absolute inset-0 z-50 flex flex-col items-center justify-center rounded-2xl bg-white/70 backdrop-blur-sm transition-opacity duration-300 ${
+          isActionPending ? 'opacity-100' : 'pointer-events-none opacity-0'
+        }`}
+      >
+        <LoadingSpinner label={commonMessages.loading} />
+      </div>
+      <FadeIn className={`${isActionPending ? 'pointer-events-none opacity-60' : ''} transition-opacity duration-300`}>
         <div className="flex flex-wrap items-center gap-4">
         <button
           type="button"
@@ -282,15 +286,19 @@ export function ApplicationDetailContent({ id }: { id: string }) {
             <button
               onClick={handleSimulate}
               className="rounded-xl bg-emerald-600 px-5 py-2.5 font-semibold text-white shadow-md shadow-emerald-100 transition hover:-translate-y-0.5 hover:bg-emerald-700 disabled:opacity-50"
-              disabled={isMutating}
+              disabled={isSimulating}
             >
-              {detailMessages.simulate}
+              {isSimulating ? (
+                <LoadingSpinner size={18} className="text-white" />
+              ) : (
+                detailMessages.simulate
+              )}
             </button>
             {canFinalize && (
               <button
                 onClick={handleFinalize}
                 className="rounded-xl bg-blue-600 px-5 py-2.5 font-semibold text-white shadow-md shadow-blue-100 transition hover:-translate-y-0.5 hover:bg-blue-700 disabled:opacity-50"
-                disabled={isMutating}
+                disabled={isActionPending}
               >
                 {detailMessages.finalize}
               </button>
@@ -301,13 +309,13 @@ export function ApplicationDetailContent({ id }: { id: string }) {
                 onChange={(e) => setReason(e.target.value)}
                 placeholder={detailMessages.reasonPlaceholder}
                 className="rounded-xl border border-slate-300 p-2.5 text-sm"
-                disabled={isMutating}
+                disabled={isActionPending}
                 aria-label={detailMessages.reasonPlaceholder}
               />
               <button
                 onClick={handleAbandon}
                 className="rounded-xl bg-red-600 px-5 py-2.5 font-semibold text-white shadow-md shadow-red-100 transition hover:-translate-y-0.5 hover:bg-red-700 disabled:opacity-50"
-                disabled={isMutating}
+                disabled={isActionPending}
               >
                 {detailMessages.abandon}
               </button>
@@ -326,14 +334,14 @@ export function ApplicationDetailContent({ id }: { id: string }) {
             <button
               onClick={handleApprove}
               className="rounded-xl bg-emerald-600 px-5 py-2.5 font-semibold text-white shadow-md shadow-emerald-100 transition hover:-translate-y-0.5 hover:bg-emerald-700 disabled:opacity-50"
-              disabled={isMutating}
+              disabled={isActionPending}
             >
               {detailMessages.approve}
             </button>
             <button
               onClick={handleReject}
               className="rounded-xl bg-red-600 px-5 py-2.5 font-semibold text-white shadow-md shadow-red-100 transition hover:-translate-y-0.5 hover:bg-red-700 disabled:opacity-50"
-              disabled={isMutating}
+              disabled={isActionPending}
             >
               {detailMessages.reject}
             </button>

@@ -1,6 +1,7 @@
 ﻿'use client';
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import { ApplicationsList } from './ApplicationsList';
 import { LoginForm } from '../auth/LoginForm';
 import { RoleHeader } from '../auth/RoleHeader';
@@ -11,6 +12,8 @@ import { setOnUnauthorized } from '@/infrastructure/api/HttpClient';
 import { useQueryClient } from '@tanstack/react-query';
 
 export function ApplicationsView() {
+  const router = useRouter();
+  const pathname = usePathname();
   const [, forceRender] = useState(0);
   const queryClient = useQueryClient();
   const { logout } = useAuthActions();
@@ -20,6 +23,10 @@ export function ApplicationsView() {
   const role = parseRole(token);
 
   const handleAuthChange = useCallback(() => forceRender((k) => k + 1), []);
+
+  useEffect(() => {
+    router.replace(pathname);
+  }, [token, pathname, router]);
 
   const handleLogout = useCallback(() => {
     logout();
