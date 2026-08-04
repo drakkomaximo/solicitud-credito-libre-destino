@@ -57,7 +57,7 @@ export function ApplicationListResults({
 
   if (isPending) {
     return (
-      <div className="flex items-center justify-center rounded-2xl border border-slate-100 bg-white p-12 shadow-sm">
+      <div className="flex min-h-[16rem] items-center justify-center rounded-2xl border border-slate-100 bg-white p-8 shadow-sm sm:p-12">
         <LoadingSpinner size={28} label={commonMessages.loading} />
       </div>
     );
@@ -103,12 +103,12 @@ export function ApplicationListResults({
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.25, delay: i * 0.05 }}
-            className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition hover:shadow-md"
+            className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm transition hover:shadow-md sm:p-5"
           >
-            <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <Link
                 href={`/applications/${app.id}`}
-                className="text-lg font-semibold text-sky-700 hover:underline"
+                className="text-base font-semibold text-sky-700 hover:underline sm:text-lg"
               >
                 {app.firstName} {app.lastName}
               </Link>

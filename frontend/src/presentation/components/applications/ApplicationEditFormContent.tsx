@@ -58,7 +58,7 @@ export function ApplicationEditFormContent({ id }: { id: string }) {
   const onSubmit = async (data: FormData) => {
     try {
       await save.mutateAsync({ id, data });
-      success('Cambios guardados');
+      success(applicationFormLabels.saveSuccess);
       router.replace(`/applications/${id}`);
     } catch (err) {
       showError(err instanceof Error ? err.message : applicationFormLabels.saveError);
@@ -87,14 +87,14 @@ export function ApplicationEditFormContent({ id }: { id: string }) {
   }
 
   return (
-    <main className="mx-auto max-w-2xl p-6">
+    <main className="mx-auto max-w-2xl p-4 sm:p-6">
       <FadeIn className="w-full">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-2xl border border-slate-100 bg-white p-8 shadow-lg"
+          className="rounded-2xl border border-slate-100 bg-white p-5 shadow-lg sm:p-8"
         >
-          <h1 className="text-3xl font-bold text-slate-900">{applicationFormLabels.editTitle}</h1>
+          <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">{applicationFormLabels.editTitle}</h1>
           <p className="mt-2 text-slate-500">{applicationFormLabels.editDescription}</p>
           <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-5">
         <FormField
@@ -140,17 +140,17 @@ export function ApplicationEditFormContent({ id }: { id: string }) {
           error={errors.dataAuthorized}
           registration={register('dataAuthorized')}
         />
-        <div className="mt-8 flex gap-3">
+        <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row">
           <button
             type="button"
             onClick={() => router.replace(`/applications/${id}`)}
-            className="rounded-xl border border-slate-300 px-5 py-2.5 font-medium text-slate-700 transition hover:bg-slate-50"
+            className="w-full rounded-xl border border-slate-300 px-5 py-2.5 font-medium text-slate-700 transition hover:bg-slate-50 sm:w-auto"
           >
             {applicationFormLabels.cancel}
           </button>
           <button
             type="submit"
-            className="ml-auto rounded-xl bg-sky-600 px-5 py-2.5 font-semibold text-white shadow-md shadow-sky-100 transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full rounded-xl bg-sky-600 px-5 py-2.5 font-semibold text-white shadow-md shadow-sky-100 transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50 sm:ml-auto sm:w-auto"
             disabled={save.isPending || !watched.dataAuthorized}
           >
             {applicationFormLabels.save}

@@ -79,8 +79,8 @@ export function ApplicationsList({ role }: { role: string }) {
   const changeSearch = (value: string) => setSearch(value);
 
   return (
-    <main className="mx-auto max-w-5xl p-6">
-      <h1 className="text-2xl font-bold text-slate-900">{listPageMessages.title}</h1>
+    <main className="mx-auto max-w-5xl p-4 sm:p-6">
+      <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">{listPageMessages.title}</h1>
 
       <ApplicationFilters
         status={status}

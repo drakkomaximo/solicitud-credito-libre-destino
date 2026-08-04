@@ -41,7 +41,7 @@ export function ClientLoginForm({ onClientLogin }: ClientLoginFormProps) {
           value={documentNumber}
           onChange={(e) => setDocumentNumber(e.target.value)}
           className="mt-1.5 w-full rounded-xl border border-slate-200 p-3 text-sm outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
-          placeholder="12345678"
+          placeholder={authMessages.documentNumberPlaceholder}
           required
         />
       </div>
@@ -54,7 +54,7 @@ export function ClientLoginForm({ onClientLogin }: ClientLoginFormProps) {
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           className="mt-1.5 w-full rounded-xl border border-slate-200 p-3 text-sm outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
-          placeholder="300 123 4567"
+          placeholder={authMessages.phonePlaceholder}
           required
         />
       </div>

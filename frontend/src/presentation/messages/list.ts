@@ -1,5 +1,8 @@
 export const listPageMessages = {
   title: 'Solicitudes',
+  statusLabel: 'Estado',
+  channelLabel: 'Canal',
+  searchLabel: 'Buscar',
   allStatuses: 'Todos los estados',
   allChannels: 'Todos los canales',
   searchPlaceholder: 'Buscar por documento, nombre o apellido',

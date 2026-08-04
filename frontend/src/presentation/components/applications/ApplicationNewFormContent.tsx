@@ -105,7 +105,7 @@ export function ApplicationNewFormContent() {
         id: res.id,
         data: { income, expenses, amount, term, purpose, dataAuthorized },
       });
-      success('Solicitud creada');
+      success(applicationFormLabels.createSuccess);
       router.replace(`/applications/${res.id}`);
     } catch (e) {
       showError(e instanceof Error ? e.message : applicationFormLabels.connectionError);
@@ -121,10 +121,10 @@ export function ApplicationNewFormContent() {
   }
 
   return (
-    <main className="mx-auto max-w-2xl p-6">
+    <main className="mx-auto max-w-2xl p-4 sm:p-6">
       <FadeIn className="w-full">
-        <div className="rounded-2xl border border-slate-100 bg-white p-8 shadow-lg">
-          <h1 className="text-3xl font-bold text-slate-900">{applicationFormLabels.newTitle}</h1>
+        <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-lg sm:p-8">
+          <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">{applicationFormLabels.newTitle}</h1>
           <div className="mt-4 flex items-center gap-2">
             {[1, 2, 3].map((s) => (
               <motion.div
@@ -166,12 +166,12 @@ export function ApplicationNewFormContent() {
               {step === 3 && <ApplicationNewFormStep3 watched={watched} />}
             </motion.div>
 
-        <div className="mt-8 flex gap-3">
+        <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row">
           {step > 1 && (
             <button
               type="button"
               onClick={() => setStep(step - 1)}
-              className="rounded-xl border border-slate-300 px-5 py-2.5 font-medium text-slate-700 transition hover:bg-slate-50"
+              className="w-full rounded-xl border border-slate-300 px-5 py-2.5 font-medium text-slate-700 transition hover:bg-slate-50 sm:w-auto"
             >
               {applicationFormLabels.back}
             </button>
@@ -180,7 +180,7 @@ export function ApplicationNewFormContent() {
             <button
               type="button"
               onClick={next}
-              className="ml-auto rounded-xl bg-sky-600 px-5 py-2.5 font-semibold text-white shadow-md shadow-sky-100 transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-full rounded-xl bg-sky-600 px-5 py-2.5 font-semibold text-white shadow-md shadow-sky-100 transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50 sm:ml-auto sm:w-auto"
               disabled={step === 2 && !watched.dataAuthorized}
             >
               {applicationFormLabels.next}
@@ -189,7 +189,7 @@ export function ApplicationNewFormContent() {
           {step === 3 && (
             <button
               type="submit"
-              className="ml-auto rounded-xl bg-emerald-600 px-5 py-2.5 font-semibold text-white shadow-md shadow-emerald-100 transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-full rounded-xl bg-emerald-600 px-5 py-2.5 font-semibold text-white shadow-md shadow-emerald-100 transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50 sm:ml-auto sm:w-auto"
               disabled={isMutating || !watched.dataAuthorized}
             >
               {applicationFormLabels.create}
