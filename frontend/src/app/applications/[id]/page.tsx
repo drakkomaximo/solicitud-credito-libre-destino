@@ -1,4 +1,4 @@
-import { ApplicationDetail } from '@/presentation/components/applications/ApplicationDetail';
+import { ApplicationDetail } from '@/presentation/components/applications/detail/ApplicationDetail';
 
 interface PageProps {
   params: Promise<{ id: string }>;

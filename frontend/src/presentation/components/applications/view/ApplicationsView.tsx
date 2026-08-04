@@ -2,9 +2,9 @@
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { ApplicationsList } from './ApplicationsList';
-import { LoginForm } from '../auth/LoginForm';
-import { RoleHeader } from '../auth/RoleHeader';
+import { ApplicationsList } from '@/presentation/components/applications/list/ApplicationsList';
+import { LoginForm } from '@/presentation/components/auth/LoginForm';
+import { RoleHeader } from '@/presentation/components/auth/RoleHeader';
 import { parseRole } from '@/presentation/utils/parseRole';
 import { CookieTokenStorage } from '@/infrastructure/storage/CookieTokenStorage';
 import { useAuthActions } from '@/presentation/hooks/useAuthActions';

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useApplicationActions } from '@/presentation/hooks/useApplicationActions';
 import { useApplicationList } from '@/presentation/hooks/useApplicationQueries';
 import { LoadingSpinner } from '@/presentation/components/common/LoadingSpinner';
+import { ApplicationListSkeleton } from '@/presentation/components/applications/skeletons/ApplicationListSkeleton';
 import { ScrollToTop } from '@/presentation/components/common/ScrollToTop';
 import { StatusBadge } from '@/presentation/components/common/StatusBadge';
 import { listPageMessages } from '@/presentation/messages/list';
@@ -57,11 +58,7 @@ export function ApplicationListResults({
   }, [role, status, channel, q]);
 
   if (isPending) {
-    return (
-      <div className="flex min-h-[16rem] items-center justify-center rounded-2xl border border-slate-100 bg-white p-8 shadow-sm sm:p-12">
-        <LoadingSpinner size={28} label={commonMessages.loading} />
-      </div>
-    );
+    return <ApplicationListSkeleton />;
   }
 
   if (pageError) {

@@ -91,16 +91,19 @@ export class PrismaCreditApplicationRepository implements ICreditApplicationRepo
     const limit = Math.min(query.limit ?? 10, 100);
     const where = this.buildWhere(query);
 
-    if (query.cursor) {
-      where.id = { gt: query.cursor };
-    }
-
-    const raw = await this.prisma.creditApplication.findMany({
+    const options: any = {
       where,
       take: limit + 1,
-      orderBy: { id: 'asc' },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
       include: { events: true },
-    });
+    };
+
+    if (query.cursor) {
+      options.cursor = { id: query.cursor };
+      options.skip = 1;
+    }
+
+    const raw = await this.prisma.creditApplication.findMany(options);
 
     return raw.map((r) => this.toDomain(r));
   }

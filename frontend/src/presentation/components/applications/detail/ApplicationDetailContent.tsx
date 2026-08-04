@@ -13,6 +13,7 @@ import { formatCOP } from '@/presentation/utils/formatCOP';
 import { parseRole } from '@/presentation/utils/parseRole';
 import { FadeIn } from '@/presentation/components/common/FadeIn';
 import { LoadingSpinner } from '@/presentation/components/common/LoadingSpinner';
+import { ApplicationDetailSkeleton } from '@/presentation/components/applications/skeletons/ApplicationDetailSkeleton';
 import { StatusBadge } from '@/presentation/components/common/StatusBadge';
 import { CHANNEL_LABELS } from '@/presentation/constants/channels';
 import { eventLabel } from '@/presentation/messages/statusLabels';
@@ -73,7 +74,7 @@ export function ApplicationDetailContent({ id }: { id: string }) {
   }, [events]);
 
   if (isPending) {
-    return <LoadingSpinner label={commonMessages.loading} />;
+    return <ApplicationDetailSkeleton />;
   }
 
   if (error) {

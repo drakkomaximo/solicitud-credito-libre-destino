@@ -9,6 +9,10 @@ Aplicación Next.js del micrositio de originación digital. Consume la API del b
 - TypeScript
 - Tailwind CSS 4
 - React Hook Form + Zod
+- Framer Motion
+- Lucide React
+- SweetAlert2
+- TanStack Query
 - Bun
 
 ## 🚀 Ejecución
@@ -30,7 +34,12 @@ frontend/src/
 ├── infrastructure/      # clientes HTTP, repositorios, storage (cookies)
 └── presentation/        # UI, componentes, hooks, mensajes, validaciones
     ├── components/
-    │   ├── applications/  # listado, filtros, formulario, detalle
+    │   ├── applications/  # módulo de solicitudes
+    │   │   ├── detail/    # detalle de solicitud
+    │   │   ├── form/      # formulario nuevo y edición
+    │   │   ├── list/      # listado, filtros y resultados
+    │   │   ├── skeletons/ # placeholders de carga
+    │   │   └── view/      # vistas contenedoras y dashboard
     │   ├── auth/          # login, sesión, cabecera de rol
     │   ├── common/        # badges, spinners, inputs reutilizables
     │   ├── forms/         # campos y layouts de formulario
@@ -47,7 +56,7 @@ frontend/src/
 - **cliente**: inicia con documento y teléfono; ve únicamente sus solicitudes.
 - **solicitud** (token de aplicación): permite continuar una solicitud sin sesión.
 
-## � Estado actual
+## 🚀 Estado actual
 
 Se completó el rediseño de la interfaz y la usabilidad del micrositio:
 
@@ -55,8 +64,10 @@ Se completó el rediseño de la interfaz y la usabilidad del micrositio:
 - **Home y landing:** ajuste de layouts para el header sticky y espaciado consistente.
 - **Formulario de solicitud:** multistep con scroll al cambiar de paso, mejor espaciado en mobile y validación con Zod.
 - **Detalle de solicitud:** tipografía reducida en mobile, modal de abandono con motivo y estados más compactos.
-- **Listado de solicitudes:** tarjetas rediseñadas con chip de canal (autogestionado/asistido), fecha/hora de creación, grid responsive (1/2/3 columnas) y filtros con wrap en pantallas medianas.
+- **Listado de solicitudes:** tarjetas rediseñadas con chip de canal, fecha/hora de creación, grid responsive (1/2/3 columnas), filtros con wrap y ordenamiento descendente por fecha gestionado por el backend.
 - **Sesión:** `RoleHeader` integrado dentro del contenedor principal de solicitudes.
+- **Skeletons:** spinners de carga del detalle y del listado reemplazados por esqueletos con la estructura real de los componentes.
+- **Organización:** componentes de `applications` agrupados en `detail/`, `form/`, `list/`, `skeletons/` y `view/`.
 
 ## ✅ Comandos
 

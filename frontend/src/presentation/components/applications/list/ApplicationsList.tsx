@@ -2,10 +2,10 @@
 
 import { useCallback, useEffect, useRef, useState, useTransition, Suspense } from 'react';
 import { useSearchParams, usePathname, useRouter } from 'next/navigation';
-import { ApplicationFilters } from './ApplicationFilters';
-import { ApplicationListResults } from './ApplicationListResults';
+import { ApplicationFilters } from '@/presentation/components/applications/list/ApplicationFilters';
+import { ApplicationListResults } from '@/presentation/components/applications/list/ApplicationListResults';
+import { ApplicationListSkeleton } from '@/presentation/components/applications/skeletons/ApplicationListSkeleton';
 import { LoadingSpinner } from '@/presentation/components/common/LoadingSpinner';
-import { SuspenseFallback } from '@/presentation/components/common/SuspenseFallback';
 import { listPageMessages } from '@/presentation/messages/list';
 import { commonMessages } from '@/presentation/messages/common';
 
@@ -99,7 +99,7 @@ export function ApplicationsList({ role }: { role: string }) {
             <LoadingSpinner label={commonMessages.loading} />
           </div>
         )}
-        <Suspense fallback={<SuspenseFallback />}>
+        <Suspense fallback={<ApplicationListSkeleton />}>
           <ApplicationListResults role={role} status={status} channel={channel} q={q} />
         </Suspense>
       </div>
