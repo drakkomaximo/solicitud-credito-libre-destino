@@ -18,11 +18,11 @@ API NestJS que soporta el flujo de originación digital de crédito de libre des
 - **Notificaciones en tiempo real:** Server-Sent Events (`/api/v1/events`) para revalidación de cachés (SSG/ISR).
 - **Autenticación administrativa:** JWT (`/api/v1/auth/login`) para proteger el panel `/api/v1/admin` y `/api/v1/seed`.
 
-## � Estado actual
+## Estado actual
 
-El backend se mantiene estable y no sufrió cambios estructurales en este ciclo. El trabajo reciente se concentró en el frontend, manteniendo intactos los contratos de API, autenticación y flujo de solicitudes. Los próximos refuerzos del lado del servidor —rate limiting, logs de auditoría, firma de commits y tests de guardias JWT/E2E— quedan como trabajo futuro.
+El backend mantiene los contratos de API y autenticación intactos. En este ciclo se ajustó `PrismaCreditApplicationRepository.findAll` para ordenar las solicitudes por `createdAt` de forma descendente (más recientes primero), con `id` como desempate, y para usar la paginación por cursor nativa de Prisma. Los refuerzos del lado del servidor —rate limiting, logs de auditoría, firma de commits y tests de guardias JWT/E2E— quedan como trabajo futuro.
 
-## �📁 Estructura de carpetas
+## Estructura de carpetas
 
 ```
 backend/
