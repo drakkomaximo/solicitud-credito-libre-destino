@@ -102,7 +102,7 @@ Este documento resume el estado de cada requerimiento del enunciado, el criterio
 | Mocks o backend simulado | `✅` | Backend NestJS en `/backend` |
 | Pruebas automatizadas | `✅` | Tests unitarios con `bun:test` |
 | Contratos API usados o propuestos | `✅` | Documentados en README del backend |
-| Tres historias técnicas | `🔲` | Pendiente redactar documento de historias |
+| Tres historias técnicas | `✅` | 3 historias técnicas en `/historias/HT-01-frontend-rendering.md`, `HT-02-formularios-validaciones.md`, `HT-03-integracion-frontend-backend.md` |
 
 ---
 
@@ -131,10 +131,9 @@ Este documento resume el estado de cada requerimiento del enunciado, el criterio
 
 ## Mejoras futuras priorizadas
 
-1. **Historias técnicas**: redactar las 3 historias solicitadas (frontend/rendering, formularios/validaciones, integración frontend-backend).
-2. **Accesibilidad**: auditar con `axe-core`, roles, ARIA y foco visible.
-3. **Observabilidad**: `x-request-id`, logs estructurados o Sentry.
-4. **Performance**: `Suspense`/`loading.tsx`, streaming y Server Components en listado.
-5. **Skeletons en "cargar más"**: evaluar si agregar placeholders al final del listado.
-6. **Búsqueda avanzada**: índice GIN o FTS en PostgreSQL para búsqueda exacta.
-7. **Más tests**: hooks de TanStack Query y componentes con DOM (happy-dom/jsdom).
+1. **Accesibilidad**: auditar con `axe-core`, roles, ARIA y foco visible (iniciado con `<main>`, `aria-label` y `loading.tsx`).
+2. **Observabilidad**: `x-request-id`, logs estructurados o Sentry.
+3. **Performance**: `Suspense` en listado y migración de Server Components en listado (`loading.tsx` y `<main>` ya agregados).
+4. **Skeletons en "cargar más"**: evaluar si agregar placeholders al final del listado.
+5. **Búsqueda avanzada**: índice GIN o FTS en PostgreSQL para búsqueda exacta.
+6. **Más tests**: hooks de TanStack Query y componentes con DOM (happy-dom/jsdom).
