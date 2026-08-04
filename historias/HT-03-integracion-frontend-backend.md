@@ -32,5 +32,5 @@
 
 ## Notas
 
-- `HttpClient` centraliza el consumo. La mejora implica agregar `x-request-id` y enriquecer `ApiError` con `requestId`.
-- En el backend se requiere un middleware que lea o genere `x-request-id` y lo agregue a los logs de NestJS.
+- **Estado: implementado.** `HttpClient` centraliza el consumo, genera el `x-request-id` en cada petición y `ApiError` incluye el `requestId`.
+- El backend lee o genera `x-request-id` mediante middleware, lo registra en los logs HTTP/errores y lo expone al cliente vía `exposedHeaders` en CORS.

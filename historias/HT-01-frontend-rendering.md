@@ -31,5 +31,7 @@
 
 ## Notas
 
-- El listado actual es un Client Component por el uso de `useSearchParams` y `useQuery`. Se propone mover la lectura inicial de filtros al servidor y delegar solo la interacción al cliente.
-- `ApplicationListSkeleton` y `ApplicationFormSkeleton` deben mantenerse como Server Components puros.
+- **Estado: implementado.** Las páginas, layouts, skeletons y los wrappers con `Suspense` (`ApplicationDetail`, `ApplicationNewForm`, `ApplicationEditForm`) son Server Components; cada segmento de ruta tiene su `loading.tsx` con el skeleton real para streaming.
+- Los Client Components se limitan a lo interactivo: formularios (`react-hook-form`), filtros con `useSearchParams`, autenticación por cookies (`ApplicationsView`), header con menú móvil y animaciones (`FadeIn`).
+- `ApplicationListSkeleton`, `ApplicationDetailSkeleton` y `ApplicationFormSkeleton` son Server Components puros.
+- Mejora futura: streaming de datos del listado desde el servidor, que requiere mover la autenticación a cookies `HttpOnly` legibles por el servidor.
