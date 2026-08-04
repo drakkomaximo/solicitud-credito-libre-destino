@@ -4,6 +4,7 @@ export default function Loading() {
       className="mx-auto flex w-full max-w-5xl flex-col items-center justify-center p-6"
       aria-busy="true"
       aria-live="polite"
+      aria-atomic="true"
       role="status"
     >
       <h1 className="sr-only">Cargando contenido</h1>

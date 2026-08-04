@@ -499,12 +499,34 @@ Esta implementación se mantuvo deliberadamente mínima para cumplir el alcance 
 
 ## 🌐 CORS y despliegue
 
-El backend permite orígenes mediante la variable `CORS_ORIGIN` (lista separada por comas). Ejemplo para Vercel:
+### Vercel
+
+El frontend está optimizado para Vercel (`vercel.json` en `frontend/`). El backend permite orígenes mediante `CORS_ORIGIN` (lista separada por comas):
 
 ```bash
 CORS_ORIGIN=http://localhost:3000,http://localhost:3001,https://mi-proyecto.vercel.app
 ```
 
 - No uses `*` cuando `credentials: true` esté activo; los navegadores rechazan credenciales con wildcard.
-- Si tienes varios entornos (preview, producción), agrégales todos separados por comas.
-- El header `x-request-id` ya está permitido para futura trazabilidad.
+- `x-request-id` ya se genera en el frontend y se refleja en logs y respuestas de error.
+
+### Azure (alternativa de cloud de referencia)
+
+El `backend/Dockerfile` es multi-stage y compatible con **Azure Container Apps** o **Azure App Service**:
+
+```bash
+cd backend
+docker build -t solicitud-credito-backend .
+docker run -p 3000:3000 --env-file .env solicitud-credito-backend
+```
+
+Variables mínimas en Azure:
+
+```bash
+DATABASE_URL=<cadena-de-conexión-de-azure-postgresql>
+CORS_ORIGIN=https://<tu-frontend>.azurewebsites.net,https://<tu-frontend>.vercel.app
+JWT_SECRET=<secreto-fuerte>
+ADMIN_SECRET=<secreto-admin>
+```
+
+La imagen genera el cliente Prisma, aplica migraciones vía `entrypoint.sh` y expone el puerto `3000`.
