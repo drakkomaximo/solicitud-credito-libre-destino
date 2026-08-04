@@ -95,7 +95,7 @@ export function ApplicationsList({ role }: { role: string }) {
 
       <div className="relative mt-6">
         {isPending && (
-          <div className="absolute inset-0 z-10 flex items-start justify-center bg-white/80 pt-10">
+          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-white/70 backdrop-blur-sm">
             <LoadingSpinner label={commonMessages.loading} />
           </div>
         )}

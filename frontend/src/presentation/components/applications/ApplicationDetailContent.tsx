@@ -179,7 +179,7 @@ export function ApplicationDetailContent({ id }: { id: string }) {
   return (
     <main className="relative mx-auto max-w-3xl p-6">
       <div
-        className={`absolute inset-0 z-50 flex flex-col items-center justify-start rounded-2xl bg-white/70 pt-20 backdrop-blur-sm transition-opacity duration-300 ${
+        className={`absolute inset-0 z-50 flex flex-col items-center justify-center rounded-2xl bg-white/70 backdrop-blur-sm transition-opacity duration-300 ${
           isActionPending ? 'opacity-100' : 'pointer-events-none opacity-0'
         }`}
       >
