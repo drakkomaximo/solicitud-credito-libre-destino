@@ -30,7 +30,7 @@ export function AdminLoginForm({ onAdminLogin }: AdminLoginFormProps) {
   };
 
   return (
-    <form onSubmit={handleAdminLogin} className="mt-6 space-y-4">
+    <form onSubmit={handleAdminLogin} className="mt-6 space-y-5">
       <div>
         <label htmlFor="username" className="block text-sm font-medium text-slate-700">
           {authMessages.username}
@@ -39,7 +39,8 @@ export function AdminLoginForm({ onAdminLogin }: AdminLoginFormProps) {
           id="username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          className="mt-1 w-full rounded border p-2"
+          className="mt-1.5 w-full rounded-xl border border-slate-200 p-3 text-sm outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+          placeholder="admin"
           required
         />
       </div>
@@ -52,18 +53,19 @@ export function AdminLoginForm({ onAdminLogin }: AdminLoginFormProps) {
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="mt-1 w-full rounded border p-2"
+          className="mt-1.5 w-full rounded-xl border border-slate-200 p-3 text-sm outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+          placeholder="••••••"
           required
         />
       </div>
       <button
         type="submit"
         disabled={loading}
-        className="rounded bg-sky-600 px-4 py-2 text-white disabled:opacity-60"
+        className="w-full rounded-xl bg-sky-600 px-4 py-3 font-semibold text-white shadow-md shadow-sky-100 transition hover:bg-sky-700 disabled:opacity-60"
       >
-        {authMessages.login}
+        {loading ? authMessages.loggingIn : authMessages.login}
       </button>
-      {error && <p className="text-red-600">{error}</p>}
+      {error && <p className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
     </form>
   );
 }

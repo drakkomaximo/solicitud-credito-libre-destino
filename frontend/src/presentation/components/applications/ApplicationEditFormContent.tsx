@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { useForm, useWatch, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -10,6 +11,7 @@ import { useAlert } from '@/presentation/hooks/useAlert';
 import { FormField } from '@/presentation/components/forms/FormField';
 import { TextareaField } from '@/presentation/components/forms/TextareaField';
 import { CheckboxField } from '@/presentation/components/forms/CheckboxField';
+import { FadeIn } from '@/presentation/components/common/FadeIn';
 import { LoadingSpinner } from '@/presentation/components/common/LoadingSpinner';
 import { formatCOP } from '@/presentation/utils/formatCOP';
 import { editApplicationSchema, type EditApplicationFormData } from '@/presentation/validation/editApplicationSchema';
@@ -86,10 +88,15 @@ export function ApplicationEditFormContent({ id }: { id: string }) {
 
   return (
     <main className="mx-auto max-w-2xl p-6">
-      <div className="rounded-2xl border border-slate-100 bg-white p-8 shadow-lg">
-        <h1 className="text-3xl font-bold text-slate-900">{applicationFormLabels.editTitle}</h1>
-        <p className="mt-2 text-slate-500">{applicationFormLabels.editDescription}</p>
-        <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-5">
+      <FadeIn className="w-full">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-2xl border border-slate-100 bg-white p-8 shadow-lg"
+        >
+          <h1 className="text-3xl font-bold text-slate-900">{applicationFormLabels.editTitle}</h1>
+          <p className="mt-2 text-slate-500">{applicationFormLabels.editDescription}</p>
+          <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-5">
         <FormField
           id="income"
           label={applicationFormLabels.income}
@@ -150,7 +157,8 @@ export function ApplicationEditFormContent({ id }: { id: string }) {
           </button>
         </div>
         </form>
-      </div>
+        </motion.div>
+      </FadeIn>
     </main>
   );
 }

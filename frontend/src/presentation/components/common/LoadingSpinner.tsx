@@ -9,12 +9,12 @@ interface LoadingSpinnerProps {
 }
 
 export function LoadingSpinner({
-  size = 20,
+  size = 24,
   label,
-  className = 'text-slate-600',
+  className = 'text-sky-700',
 }: LoadingSpinnerProps) {
   return (
-    <span className={`inline-flex items-center gap-2 ${className}`}>
+    <span className={`inline-flex items-center gap-2 font-medium ${className}`}>
       <Loader2 size={size} className="animate-spin" aria-hidden="true" />
       {label && <span>{label}</span>}
     </span>

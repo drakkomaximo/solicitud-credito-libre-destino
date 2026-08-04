@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useApplicationActions } from '@/presentation/hooks/useApplicationActions';
 import { useApplicationList } from '@/presentation/hooks/useApplicationQueries';
@@ -55,7 +56,11 @@ export function ApplicationListResults({
   }, [role, status, channel, q]);
 
   if (isPending) {
-    return <LoadingSpinner label={commonMessages.loading} />;
+    return (
+      <div className="flex items-center justify-center rounded-2xl border border-slate-100 bg-white p-12 shadow-sm">
+        <LoadingSpinner size={28} label={commonMessages.loading} />
+      </div>
+    );
   }
 
   if (pageError) {
@@ -92,8 +97,14 @@ export function ApplicationListResults({
     <>
       <ul className="mt-6 space-y-4">
         {items.length === 0 && <li className="text-slate-600">{listPageMessages.empty}</li>}
-        {items.map((app) => (
-          <li key={app.id} className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition hover:shadow-md">
+        {items.map((app, i) => (
+          <motion.li
+            key={app.id}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25, delay: i * 0.05 }}
+            className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition hover:shadow-md"
+          >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <Link
                 href={`/applications/${app.id}`}
@@ -109,20 +120,20 @@ export function ApplicationListResults({
             <p className="mt-2 text-sm font-medium text-slate-700">
               {formatCOP(app.amount)} · {app.term} meses
             </p>
-          </li>
+          </motion.li>
         ))}
       </ul>
       {listError && <p className="mt-4 text-red-600">{listError}</p>}
       {hasMore && (
-        <div className="mt-6 text-center">
+        <div className="mt-8 flex justify-center">
           <button
             type="button"
             onClick={loadMore}
             disabled={loadingMore}
-            className="inline-flex items-center gap-2 rounded bg-sky-600 px-4 py-2 text-white disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-6 py-3 font-semibold text-white shadow-md shadow-sky-100 transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loadingMore ? (
-              <LoadingSpinner size={16} label={commonMessages.loading} className="text-white" />
+              <LoadingSpinner size={18} label={commonMessages.loading} className="text-white" />
             ) : (
               listPageMessages.loadMore
             )}
