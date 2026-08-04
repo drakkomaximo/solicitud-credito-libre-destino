@@ -87,7 +87,7 @@ Se completó el rediseño de la interfaz y la usabilidad del micrositio:
 - **Navegación global:** header sticky, navbar responsive, menú hamburguesa con transición suave y footer global.
 - **Home y landing:** ajuste de layouts para el header sticky y espaciado consistente.
 - **Formulario de solicitud:** multistep con scroll al cambiar de paso, mejor espaciado en mobile y validación con Zod.
-- **Detalle de solicitud:** tipografía reducida en mobile, modal de abandono con motivo y estados más compactos.
+- **Detalle de solicitud:** tipografía reducida en mobile, modal de abandono con motivo y estados más compactos; las acciones (abandonar, finalizar, aprobar, rechazar) muestran el spinner dentro del botón en lugar del overlay glass sobre la pantalla, manteniendo el bloqueo de doble envío.
 - **Listado de solicitudes:** tarjetas rediseñadas con chip de canal, fecha/hora de creación, grid responsive (1/2/3 columnas), filtros con wrap y ordenamiento descendente por fecha gestionado por el backend.
 - **Sesión:** `RoleHeader` integrado dentro del contenedor principal de solicitudes.
 - **Skeletons:** spinners de carga del detalle y del listado reemplazados por esqueletos con la estructura real de los componentes.
