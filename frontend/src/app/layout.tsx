@@ -26,9 +26,9 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <QueryProvider>
           <Header />
-          <div className="flex-1">
+          <main id="main-content" className="flex-1" tabIndex={-1}>
             {children}
-          </div>
+          </main>
         </QueryProvider>
         <Footer />
       </body>

@@ -68,7 +68,8 @@ Se completó el rediseño de la interfaz y la usabilidad del micrositio:
 - **Sesión:** `RoleHeader` integrado dentro del contenedor principal de solicitudes.
 - **Skeletons:** spinners de carga del detalle y del listado reemplazados por esqueletos con la estructura real de los componentes.
 - **Favicon:** icono del proyecto (`src/app/icon.tsx`) reemplaza el favicon por defecto de Next.js.
-- **Tests:** cobertura ampliada con pruebas unitarias para utilidades (`normalizePhone`, `formatCOP`, `parseRole`).
+- **Tests:** cobertura ampliada con pruebas unitarias para utilidades, validaciones y casos de uso.
+- **Accesibilidad básica:** landmark `<main>`, `aria-label` en footer y `loading.tsx` accesible (`aria-busy`, `aria-live`).
 - **Organización:** componentes de `applications` agrupados en `detail/`, `form/`, `list/`, `skeletons/` y `view/`.
 
 ## ✅ Comandos
