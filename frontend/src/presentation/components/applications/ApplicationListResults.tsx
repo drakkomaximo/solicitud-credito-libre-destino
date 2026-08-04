@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useApplicationActions } from '@/presentation/hooks/useApplicationActions';
 import { useApplicationList } from '@/presentation/hooks/useApplicationQueries';
@@ -92,8 +93,14 @@ export function ApplicationListResults({
     <>
       <ul className="mt-6 space-y-4">
         {items.length === 0 && <li className="text-slate-600">{listPageMessages.empty}</li>}
-        {items.map((app) => (
-          <li key={app.id} className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition hover:shadow-md">
+        {items.map((app, i) => (
+          <motion.li
+            key={app.id}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25, delay: i * 0.05 }}
+            className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition hover:shadow-md"
+          >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <Link
                 href={`/applications/${app.id}`}
@@ -109,7 +116,7 @@ export function ApplicationListResults({
             <p className="mt-2 text-sm font-medium text-slate-700">
               {formatCOP(app.amount)} · {app.term} meses
             </p>
-          </li>
+          </motion.li>
         ))}
       </ul>
       {listError && <p className="mt-4 text-red-600">{listError}</p>}

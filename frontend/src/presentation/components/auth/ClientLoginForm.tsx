@@ -31,7 +31,7 @@ export function ClientLoginForm({ onClientLogin }: ClientLoginFormProps) {
   };
 
   return (
-    <form onSubmit={handleClientLogin} className="mt-6 space-y-4">
+    <form onSubmit={handleClientLogin} className="mt-6 space-y-5">
       <div>
         <label htmlFor="document" className="block text-sm font-medium text-slate-700">
           {authMessages.documentNumber}
@@ -40,7 +40,8 @@ export function ClientLoginForm({ onClientLogin }: ClientLoginFormProps) {
           id="document"
           value={documentNumber}
           onChange={(e) => setDocumentNumber(e.target.value)}
-          className="mt-1 w-full rounded border p-2"
+          className="mt-1.5 w-full rounded-xl border border-slate-200 p-3 text-sm outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+          placeholder="12345678"
           required
         />
       </div>
@@ -52,18 +53,19 @@ export function ClientLoginForm({ onClientLogin }: ClientLoginFormProps) {
           id="phone"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          className="mt-1 w-full rounded border p-2"
+          className="mt-1.5 w-full rounded-xl border border-slate-200 p-3 text-sm outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+          placeholder="300 123 4567"
           required
         />
       </div>
       <button
         type="submit"
         disabled={loading}
-        className="rounded bg-sky-600 px-4 py-2 text-white disabled:opacity-60"
+        className="w-full rounded-xl bg-sky-600 px-4 py-3 font-semibold text-white shadow-md shadow-sky-100 transition hover:bg-sky-700 disabled:opacity-60"
       >
-        {authMessages.lookup}
+        {loading ? authMessages.lookingUp : authMessages.lookup}
       </button>
-      {error && <p className="text-red-600">{error}</p>}
+      {error && <p className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
     </form>
   );
 }

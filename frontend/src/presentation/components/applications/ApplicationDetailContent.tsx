@@ -10,6 +10,7 @@ import { detailMessages } from '@/presentation/messages/detail';
 import { commonMessages } from '@/presentation/messages/common';
 import { formatCOP } from '@/presentation/utils/formatCOP';
 import { parseRole } from '@/presentation/utils/parseRole';
+import { FadeIn } from '@/presentation/components/common/FadeIn';
 import { LoadingSpinner } from '@/presentation/components/common/LoadingSpinner';
 import { StatusBadge } from '@/presentation/components/common/StatusBadge';
 import { CHANNEL_LABELS } from '@/presentation/constants/channels';
@@ -180,7 +181,7 @@ export function ApplicationDetailContent({ id }: { id: string }) {
           <LoadingSpinner label={commonMessages.loading} />
         </div>
       )}
-      <div className={`${isMutating ? 'pointer-events-none opacity-50' : ''} transition-opacity`}>
+      <FadeIn className={`${isMutating ? 'pointer-events-none opacity-50' : ''} transition-opacity`}>
         <div className="flex flex-wrap items-center gap-4">
         <button
           type="button"
@@ -381,7 +382,7 @@ export function ApplicationDetailContent({ id }: { id: string }) {
           </li>
         ))}
       </ul>
-      </div>
+      </FadeIn>
     </main>
   );
 }

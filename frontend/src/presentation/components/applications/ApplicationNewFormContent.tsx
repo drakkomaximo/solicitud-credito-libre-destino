@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { useForm, type Resolver, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -10,6 +11,7 @@ import { useAlert } from '@/presentation/hooks/useAlert';
 import { ApplicationNewFormStep1 } from './new-form/ApplicationNewFormStep1';
 import { ApplicationNewFormStep2 } from './new-form/ApplicationNewFormStep2';
 import { ApplicationNewFormStep3 } from './new-form/ApplicationNewFormStep3';
+import { FadeIn } from '@/presentation/components/common/FadeIn';
 import { LoadingSpinner } from '@/presentation/components/common/LoadingSpinner';
 import type { CreateApplicationInput } from '@/domain/entities/Application';
 import { newApplicationSchema, type NewApplicationFormData } from '@/presentation/validation/newApplicationSchema';
@@ -120,39 +122,49 @@ export function ApplicationNewFormContent() {
 
   return (
     <main className="mx-auto max-w-2xl p-6">
-      <div className="rounded-2xl border border-slate-100 bg-white p-8 shadow-lg">
-        <h1 className="text-3xl font-bold text-slate-900">{applicationFormLabels.newTitle}</h1>
-        <div className="mt-4 flex items-center gap-2">
-          {[1, 2, 3].map((s) => (
-            <div
-              key={s}
-              className={`h-2 flex-1 rounded-full ${s <= step ? 'bg-sky-600' : 'bg-slate-200'}`}
-            />
-          ))}
-        </div>
-        <p className="mt-2 text-right text-sm text-slate-500">
-          Paso {step} de 3
-        </p>
-        <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
-        {step === 1 && (
-          <ApplicationNewFormStep1
-            register={register}
-            errors={errors}
-            references={references ?? {}}
-            watchedChannel={watched.channel ?? 'self-service'}
-          />
-        )}
+      <FadeIn className="w-full">
+        <div className="rounded-2xl border border-slate-100 bg-white p-8 shadow-lg">
+          <h1 className="text-3xl font-bold text-slate-900">{applicationFormLabels.newTitle}</h1>
+          <div className="mt-4 flex items-center gap-2">
+            {[1, 2, 3].map((s) => (
+              <motion.div
+                key={s}
+                initial={false}
+                animate={{ backgroundColor: s <= step ? '#0284c7' : '#e2e8f0' }}
+                className="h-2 flex-1 rounded-full"
+              />
+            ))}
+          </div>
+          <p className="mt-2 text-right text-sm text-slate-500">
+            Paso {step} de 3
+          </p>
+          <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
+            <motion.div
+              key={step}
+              initial={{ opacity: 0, x: 24 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.25 }}
+            >
+              {step === 1 && (
+                <ApplicationNewFormStep1
+                  register={register}
+                  errors={errors}
+                  references={references ?? {}}
+                  watchedChannel={watched.channel ?? 'self-service'}
+                />
+              )}
 
-        {step === 2 && (
-          <ApplicationNewFormStep2
-            register={register}
-            errors={errors}
-            references={references ?? {}}
-            watched={watched}
-          />
-        )}
+              {step === 2 && (
+                <ApplicationNewFormStep2
+                  register={register}
+                  errors={errors}
+                  references={references ?? {}}
+                  watched={watched}
+                />
+              )}
 
-        {step === 3 && <ApplicationNewFormStep3 watched={watched} />}
+              {step === 3 && <ApplicationNewFormStep3 watched={watched} />}
+            </motion.div>
 
         <div className="mt-8 flex gap-3">
           {step > 1 && (
@@ -186,6 +198,7 @@ export function ApplicationNewFormContent() {
         </div>
         </form>
       </div>
+    </FadeIn>
     </main>
   );
 }
