@@ -16,7 +16,7 @@
 ### CA-02 — Abandono con motivo
 - **Dado** que el titular confirmó el abandono,
 - **Cuando** ingresa un motivo y confirma,
-- **Entonces** el sistema cambia el estado a `ABANDONED`, persiste el evento `ABANDONED` con el motivo y redirige a la landing.
+- **Entonces** el sistema cambia el estado a `ABANDONED`, persiste el evento `ABANDONED` con el motivo y permanece en el detalle mostrando el nuevo estado.
 
 ### CA-03 — Cancelación de abandono
 - **Dado** que el titular abrió el modal de abandono,
@@ -37,7 +37,7 @@
 3. El frontend muestra un modal con campo de motivo.
 4. El titular escribe el motivo y confirma.
 5. El backend valida el estado, cambia a `ABANDONED` y persiste el evento.
-6. El frontend redirige a la landing o al home.
+6. El frontend permanece en el detalle de la solicitud, mostrando el estado `ABANDONED` y el evento en la trazabilidad.
 7. Si el usuario cancela, el modal se cierra sin mutación.
 
 ## Notas
