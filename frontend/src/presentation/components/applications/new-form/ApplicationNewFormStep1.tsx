@@ -31,7 +31,7 @@ export function ApplicationNewFormStep1({
   }));
 
   return (
-    <section className="space-y-4">
+    <section className="space-y-6">
       <SelectField
         id="channel"
         label={applicationFormLabels.channel}

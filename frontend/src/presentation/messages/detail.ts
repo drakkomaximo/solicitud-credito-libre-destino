@@ -54,6 +54,8 @@ export const detailMessages = {
   confirmFinalizeText: '¿Enviar la solicitud a validación? Una vez finalizada no podrá editarla.',
   confirmAbandonTitle: 'Abandonar solicitud',
   confirmAbandonText: '¿Confirmas que deseas abandonar esta solicitud?',
+  confirmAbandonPrompt: 'Motivo del abandono',
+  confirmAbandonButton: 'Abandonar',
   confirmApproveTitle: 'Aprobar solicitud',
   confirmApproveText: '¿Confirmas la aprobación final de esta solicitud?',
   confirmRejectTitle: 'Rechazar solicitud',

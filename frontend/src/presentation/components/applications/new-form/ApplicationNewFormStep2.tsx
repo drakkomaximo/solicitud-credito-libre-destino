@@ -28,7 +28,7 @@ export function ApplicationNewFormStep2({
     })) ?? [];
 
   return (
-    <section className="space-y-4">
+    <section className="space-y-6">
       <FormField
         id="income"
         label={applicationFormLabels.income}
@@ -36,7 +36,7 @@ export function ApplicationNewFormStep2({
         registration={register('income')}
         error={errors.income}
       />
-      <p className="text-sm text-slate-500">{formatCOP(watched.income ?? 0)}</p>
+      <p className="-mt-4 text-sm text-slate-500">{formatCOP(watched.income ?? 0)}</p>
       <FormField
         id="expenses"
         label={applicationFormLabels.expenses}
@@ -44,7 +44,7 @@ export function ApplicationNewFormStep2({
         registration={register('expenses')}
         error={errors.expenses}
       />
-      <p className="text-sm text-slate-500">{formatCOP(watched.expenses ?? 0)}</p>
+      <p className="-mt-4 text-sm text-slate-500">{formatCOP(watched.expenses ?? 0)}</p>
       <FormField
         id="amount"
         label={applicationFormLabels.amount}
@@ -52,7 +52,7 @@ export function ApplicationNewFormStep2({
         registration={register('amount')}
         error={errors.amount}
       />
-      <p className="text-sm text-slate-500">{formatCOP(watched.amount ?? 0)}</p>
+      <p className="-mt-4 text-sm text-slate-500">{formatCOP(watched.amount ?? 0)}</p>
       <SelectField
         id="term"
         label={applicationFormLabels.term}

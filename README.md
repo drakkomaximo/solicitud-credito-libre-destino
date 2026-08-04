@@ -14,7 +14,21 @@ Micrositio de originación digital de crédito de libre destino con backend en N
 └── README.md
 ```
 
-## 🛠️ Tecnologías
+## � Estado actual
+
+Este ciclo cerró el rediseño completo de la interfaz del micrositio, dejando operativo el flujo desde la landing hasta el detalle de una solicitud:
+
+- **Frontend:** header sticky, navegación responsive, footer global, home actualizada, formulario multistep, detalle mobile, listado de solicitudes con tarjetas rediseñadas (chip de canal, fecha/hora, grid 1/2/3 columnas) y filtros responsivos.
+- **Backend:** se mantuvo estable; los contratos de API, autenticación y flujo de solicitudes no cambiaron.
+
+Ver `frontend/README.md` y `backend/README.md` para el detalle de cada capa.
+
+## 🚧 Mejoras futuras
+
+- **Backend:** rate limiting, logs de auditoría, tests E2E de flujos de autenticación, firmas de commits.
+- **Frontend:** toasts y estados optimistas con TanStack Query, animaciones Framer Motion en formularios, i18n con `next-intl`, pruebas de componentes y almacenamiento de token en `HttpOnly`/`SameSite=Strict`.
+
+## �🛠️ Tecnologías
 
 - **Backend:** NestJS 11, TypeScript 5.7, Prisma 5, PostgreSQL, Bun, Jest, `@nestjs/swagger`, `@nestjs/terminus`.
 - **Frontend:** Next.js 16, React 19, TypeScript, Tailwind CSS 4, React Hook Form, Zod, Lucide icons, Bun.

@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useApplicationDetail } from '@/presentation/hooks/useApplicationQueries';
@@ -29,8 +30,7 @@ export function ApplicationDetailContent({ id }: { id: string }) {
 
   const isSimulating = simulate.isPending;
   const isActionPending = finalize.isPending || abandon.isPending || decide.isPending;
-  const { success, error: showError, confirm, confirmDanger, confirmWithReason } = useAlert();
-  const [reason, setReason] = useState('');
+  const { success, error: showError, confirm, confirmWithReason } = useAlert();
   const [liveSimulation, setLiveSimulation] = useState<
     | {
         status: 'approved' | 'not-viable';
@@ -122,19 +122,16 @@ export function ApplicationDetailContent({ id }: { id: string }) {
   };
 
   const handleAbandon = async () => {
-    if (!reason) {
-      showError(detailMessages.missingReason);
-      return;
-    }
-    const confirmed = await confirmDanger({
+    const reasonValue = await confirmWithReason({
       title: detailMessages.confirmAbandonTitle,
       text: detailMessages.confirmAbandonText,
+      inputLabel: detailMessages.confirmAbandonPrompt,
+      confirmButtonText: detailMessages.confirmAbandonButton,
     });
-    if (!confirmed) return;
+    if (reasonValue === null) return;
     try {
-      await abandon.mutateAsync({ id, reason });
+      await abandon.mutateAsync({ id, reason: reasonValue });
       success(detailMessages.abandonSuccess);
-      setReason('');
       router.replace(`/applications/${id}`);
     } catch (err) {
       showError(err instanceof Error ? err.message : detailMessages.abandonError);
@@ -195,77 +192,77 @@ export function ApplicationDetailContent({ id }: { id: string }) {
         >
           {detailMessages.back}
         </button>
-        <h1 className="text-2xl font-extrabold text-slate-900 sm:text-3xl">
+        <h1 className="text-xl font-extrabold text-slate-900 sm:text-3xl">
           {detailMessages.requestTitle} {app.firstName} {app.lastName}
         </h1>
         <StatusBadge status={app.status} />
       </div>
 
       <section className="mt-6 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:p-6">
-        <h2 className="text-lg font-bold text-slate-900 sm:text-xl">
+        <h2 className="text-base font-bold text-slate-900 sm:text-xl">
           {detailMessages.personalSection}
         </h2>
         <dl className="mt-3 grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2">
           <div>
-            <dt className="text-sm text-slate-500">{detailMessages.document}</dt>
-            <dd className="font-medium text-slate-800">
+            <dt className="text-xs text-slate-500 sm:text-sm">{detailMessages.document}</dt>
+            <dd className="text-sm font-medium text-slate-800 sm:text-base">
               {app.documentType} {app.documentNumber}
             </dd>
           </div>
           <div>
-            <dt className="text-sm text-slate-500">{detailMessages.phone}</dt>
-            <dd className="font-medium text-slate-800">{app.phone}</dd>
+            <dt className="text-xs text-slate-500 sm:text-sm">{detailMessages.phone}</dt>
+            <dd className="text-sm font-medium text-slate-800 sm:text-base">{app.phone}</dd>
           </div>
           <div>
-            <dt className="text-sm text-slate-500">{detailMessages.email}</dt>
-            <dd className="font-medium text-slate-800">{app.email}</dd>
+            <dt className="text-xs text-slate-500 sm:text-sm">{detailMessages.email}</dt>
+            <dd className="text-sm font-medium text-slate-800 sm:text-base">{app.email}</dd>
           </div>
           <div>
-            <dt className="text-sm text-slate-500">{detailMessages.city}</dt>
-            <dd className="font-medium text-slate-800">{app.city}</dd>
+            <dt className="text-xs text-slate-500 sm:text-sm">{detailMessages.city}</dt>
+            <dd className="text-sm font-medium text-slate-800 sm:text-base">{app.city}</dd>
           </div>
           <div>
-            <dt className="text-sm text-slate-500">{detailMessages.channel}</dt>
-            <dd className="font-medium text-slate-800">
+            <dt className="text-xs text-slate-500 sm:text-sm">{detailMessages.channel}</dt>
+            <dd className="text-sm font-medium text-slate-800 sm:text-base">
               {CHANNEL_LABELS[app.channel as keyof typeof CHANNEL_LABELS] ?? app.channel}
             </dd>
           </div>
           {app.advisorId && (
             <div>
-              <dt className="text-sm text-slate-500">{detailMessages.advisor}</dt>
-              <dd className="font-medium text-slate-800">{app.advisorId}</dd>
+              <dt className="text-xs text-slate-500 sm:text-sm">{detailMessages.advisor}</dt>
+              <dd className="text-sm font-medium text-slate-800 sm:text-base">{app.advisorId}</dd>
             </div>
           )}
         </dl>
       </section>
 
       <section className="mt-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:p-6">
-        <h2 className="text-lg font-bold text-slate-900 sm:text-xl">
+        <h2 className="text-base font-bold text-slate-900 sm:text-xl">
           {detailMessages.financialSection}
         </h2>
         <dl className="mt-3 grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2">
           <div>
-            <dt className="text-sm text-slate-500">{detailMessages.amount}</dt>
-            <dd className="font-medium text-slate-800">{formatCOP(app.amount)}</dd>
+            <dt className="text-xs text-slate-500 sm:text-sm">{detailMessages.amount}</dt>
+            <dd className="text-sm font-medium text-slate-800 sm:text-base">{formatCOP(app.amount)}</dd>
           </div>
           <div>
-            <dt className="text-sm text-slate-500">{detailMessages.term}</dt>
-            <dd className="font-medium text-slate-800">
+            <dt className="text-xs text-slate-500 sm:text-sm">{detailMessages.term}</dt>
+            <dd className="text-sm font-medium text-slate-800 sm:text-base">
               {app.term} {detailMessages.termSuffix}
             </dd>
           </div>
           <div>
-            <dt className="text-sm text-slate-500">{detailMessages.income}</dt>
-            <dd className="font-medium text-slate-800">{formatCOP(app.income)}</dd>
+            <dt className="text-xs text-slate-500 sm:text-sm">{detailMessages.income}</dt>
+            <dd className="text-sm font-medium text-slate-800 sm:text-base">{formatCOP(app.income)}</dd>
           </div>
           <div>
-            <dt className="text-sm text-slate-500">{detailMessages.expenses}</dt>
-            <dd className="font-medium text-slate-800">{formatCOP(app.expenses)}</dd>
+            <dt className="text-xs text-slate-500 sm:text-sm">{detailMessages.expenses}</dt>
+            <dd className="text-sm font-medium text-slate-800 sm:text-base">{formatCOP(app.expenses)}</dd>
           </div>
           {app.purpose && (
             <div className="sm:col-span-2">
-              <dt className="text-sm text-slate-500">{detailMessages.purpose}</dt>
-              <dd className="font-medium text-slate-800">{app.purpose}</dd>
+              <dt className="text-xs text-slate-500 sm:text-sm">{detailMessages.purpose}</dt>
+              <dd className="text-sm font-medium text-slate-800 sm:text-base">{app.purpose}</dd>
             </div>
           )}
         </dl>
@@ -273,7 +270,7 @@ export function ApplicationDetailContent({ id }: { id: string }) {
 
       {app.status === 'DRAFT' && (
         <section className="mt-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:p-6">
-          <h2 className="text-lg font-bold text-slate-900 sm:text-xl">
+          <h2 className="text-base font-bold text-slate-900 sm:text-xl">
             {detailMessages.actionsSection}
           </h2>
           <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -303,30 +300,20 @@ export function ApplicationDetailContent({ id }: { id: string }) {
                 {detailMessages.finalize}
               </button>
             )}
-            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
-              <input
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                placeholder={detailMessages.reasonPlaceholder}
-                className="w-full rounded-xl border border-slate-300 p-2.5 text-sm sm:w-auto"
-                disabled={isActionPending}
-                aria-label={detailMessages.reasonPlaceholder}
-              />
-              <button
-                onClick={handleAbandon}
-                className="w-full rounded-xl bg-red-600 px-5 py-2.5 font-semibold text-white shadow-md shadow-red-100 transition hover:-translate-y-0.5 hover:bg-red-700 disabled:opacity-50 sm:w-auto"
-                disabled={isActionPending}
-              >
-                {detailMessages.abandon}
-              </button>
-            </div>
+            <button
+              onClick={handleAbandon}
+              className="w-full rounded-xl bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-red-100 transition hover:-translate-y-0.5 hover:bg-red-700 disabled:opacity-50 sm:w-auto sm:text-base"
+              disabled={isActionPending}
+            >
+              {detailMessages.abandon}
+            </button>
           </div>
         </section>
       )}
 
       {role === 'admin' && app.status === 'PENDING_VALIDATION' && (
         <section className="mt-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:p-6">
-          <h2 className="text-lg font-bold text-slate-900 sm:text-xl">
+          <h2 className="text-base font-bold text-slate-900 sm:text-xl">
             {detailMessages.adminDecisionTitle}
           </h2>
           <p className="text-sm text-slate-600">{detailMessages.adminDecisionDescription}</p>
@@ -351,25 +338,25 @@ export function ApplicationDetailContent({ id }: { id: string }) {
 
       {simulation && (
         <section className={`mt-4 rounded-2xl border p-4 shadow-sm sm:p-6 ${simulation.status === 'approved' ? 'border-emerald-100 bg-emerald-50' : 'border-orange-100 bg-orange-50'}`}>
-          <h2 className="text-lg font-bold text-slate-900 sm:text-xl">
+          <h2 className="text-base font-bold text-slate-900 sm:text-xl">
             {detailMessages.simulationTitle}
           </h2>
-          <p className="mt-2 font-semibold">
+          <p className="mt-2 text-sm font-semibold sm:text-base">
             {simulation.status === 'approved' ? detailMessages.simulationViable : detailMessages.simulationNotViable}
           </p>
           {simulation.status === 'approved' && (
             <dl className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
               <div className="rounded-xl bg-white p-3 shadow-sm">
                 <dt className="text-xs text-slate-500">{detailMessages.monthlyPayment}</dt>
-                <dd className="text-lg font-semibold text-emerald-700">{formatCOP(simulation.monthlyPayment ?? 0)}</dd>
+                <dd className="text-base font-semibold text-emerald-700 sm:text-lg">{formatCOP(simulation.monthlyPayment ?? 0)}</dd>
               </div>
               <div className="rounded-xl bg-white p-3 shadow-sm">
                 <dt className="text-xs text-slate-500">{detailMessages.totalPayment}</dt>
-                <dd className="text-lg font-semibold text-emerald-700">{formatCOP(simulation.totalPayment ?? 0)}</dd>
+                <dd className="text-base font-semibold text-emerald-700 sm:text-lg">{formatCOP(simulation.totalPayment ?? 0)}</dd>
               </div>
               <div className="rounded-xl bg-white p-3 shadow-sm">
                 <dt className="text-xs text-slate-500">{detailMessages.interestRate}</dt>
-                <dd className="text-lg font-semibold text-emerald-700">{(simulation.interestRate ?? 0) * 100}% EA</dd>
+                <dd className="text-base font-semibold text-emerald-700 sm:text-lg">{(simulation.interestRate ?? 0) * 100}% EA</dd>
               </div>
             </dl>
           )}
@@ -379,11 +366,11 @@ export function ApplicationDetailContent({ id }: { id: string }) {
         </section>
       )}
 
-      <h2 className="mt-8 text-xl font-bold text-slate-900">{detailMessages.traceability}</h2>
+      <h2 className="mt-8 text-lg font-bold text-slate-900 sm:text-xl">{detailMessages.traceability}</h2>
       <ul className="mt-4 space-y-3">
         {events.map((e) => (
           <li key={e.id} className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-            <p className="font-semibold text-slate-800">{eventLabel(e.type)}</p>
+            <p className="text-sm font-semibold text-slate-800 sm:text-base">{eventLabel(e.type)}</p>
             <p className="text-sm text-slate-500">
               {new Date(e.occurredAt).toLocaleString('es-CO')}
             </p>

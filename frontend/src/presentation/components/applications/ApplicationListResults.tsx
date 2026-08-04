@@ -11,6 +11,7 @@ import { StatusBadge } from '@/presentation/components/common/StatusBadge';
 import { listPageMessages } from '@/presentation/messages/list';
 import { commonMessages } from '@/presentation/messages/common';
 import { formatCOP } from '@/presentation/utils/formatCOP';
+import { CHANNEL_LABELS } from '@/presentation/constants/channels';
 import type { CreditApplication, ListApplicationsResult } from '@/domain/entities/Application';
 
 const PAGE_SIZE = 10;
@@ -95,33 +96,59 @@ export function ApplicationListResults({
 
   return (
     <>
-      <ul className="mt-6 space-y-4">
-        {items.length === 0 && <li className="text-slate-600">{listPageMessages.empty}</li>}
-        {items.map((app, i) => (
-          <motion.li
-            key={app.id}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.25, delay: i * 0.05 }}
-            className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm transition hover:shadow-md sm:p-5"
-          >
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <ul className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {items.length === 0 && <li className="col-span-full text-slate-600">{listPageMessages.empty}</li>}
+        {items.map((app, i) => {
+          const channel = CHANNEL_LABELS[app.channel as keyof typeof CHANNEL_LABELS] ?? app.channel;
+          const isSelfService = app.channel === 'self-service';
+          const createdAt = new Date(app.createdAt).toLocaleString('es-CO', {
+            dateStyle: 'short',
+            timeStyle: 'short',
+          });
+          return (
+            <motion.li
+              key={app.id}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25, delay: i * 0.05 }}
+              className="flex h-full flex-col rounded-2xl border border-slate-100 bg-white p-4 shadow-sm transition hover:shadow-md sm:p-5"
+            >
               <Link
                 href={`/applications/${app.id}`}
-                className="text-base font-semibold text-sky-700 hover:underline sm:text-lg"
+                className="group flex h-full flex-col"
               >
-                {app.firstName} {app.lastName}
+                <div className="flex min-w-0 flex-col gap-2">
+                  <h3 className="truncate text-sm font-semibold text-sky-700 group-hover:underline sm:text-base">
+                    {app.firstName} {app.lastName}
+                  </h3>
+                  <p className="text-xs text-slate-600 sm:text-sm">
+                    {app.documentType} {app.documentNumber}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <StatusBadge status={app.status} />
+                    <span
+                      className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold ${
+                        isSelfService
+                          ? 'border-sky-200 bg-sky-50 text-sky-700'
+                          : 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                      }`}
+                    >
+                      {channel}
+                    </span>
+                  </div>
+                </div>
+                <div className="mt-auto flex flex-col gap-1 border-t border-slate-100 pt-3 text-xs text-slate-700 sm:text-sm">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <span className="font-medium">{formatCOP(app.amount)}</span>
+                    <span className="text-slate-300">·</span>
+                    <span>{app.term} meses</span>
+                  </div>
+                  <span className="text-xs text-slate-400">{createdAt}</span>
+                </div>
               </Link>
-              <StatusBadge status={app.status} />
-            </div>
-            <p className="mt-1 text-sm text-slate-600">
-              {app.documentType} {app.documentNumber}
-            </p>
-            <p className="mt-2 text-sm font-medium text-slate-700">
-              {formatCOP(app.amount)} · {app.term} meses
-            </p>
-          </motion.li>
-        ))}
+            </motion.li>
+          );
+        })}
       </ul>
       {listError && <p className="mt-4 text-red-600">{listError}</p>}
       {hasMore && (
