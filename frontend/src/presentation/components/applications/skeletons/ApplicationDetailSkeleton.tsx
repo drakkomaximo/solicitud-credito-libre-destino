@@ -1,5 +1,3 @@
-'use client';
-
 export function ApplicationDetailSkeleton() {
   return (
     <main className="relative mx-auto max-w-3xl p-4 sm:p-6">

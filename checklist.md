@@ -49,7 +49,7 @@ Este documento resume el estado de cada requerimiento del enunciado, el criterio
 |---------|--------|-------|-----------------|
 | Next.js App Router, React y TypeScript | `✅` | `app/` router, páginas principales | Revisar uso de `loading.tsx` |
 | Arquitectura limpia, separación de UI, hooks, servicios y utilidades | `✅` | Capas `domain`, `application`, `infrastructure`, `presentation` | Definir design system y tokens de color |
-| Renderizado consciente (SSR/Server Components) | `⚠️` | Global `loading.tsx`, landmark `<main>` y skeletons agregados; listado aún Client Component | Migrar listado a RSC con streaming |
+| Renderizado consciente (SSR/Server Components) | `✅` | Server Components por defecto (páginas, skeletons, wrappers con `Suspense`); `loading.tsx` por segmento de ruta; solo interactividad es Client | Streaming de datos del listado desde el servidor (requiere mover auth a cookies HttpOnly) |
 | Consumo de servicios REST | `✅` | `HttpClient` genérico + repositorios | Añadir `react-query` devtools condicional |
 | Validaciones de formulario | `✅` | Zod en pasos y edición | Validación asíncrona de documentos duplicados |
 | Accesibilidad | `✅` | Skip link, `aria-current`, `aria-expanded`, `aria-invalid`, `aria-describedby`, landmark `<main>` y `loading.tsx` accesible | — |
@@ -87,7 +87,7 @@ Este documento resume el estado de cada requerimiento del enunciado, el criterio
 | Trazabilidad (correlación) | `✅` | Header `x-request-id` generado en frontend, leído/devuelto por backend; eventos por solicitud | — |
 | Mantenibilidad | `✅` | Estructura clara, nombres consistentes | Completar design system |
 | Calidad (pruebas automatizadas) | `✅` | 20 archivos de tests, 42+ casos | Subir cobertura de hooks y componentes |
-| Performance | `⚠️` | `loading.tsx` global, skeletons en lista y formularios; carga razonable | Implementar `Suspense` en listado con Server Components |
+| Performance | `✅` | `loading.tsx` por ruta con skeletons reales, `Suspense` boundaries, Server Components reducen JS del cliente | Medir Core Web Vitals en producción |
 | Usabilidad | `✅` | Navegación clara, textos en español, responsive | Test de usabilidad con usuarios |
 
 ---
@@ -111,12 +111,12 @@ Este documento resume el estado de cada requerimiento del enunciado, el criterio
 | Criterio | % | Estado estimado | Comentario |
 |----------|---:|-----------------|------------|
 | Arquitectura y dominio frontend | 40% | `✅` ~40/40 | Capas limpias, Next.js App Router, TypeScript |
-| UX técnica, accesibilidad y performance | 15% | `✅` ~13/15 | Responsive, validaciones y accesibilidad completas; falta SC/Suspense |
+| UX técnica, accesibilidad y performance | 15% | `✅` ~14/15 | Responsive, validaciones, accesibilidad y RSC/Suspense implementados |
 | Integración con backend y contratos | 15% | `✅` ~13/15 | Consumo correcto, contratos claros, CORS flexible |
 | Calidad y pruebas | 15% | `✅` ~13/15 | 20 archivos de tests; faltan tests de hooks/componentes |
 | Seguridad, observabilidad y trazabilidad | 10% | `✅` ~9/10 | CORS, x-request-id y logs con requestId listos; falta token HttpOnly |
 | Documentación y criterio técnico | 5% | `✅` ~5/5 | READMEs actualizados con CORS/Vercel; 3 historias técnicas incluidas |
-| **Total estimado** | **100%** | **~93/100** | Sin contar el PLUS de backend que aportaría puntos adicionales |
+| **Total estimado** | **100%** | **~94/100** | Sin contar el PLUS de backend que aportaría puntos adicionales |
 
 ---
 
@@ -131,8 +131,8 @@ Este documento resume el estado de cada requerimiento del enunciado, el criterio
 
 ## Mejoras futuras priorizadas
 
-1. **Performance / Server Components**: `Suspense` en listado y migración a RSC (`loading.tsx` y `<main>` ya agregados).
-2. **Seguridad**: token en cookie `HttpOnly`/`SameSite=Strict` seteada desde backend.
-3. **Búsqueda avanzada**: índice GIN o FTS en PostgreSQL para búsqueda exacta.
-4. **Más tests**: hooks de TanStack Query y componentes con DOM (happy-dom/jsdom).
-5. **Sentry / logs remotos**: integración con servicio de trazabilidad remota para observabilidad en producción.
+1. **Seguridad**: token en cookie `HttpOnly`/`SameSite=Strict` seteada desde backend (habilitaría streaming de datos del listado desde el servidor).
+2. **Búsqueda avanzada**: índice GIN o FTS en PostgreSQL para búsqueda exacta.
+3. **Más tests**: hooks de TanStack Query y componentes con DOM (happy-dom/jsdom).
+4. **Sentry / logs remotos**: integración con servicio de trazabilidad remota para observabilidad en producción.
+5. **Core Web Vitals**: medición en producción (Vercel Analytics o Lighthouse CI).

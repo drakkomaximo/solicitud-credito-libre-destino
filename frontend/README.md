@@ -67,6 +67,13 @@ frontend/src/
     └── utils/             # helpers de formato y parseo
 ```
 
+## ⚡ Estrategia de renderizado (RSC)
+
+- **Server Components por defecto:** páginas, layouts, skeletons, `LoadingSpinner` y los wrappers `ApplicationDetail`, `ApplicationNewForm`, `ApplicationEditForm` se renderizan en el servidor; solo se hidrata lo interactivo.
+- **Client Components solo donde hay interacción:** formularios (`react-hook-form`), filtros del listado (`useSearchParams`), autenticación por cookies (`ApplicationsView`), header con menú móvil y animaciones (`FadeIn`).
+- **Streaming con `loading.tsx`:** cada segmento de ruta (`/applications`, `/applications/[id]`, `/applications/new`, `/applications/[id]/edit`) tiene su `loading.tsx` con el skeleton correspondiente para respuesta instantánea al navegar.
+- **`Suspense` boundaries:** el contenido dependiente de datos se envuelve en `Suspense` con fallback del skeleton real de la vista.
+
 ## 🔐 Roles
 
 - **admin**: inicia sesión con usuario/contraseña y ve el listado completo.

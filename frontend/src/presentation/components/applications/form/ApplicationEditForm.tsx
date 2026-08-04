@@ -1,12 +1,10 @@
-﻿'use client';
-
-import { Suspense } from 'react';
+﻿import { Suspense } from 'react';
 import { ApplicationEditFormContent } from './ApplicationEditFormContent';
-import { SuspenseFallback } from '@/presentation/components/common/SuspenseFallback';
+import { ApplicationFormSkeleton } from '@/presentation/components/applications/skeletons/ApplicationFormSkeleton';
 
 export function ApplicationEditForm({ id }: { id: string }) {
   return (
-    <Suspense fallback={<SuspenseFallback />}>
+    <Suspense fallback={<ApplicationFormSkeleton />}>
       <ApplicationEditFormContent id={id} />
     </Suspense>
   );

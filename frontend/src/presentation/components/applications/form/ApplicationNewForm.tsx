@@ -1,12 +1,10 @@
-﻿'use client';
-
-import { Suspense } from 'react';
-import { SuspenseFallback } from '@/presentation/components/common/SuspenseFallback';
+﻿import { Suspense } from 'react';
+import { ApplicationFormSkeleton } from '@/presentation/components/applications/skeletons/ApplicationFormSkeleton';
 import { ApplicationNewFormContent } from './ApplicationNewFormContent';
 
 export function ApplicationNewForm() {
   return (
-    <Suspense fallback={<SuspenseFallback />}>
+    <Suspense fallback={<ApplicationFormSkeleton />}>
       <ApplicationNewFormContent />
     </Suspense>
   );
