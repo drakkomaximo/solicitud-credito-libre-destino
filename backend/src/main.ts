@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto';
 import { NestFactory, Reflector } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from '@/app.module';
 import { ResponseFormatInterceptor } from '@/common/interceptors/response-format.interceptor';
@@ -13,10 +13,18 @@ import { PaginationMetaDto } from '@/common/dto/pagination-meta.dto';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  const httpLogger = new Logger('HTTP');
+
   (app as any).use((req: any, res: any, next: any) => {
     const requestId = req.headers['x-request-id'] || randomUUID();
     req.requestId = requestId;
     res.setHeader('x-request-id', requestId);
+    const start = Date.now();
+    res.on('finish', () => {
+      httpLogger.log(
+        `${req.method} ${req.originalUrl ?? req.url} ${res.statusCode} [${requestId}] +${Date.now() - start}ms`,
+      );
+    });
     next();
   });
 
