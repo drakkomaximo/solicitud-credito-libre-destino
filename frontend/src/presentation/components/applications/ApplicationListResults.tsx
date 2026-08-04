@@ -56,7 +56,11 @@ export function ApplicationListResults({
   }, [role, status, channel, q]);
 
   if (isPending) {
-    return <LoadingSpinner label={commonMessages.loading} />;
+    return (
+      <div className="flex items-center justify-center rounded-2xl border border-slate-100 bg-white p-12 shadow-sm">
+        <LoadingSpinner size={28} label={commonMessages.loading} />
+      </div>
+    );
   }
 
   if (pageError) {
@@ -121,15 +125,15 @@ export function ApplicationListResults({
       </ul>
       {listError && <p className="mt-4 text-red-600">{listError}</p>}
       {hasMore && (
-        <div className="mt-6 text-center">
+        <div className="mt-8 flex justify-center">
           <button
             type="button"
             onClick={loadMore}
             disabled={loadingMore}
-            className="inline-flex items-center gap-2 rounded bg-sky-600 px-4 py-2 text-white disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-6 py-3 font-semibold text-white shadow-md shadow-sky-100 transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loadingMore ? (
-              <LoadingSpinner size={16} label={commonMessages.loading} className="text-white" />
+              <LoadingSpinner size={18} label={commonMessages.loading} className="text-white" />
             ) : (
               listPageMessages.loadMore
             )}
