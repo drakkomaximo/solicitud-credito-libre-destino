@@ -1,5 +1,3 @@
-'use client';
-
 export function ApplicationFormSkeleton() {
   return (
     <main className="mx-auto w-full max-w-2xl p-3 sm:p-6">

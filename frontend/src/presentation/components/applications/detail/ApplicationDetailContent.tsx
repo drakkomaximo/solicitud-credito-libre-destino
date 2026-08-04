@@ -8,7 +8,6 @@ import { useApplicationDetail } from '@/presentation/hooks/useApplicationQueries
 import { useApplicationMutations } from '@/presentation/hooks/useApplicationMutations';
 import { useAlert } from '@/presentation/hooks/useAlert';
 import { detailMessages } from '@/presentation/messages/detail';
-import { commonMessages } from '@/presentation/messages/common';
 import { formatCOP } from '@/presentation/utils/formatCOP';
 import { parseRole } from '@/presentation/utils/parseRole';
 import { FadeIn } from '@/presentation/components/common/FadeIn';
@@ -176,14 +175,7 @@ export function ApplicationDetailContent({ id }: { id: string }) {
 
   return (
     <main className="relative mx-auto max-w-3xl p-4 sm:p-6">
-      <div
-        className={`absolute inset-0 z-50 flex flex-col items-center justify-center rounded-2xl bg-white/70 backdrop-blur-sm transition-opacity duration-300 ${
-          isActionPending ? 'opacity-100' : 'pointer-events-none opacity-0'
-        }`}
-      >
-        <LoadingSpinner label={commonMessages.loading} />
-      </div>
-      <FadeIn className={`${isActionPending ? 'pointer-events-none opacity-60' : ''} transition-opacity duration-300`}>
+      <FadeIn>
         <div className="flex flex-wrap items-center gap-4">
         <button
           type="button"
@@ -298,7 +290,11 @@ export function ApplicationDetailContent({ id }: { id: string }) {
                 className="rounded-xl bg-blue-600 px-5 py-2.5 font-semibold text-white shadow-md shadow-blue-100 transition hover:-translate-y-0.5 hover:bg-blue-700 disabled:opacity-50"
                 disabled={isActionPending}
               >
-                {detailMessages.finalize}
+                {finalize.isPending ? (
+                  <LoadingSpinner size={18} className="text-white" />
+                ) : (
+                  detailMessages.finalize
+                )}
               </button>
             )}
             <button
@@ -306,7 +302,11 @@ export function ApplicationDetailContent({ id }: { id: string }) {
               className="w-full rounded-xl bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-red-100 transition hover:-translate-y-0.5 hover:bg-red-700 disabled:opacity-50 sm:w-auto sm:text-base"
               disabled={isActionPending}
             >
-              {detailMessages.abandon}
+              {abandon.isPending ? (
+                <LoadingSpinner size={18} className="text-white" />
+              ) : (
+                detailMessages.abandon
+              )}
             </button>
           </div>
         </section>
@@ -324,14 +324,22 @@ export function ApplicationDetailContent({ id }: { id: string }) {
               className="rounded-xl bg-emerald-600 px-5 py-2.5 font-semibold text-white shadow-md shadow-emerald-100 transition hover:-translate-y-0.5 hover:bg-emerald-700 disabled:opacity-50"
               disabled={isActionPending}
             >
-              {detailMessages.approve}
+              {decide.isPending && decide.variables?.decision === 'APPROVED' ? (
+                <LoadingSpinner size={18} className="text-white" />
+              ) : (
+                detailMessages.approve
+              )}
             </button>
             <button
               onClick={handleReject}
               className="rounded-xl bg-red-600 px-5 py-2.5 font-semibold text-white shadow-md shadow-red-100 transition hover:-translate-y-0.5 hover:bg-red-700 disabled:opacity-50"
               disabled={isActionPending}
             >
-              {detailMessages.reject}
+              {decide.isPending && decide.variables?.decision === 'REJECTED' ? (
+                <LoadingSpinner size={18} className="text-white" />
+              ) : (
+                detailMessages.reject
+              )}
             </button>
           </div>
         </section>
