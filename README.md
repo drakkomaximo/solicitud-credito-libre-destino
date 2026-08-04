@@ -19,7 +19,7 @@ Micrositio de originación digital de crédito de libre destino con backend en N
 
 Este ciclo cerró el rediseño completo de la interfaz del micrositio, dejando operativo el flujo desde la landing hasta el detalle de una solicitud:
 
-- **Frontend:** header sticky, navegación responsive, footer global, home actualizada, formulario multistep, detalle mobile, listado de solicitudes con tarjetas rediseñadas (chip de canal, fecha/hora, grid 1/2/3 columnas) y filtros responsivos; skeletons de carga en detalle y listado; reorganización de componentes en `detail/`, `form/`, `list/`, `skeletons/` y `view/`.
+- **Frontend:** header sticky, navegación responsive, footer global, home actualizada, formulario multistep, detalle mobile, listado de solicitudes con tarjetas rediseñadas (chip de canal, fecha/hora, grid 1/2/3 columnas) y filtros responsivos; skeletons de carga en detalle, listado y formularios; favicon del proyecto; pruebas unitarias ampliadas para utilidades; reorganización de componentes en `detail/`, `form/`, `list/`, `skeletons/` y `view/`.
 - **Backend:** el listado de solicitudes ahora se ordena por `createdAt` descendente (más recientes primero) usando paginación por cursor nativa de Prisma; contratos de API y autenticación se mantienen estables.
 
 Ver `frontend/README.md` y `backend/README.md` para el detalle de cada capa.

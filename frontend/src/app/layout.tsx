@@ -10,6 +10,7 @@ import { geistSans, geistMono } from "@/presentation/lib/fonts";
 export const metadata: Metadata = {
   title: layoutMessages.pageTitle,
   description: layoutMessages.pageDescription,
+  icons: { icon: '/icon.svg' },
 };
 
 export default function RootLayout({

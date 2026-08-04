@@ -23,7 +23,7 @@ function removeCookie(name: string): void {
 
 export class CookieTokenStorage implements TokenStorage {
   getToken(): string | null {
-    return getCookie(KEY);
+    return getCookie(KEY) || null;
   }
 
   saveToken(token: string): void {
