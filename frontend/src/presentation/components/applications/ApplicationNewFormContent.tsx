@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useForm, type Resolver, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -22,9 +22,14 @@ import { normalizePhone } from '@/presentation/utils/normalizePhone';
 type FormData = NewApplicationFormData;
 
 export function ApplicationNewFormContent() {
-  const [step, setStep] = useState(1);
   const router = useRouter();
+  const formRef = useRef<HTMLElement>(null);
+  const [step, setStep] = useState(1);
   const { data: references, isPending: isRefsPending, error: refsError } = useReferences();
+
+  useEffect(() => {
+    formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [step]);
   const { create, save, isPending: isMutating } = useApplicationMutations();
   const { success, error: showError } = useAlert();
 
@@ -121,24 +126,24 @@ export function ApplicationNewFormContent() {
   }
 
   return (
-    <main className="mx-auto max-w-2xl p-4 sm:p-6">
+    <main ref={formRef} className="mx-auto w-full max-w-2xl p-3 sm:p-6">
       <FadeIn className="w-full">
-        <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-lg sm:p-8">
+        <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-lg sm:p-8">
           <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">{applicationFormLabels.newTitle}</h1>
-          <div className="mt-4 flex items-center gap-2">
+          <div className="mt-4 flex items-center gap-3">
             {[1, 2, 3].map((s) => (
               <motion.div
                 key={s}
                 initial={false}
                 animate={{ backgroundColor: s <= step ? '#0284c7' : '#e2e8f0' }}
-                className="h-2 flex-1 rounded-full"
+                className="h-2.5 flex-1 rounded-full"
               />
             ))}
           </div>
-          <p className="mt-2 text-right text-sm text-slate-500">
+          <p className="mt-3 text-right text-sm text-slate-500">
             Paso {step} de 3
           </p>
-          <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-6">
             <motion.div
               key={step}
               initial={{ opacity: 0, x: 24 }}
@@ -166,12 +171,12 @@ export function ApplicationNewFormContent() {
               {step === 3 && <ApplicationNewFormStep3 watched={watched} />}
             </motion.div>
 
-        <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row">
+        <div className="mt-10 flex flex-col-reverse gap-4 sm:flex-row">
           {step > 1 && (
             <button
               type="button"
               onClick={() => setStep(step - 1)}
-              className="w-full rounded-xl border border-slate-300 px-5 py-2.5 font-medium text-slate-700 transition hover:bg-slate-50 sm:w-auto"
+              className="w-full rounded-xl border border-slate-300 px-6 py-3 text-base font-medium text-slate-700 transition hover:bg-slate-50 sm:w-auto"
             >
               {applicationFormLabels.back}
             </button>
@@ -180,7 +185,7 @@ export function ApplicationNewFormContent() {
             <button
               type="button"
               onClick={next}
-              className="w-full rounded-xl bg-sky-600 px-5 py-2.5 font-semibold text-white shadow-md shadow-sky-100 transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50 sm:ml-auto sm:w-auto"
+              className="w-full rounded-xl bg-sky-600 px-6 py-3 text-base font-semibold text-white shadow-md shadow-sky-100 transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50 sm:ml-auto sm:w-auto"
               disabled={step === 2 && !watched.dataAuthorized}
             >
               {applicationFormLabels.next}
@@ -189,7 +194,7 @@ export function ApplicationNewFormContent() {
           {step === 3 && (
             <button
               type="submit"
-              className="w-full rounded-xl bg-emerald-600 px-5 py-2.5 font-semibold text-white shadow-md shadow-emerald-100 transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50 sm:ml-auto sm:w-auto"
+              className="w-full rounded-xl bg-emerald-600 px-6 py-3 text-base font-semibold text-white shadow-md shadow-emerald-100 transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50 sm:ml-auto sm:w-auto"
               disabled={isMutating || !watched.dataAuthorized}
             >
               {applicationFormLabels.create}

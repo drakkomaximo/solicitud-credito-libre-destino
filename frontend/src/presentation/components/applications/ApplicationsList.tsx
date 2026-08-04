@@ -79,7 +79,7 @@ export function ApplicationsList({ role }: { role: string }) {
   const changeSearch = (value: string) => setSearch(value);
 
   return (
-    <main className="mx-auto max-w-5xl p-4 sm:p-6">
+    <section>
       <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">{listPageMessages.title}</h1>
 
       <ApplicationFilters
@@ -103,6 +103,6 @@ export function ApplicationsList({ role }: { role: string }) {
           <ApplicationListResults role={role} status={status} channel={channel} q={q} />
         </Suspense>
       </div>
-    </main>
+    </section>
   );
 }

@@ -15,16 +15,16 @@ export function CheckboxField({
 }: CheckboxFieldProps) {
   return (
     <div>
-      <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3">
+      <div className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-4">
         <input
           id={id}
           type="checkbox"
           {...registration}
-          className="h-5 w-5 cursor-pointer rounded border-slate-300 text-sky-600 focus:ring-sky-500"
+          className="h-6 w-6 shrink-0 cursor-pointer rounded border-slate-300 text-sky-600 focus:ring-sky-500"
           aria-invalid={!!error}
           aria-describedby={error ? `${id}-error` : undefined}
         />
-        <label htmlFor={id} className="cursor-pointer text-sm text-slate-700">
+        <label htmlFor={id} className="cursor-pointer text-base text-slate-700 sm:text-sm">
           {label}
         </label>
       </div>

@@ -1,8 +1,8 @@
 ﻿'use client';
 
 import { Suspense } from 'react';
-import { ApplicationNewFormContent } from './ApplicationNewFormContent';
 import { SuspenseFallback } from '@/presentation/components/common/SuspenseFallback';
+import { ApplicationNewFormContent } from './ApplicationNewFormContent';
 
 export function ApplicationNewForm() {
   return (

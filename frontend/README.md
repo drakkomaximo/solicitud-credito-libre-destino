@@ -24,11 +24,21 @@ Abrir http://localhost:3001.
 
 ```
 frontend/src/
-├── app/                 # páginas del App Router
-├── application/         # casos de uso
-├── domain/              # entidades y puertos
-├── infrastructure/      # repositorios API, client HTTP, storage
-└── presentation/        # componentes, hooks, mensajes, validaciones
+├── app/                 # páginas del App Router y layouts globales
+├── application/         # casos de uso del dominio
+├── domain/              # entidades, puertos y reglas de negocio
+├── infrastructure/      # clientes HTTP, repositorios, storage (cookies)
+└── presentation/        # UI, componentes, hooks, mensajes, validaciones
+    ├── components/
+    │   ├── applications/  # listado, filtros, formulario, detalle
+    │   ├── auth/          # login, sesión, cabecera de rol
+    │   ├── common/        # badges, spinners, inputs reutilizables
+    │   ├── forms/         # campos y layouts de formulario
+    │   └── landing/       # home y páginas de inicio
+    ├── hooks/             # hooks de autenticación y aplicaciones
+    ├── messages/          # copys centralizados por dominio
+    ├── constants/         # canales, estados y referencias
+    └── utils/             # helpers de formato y parseo
 ```
 
 ## 🔐 Roles
@@ -37,25 +47,33 @@ frontend/src/
 - **cliente**: inicia con documento y teléfono; ve únicamente sus solicitudes.
 - **solicitud** (token de aplicación): permite continuar una solicitud sin sesión.
 
-## 🚧 Limitaciones conocidas
+## � Estado actual
 
-- **Formato de teléfono:** se asume que todos los celulares son colombianos. El frontend normaliza el número a 10 dígitos antes de enviarlo, eliminando caracteres no numéricos y el prefijo `57` si existe. El soporte para otros indicativos de país requeriría un selector de región.
-- **Canal asistido:** para el canal `advisor` el cliente escribe el código del asesor. El backend valida que exista en el catálogo; el frontend no expone el listado para evitar suplantaciones.
+Se completó el rediseño de la interfaz y la usabilidad del micrositio:
+
+- **Navegación global:** header sticky, navbar responsive, menú hamburguesa con transición suave y footer global.
+- **Home y landing:** ajuste de layouts para el header sticky y espaciado consistente.
+- **Formulario de solicitud:** multistep con scroll al cambiar de paso, mejor espaciado en mobile y validación con Zod.
+- **Detalle de solicitud:** tipografía reducida en mobile, modal de abandono con motivo y estados más compactos.
+- **Listado de solicitudes:** tarjetas rediseñadas con chip de canal (autogestionado/asistido), fecha/hora de creación, grid responsive (1/2/3 columnas) y filtros con wrap en pantallas medianas.
+- **Sesión:** `RoleHeader` integrado dentro del contenedor principal de solicitudes.
 
 ## ✅ Comandos
 
 ```bash
 bun run lint        # ESLint
 bun run build       # build de producción
-bun test            # pruebas unitarias
+bun run test        # pruebas unitarias
 ```
 
 ## 🚧 Limitaciones conocidas y mejoras futuras
 
-- **Formato de teléfono:** se asume que todos los celulares son colombianos. El frontend normaliza el número a 10 dígitos antes de enviarlo, eliminando caracteres no numéricos y el prefijo `57` si existe. El soporte para otros indicativos de país requeriría un selector de región.
-- **Canal asistido:** para el canal `advisor` el cliente escribe el código del asesor. El backend valida que exista en el catálogo; el frontend no expone el listado para evitar suplantaciones.
-- **Internacionalización (i18n):** los mensajes están centralizados en `src/presentation/messages` pero no hay detección de idioma ni catálogos por locale. Para múltiples idiomas se recomienda `next-intl` o equivalente.
-- **Feedback durante mutaciones:** se implementó un overlay con spinner mientras se realizan operaciones críticas (`finalize`, `abandon`, `decide`). Para una UX más moderna se podría usar toasts y estados optimistas con TanStack Query.
-- **Diseño y animaciones:** el rediseño actual usa Tailwind con sombras, gradientes y micro-interacciones. Queda pendiente evaluar Framer Motion para transiciones entre pasos del formulario, listados y cambios de estado.
-- **Almacenamiento de token:** el token de solicitud/admin se guarda en una cookie accesible por JS. En producción se recomienda `HttpOnly`/`SameSite=Strict` o session storage según el flujo.
-- **Simulación en UI:** los resultados se traducen a español en el frontend. El backend devuelve códigos en inglés (`approved`/`not-viable`); una API más madura soportaría `Accept-Language`.
+- **Formato de teléfono:** se asume que todos los celulares son colombianos. El frontend normaliza el número a 10 dígitos antes de enviarlo. El soporte para otros indicativos requeriría un selector de región.
+- **Canal asistido:** el cliente escribe el código del asesor; el backend valida contra el catálogo. El frontend no expone el listado para evitar suplantaciones.
+- **Internacionalización (i18n):** los mensajes están centralizados en `src/presentation/messages` pero no hay catálogos por locale. Para múltiples idiomas se recomienda `next-intl`.
+- **Feedback durante mutaciones:** la UI usa un overlay/spinner. Para una UX más moderna se podría migrar a toasts y estados optimistas con TanStack Query.
+- **Animaciones:** Framer Motion está en el listado de tarjetas; pendiente extender transiciones entre pasos del formulario y cambios de estado.
+- **Caché y revalidación:** el listado se consulta en cada carga. Se puede integrar `TanStack Query` con invalidación por eventos SSE del backend.
+- **Almacenamiento de token:** el token de sesión se guarda en cookie accesible por JS. En producción se recomienda `HttpOnly`/`SameSite=Strict` o session storage según el flujo.
+- **Tests de UI:** hay cobertura básica de utilidades; faltan pruebas de componentes (React Testing Library) y flujos end-to-end.
+- **Simulación en UI:** el backend devuelve códigos en inglés (`approved`/`not-viable`); una API más madura soportaría `Accept-Language`.

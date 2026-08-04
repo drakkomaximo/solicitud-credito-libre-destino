@@ -10,10 +10,4 @@ export const landingMessages = {
     { title: 'Seguro', desc: 'Tus datos están protegidos y solo se usan con tu autorización.' },
     { title: 'Flexible', desc: 'Elige el monto, plazo y canal que mejor se ajusten a ti.' },
   ],
-  requirementsTitle: 'Requisitos mínimos',
-  requirements: [
-    'Ser mayor de edad y residir en Colombia.',
-    'Tener un correo y celular activos.',
-    'Conocer tus ingresos y egresos mensuales.',
-  ],
 } as const;
