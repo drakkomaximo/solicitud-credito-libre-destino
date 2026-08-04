@@ -4,6 +4,7 @@ import {
   ExceptionFilter,
   HttpException,
   HttpStatus,
+  Logger,
 } from '@nestjs/common';
 import { HttpArgumentsHost } from '@nestjs/common/interfaces';
 
@@ -13,6 +14,7 @@ interface StandardErrorResponse {
   error: string;
   message: string[];
   path: string;
+  requestId?: string;
   timestamp: string;
 }
 
@@ -51,14 +53,23 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     const normalizedMessage = Array.isArray(message) ? message : [message];
 
+    const requestId = request?.requestId;
+
     const body: StandardErrorResponse = {
       success: false,
       statusCode: status,
       error: errorName,
       message: normalizedMessage,
       path: request?.url ?? '',
+      requestId,
       timestamp: new Date().toISOString(),
     };
+
+    Logger.error(
+      `[${requestId}] ${request?.method ?? 'UNKNOWN'} ${body.path} :: ${status} :: ${normalizedMessage.join(' | ')}`,
+      exception instanceof Error ? exception.stack : undefined,
+      'AllExceptionsFilter',
+    );
 
     response.status(status).json(body);
   }

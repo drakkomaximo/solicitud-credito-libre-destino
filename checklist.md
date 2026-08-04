@@ -52,7 +52,7 @@ Este documento resume el estado de cada requerimiento del enunciado, el criterio
 | Renderizado consciente (SSR/Server Components) | `⚠️` | Global `loading.tsx`, landmark `<main>` y skeletons agregados; listado aún Client Component | Migrar listado a RSC con streaming |
 | Consumo de servicios REST | `✅` | `HttpClient` genérico + repositorios | Añadir `react-query` devtools condicional |
 | Validaciones de formulario | `✅` | Zod en pasos y edición | Validación asíncrona de documentos duplicados |
-| Accesibilidad | `⚠️` | `aria-invalid`, `aria-describedby`, `aria-label` en Footer, landmark `<main>` y `loading.tsx` accesible implementados | Auditar con axe-core, roles y ARIA restantes |
+| Accesibilidad | `⚠️` | Skip link, `aria-current`, `aria-expanded`, `aria-invalid`, `aria-describedby`, landmark `<main>` y `loading.tsx` accesible | Auditar con axe-core y foco en errores |
 | Trazabilidad | `✅` | Eventos de dominio persistidos y visibles; `x-request-id` en frontend y backend | Correlacionar eventos con request ID (hecho) |
 | Cloud de referencia (Azure, no obligatorio) | `⚠️` | Vercel documentado en READMEs, CORS y `vercel.json` listos | Evaluar contenedores Docker para Azure |
 
@@ -83,7 +83,7 @@ Este documento resume el estado de cada requerimiento del enunciado, el criterio
 | Aspecto | Estado | Notas | Mejoras futuras |
 |---------|--------|-------|-----------------|
 | Seguridad básica (no exponer secretos, sanitizar entradas) | `✅` | Token en cookie `HttpOnly` no, pero `SameSite=Lax`; env vars para API | Revisar manejo de token y XSS |
-| Observabilidad (logs/telemetría) | `⚠️` | `x-request-id` implementado en todas las peticiones | Integrar Sentry o logs estructurados en backend |
+| Observabilidad (logs/telemetría) | `⚠️` | `x-request-id` implementado; logs HTTP y de errores con `requestId` en backend | Integrar Sentry o logs estructurados persistentes |
 | Trazabilidad (correlación) | `✅` | Header `x-request-id` generado en frontend, leído/devuelto por backend; eventos por solicitud | — |
 | Mantenibilidad | `✅` | Estructura clara, nombres consistentes | Completar design system |
 | Calidad (pruebas automatizadas) | `✅` | 20 archivos de tests, 42+ casos | Subir cobertura de hooks y componentes |
@@ -111,10 +111,10 @@ Este documento resume el estado de cada requerimiento del enunciado, el criterio
 | Criterio | % | Estado estimado | Comentario |
 |----------|---:|-----------------|------------|
 | Arquitectura y dominio frontend | 40% | `✅` ~35/40 | Capas limpias, Next.js App Router, TypeScript |
-| UX técnica, accesibilidad y performance | 15% | `⚠️` ~11/15 | Responsive y validaciones; accesibilidad básica lista, falta SC/Suspense |
+| UX técnica, accesibilidad y performance | 15% | `⚠️` ~12/15 | Responsive y validaciones; accesibilidad mejorada, falta SC/Suspense |
 | Integración con backend y contratos | 15% | `✅` ~13/15 | Consumo correcto, contratos claros, CORS flexible |
 | Calidad y pruebas | 15% | `✅` ~13/15 | 20 archivos de tests; faltan tests de hooks/componentes |
-| Seguridad, observabilidad y trazabilidad | 10% | `⚠️` ~8/10 | CORS explícito y x-request-id listos; falta token HttpOnly y logs estructurados |
+| Seguridad, observabilidad y trazabilidad | 10% | `⚠️` ~8/10 | CORS, x-request-id y logs básicos listos; falta token HttpOnly y logs estructurados |
 | Documentación y criterio técnico | 5% | `✅` ~5/5 | READMEs actualizados con CORS/Vercel; 3 historias técnicas incluidas |
 | **Total estimado** | **100%** | **~91/100** | Sin contar el PLUS de backend que aportaría puntos adicionales |
 
@@ -133,7 +133,7 @@ Este documento resume el estado de cada requerimiento del enunciado, el criterio
 
 1. **Performance / Server Components**: `Suspense` en listado y migración a RSC (`loading.tsx` y `<main>` ya agregados).
 2. **Seguridad**: token en cookie `HttpOnly`/`SameSite=Strict` seteada desde backend.
-3. **Accesibilidad**: auditar con `axe-core`, roles, ARIA y foco visible (iniciada con `<main>`, `aria-label`, `aria-invalid` y `loading.tsx`).
-4. **Observabilidad**: logs estructurados en backend o Sentry.
+3. **Accesibilidad**: auditar con `axe-core` y foco en errores.
+4. **Observabilidad**: logs estructurados persistentes en backend o Sentry.
 5. **Búsqueda avanzada**: índice GIN o FTS en PostgreSQL para búsqueda exacta.
 6. **Más tests**: hooks de TanStack Query y componentes con DOM (happy-dom/jsdom).

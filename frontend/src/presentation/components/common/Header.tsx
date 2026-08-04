@@ -2,10 +2,12 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { layoutMessages } from '@/presentation/messages/layout';
 
 export default function Header() {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <header className="sticky top-0 z-50 bg-gradient-to-r from-sky-700 to-sky-600 shadow-lg">
@@ -20,15 +22,17 @@ export default function Header() {
           {layoutMessages.brand}
         </Link>
 
-        <nav className="hidden items-center gap-2 sm:flex">
+        <nav className="hidden items-center gap-2 sm:flex" aria-label="Navegación principal">
           <Link
             href="/applications/new"
+            aria-current={pathname === '/applications/new' ? 'page' : undefined}
             className="rounded-lg px-3 py-2 text-sm font-medium text-sky-50 transition hover:bg-white/10"
           >
             {layoutMessages.newApplication}
           </Link>
           <Link
             href="/applications"
+            aria-current={pathname === '/applications' ? 'page' : undefined}
             className="rounded-lg px-3 py-2 text-sm font-medium text-sky-50 transition hover:bg-white/10"
           >
             {layoutMessages.applications}
@@ -38,6 +42,7 @@ export default function Header() {
         <button
           type="button"
           aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
+          aria-expanded={open}
           onClick={() => setOpen((prev) => !prev)}
           className="rounded-lg p-2 text-white hover:bg-white/10 sm:hidden"
         >
