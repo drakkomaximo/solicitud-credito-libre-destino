@@ -30,11 +30,11 @@ export function ApplicationFilters({
     status !== 'all' || channel !== 'all' || search !== '';
 
   return (
-    <div className="mt-6 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-      <div className="flex flex-wrap items-end gap-4">
-        <div className="flex min-w-[10rem] flex-1 flex-col gap-1">
+    <div className="mt-6 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:p-5">
+      <div className="flex flex-col flex-wrap gap-3 sm:flex-row sm:items-end sm:gap-4">
+        <div className="flex w-full flex-col gap-1 sm:w-auto sm:min-w-[10rem] sm:flex-1">
           <label htmlFor="status-filter" className="text-xs font-medium text-slate-500">
-            Estado
+            {listPageMessages.statusLabel}
           </label>
           <select
             id="status-filter"
@@ -53,9 +53,9 @@ export function ApplicationFilters({
           </select>
         </div>
 
-        <div className="flex min-w-[10rem] flex-1 flex-col gap-1">
+        <div className="flex w-full flex-col gap-1 sm:w-auto sm:min-w-[10rem] sm:flex-1">
           <label htmlFor="channel-filter" className="text-xs font-medium text-slate-500">
-            Canal
+            {listPageMessages.channelLabel}
           </label>
           <select
             id="channel-filter"
@@ -74,9 +74,9 @@ export function ApplicationFilters({
           </select>
         </div>
 
-        <div className="flex min-w-[14rem] flex-[2] flex-col gap-1">
+        <div className="flex w-full flex-col gap-1 sm:w-auto sm:min-w-[14rem] sm:flex-[2]">
           <label htmlFor="search-filter" className="text-xs font-medium text-slate-500">
-            Buscar
+            {listPageMessages.searchLabel}
           </label>
           <input
             id="search-filter"
@@ -94,7 +94,7 @@ export function ApplicationFilters({
             type="button"
             onClick={onReset}
             disabled={disabled}
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-50"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-50 sm:w-auto"
             aria-label={listPageMessages.clearFilters}
           >
             <RotateCcw size={16} aria-hidden="true" />

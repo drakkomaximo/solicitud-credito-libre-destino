@@ -1,4 +1,5 @@
 import { applicationFormLabels, summaryLabels } from '@/presentation/messages/applicationForm';
+
 import { formatCOP } from '@/presentation/utils/formatCOP';
 import { CHANNEL_LABELS } from '@/presentation/constants/channels';
 import type { NewApplicationFormData } from '@/presentation/validation/newApplicationSchema';
@@ -27,7 +28,7 @@ export function ApplicationNewFormStep3({ watched }: Step3Props) {
         <p>{summaryLabels.income}: {formatCOP(watched.income ?? 0)} — {summaryLabels.expenses}: {formatCOP(watched.expenses ?? 0)}</p>
         <p>{summaryLabels.amount}: {formatCOP(watched.amount ?? 0)} — {summaryLabels.term}: {watched.term} {summaryLabels.termSuffix}</p>
         <p>{summaryLabels.purpose}: {watched.purpose}</p>
-        <p>{summaryLabels.dataAuthorized}: {watched.dataAuthorized ? 'Sí' : 'No'}</p>
+        <p>{summaryLabels.dataAuthorized}: {watched.dataAuthorized ? summaryLabels.yes : summaryLabels.no}</p>
       </div>
     </section>
   );

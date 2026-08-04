@@ -16,10 +16,10 @@ export function LoginForm({ onAdminLogin, onClientLogin }: LoginFormProps) {
   const [mode, setMode] = useState<'admin' | 'client'>('client');
 
   return (
-    <main className="mx-auto flex min-h-[70vh] max-w-md flex-col items-center justify-center p-6">
+    <main className="mx-auto flex min-h-[70vh] max-w-md flex-col items-center justify-center p-4 sm:p-6">
       <FadeIn className="w-full">
-        <div className="w-full rounded-3xl border border-slate-100 bg-white p-8 shadow-xl">
-          <h1 className="text-center text-3xl font-extrabold text-slate-900">{authMessages.chooseRole}</h1>
+        <div className="w-full rounded-3xl border border-slate-100 bg-white p-5 shadow-xl sm:p-8">
+          <h1 className="text-center text-2xl font-extrabold text-slate-900 sm:text-3xl">{authMessages.chooseRole}</h1>
           <p className="mt-2 text-center text-slate-500">{authMessages.loginDescription}</p>
 
           <div className="mt-6 grid grid-cols-2 gap-2 rounded-2xl bg-slate-100 p-1">

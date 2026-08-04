@@ -32,6 +32,8 @@ export const applicationFormLabels = {
   saveError: 'Error guardando cambios',
   loadError: 'Error cargando solicitud',
   editNotAllowed: 'Solo se puede editar una solicitud en estado DRAFT.',
+  createSuccess: 'Solicitud creada',
+  saveSuccess: 'Cambios guardados',
 } as const;
 
 export const summaryLabels = {
@@ -49,6 +51,8 @@ export const summaryLabels = {
   termSuffix: 'meses',
   purpose: 'Destino',
   dataAuthorized: 'Autorización de datos',
+  yes: 'Sí',
+  no: 'No',
 } as const;
 
 export const applicationFormErrors = {

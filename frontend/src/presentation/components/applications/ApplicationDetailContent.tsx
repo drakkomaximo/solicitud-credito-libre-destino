@@ -108,8 +108,8 @@ export function ApplicationDetailContent({ id }: { id: string }) {
 
   const handleFinalize = async () => {
     const confirmed = await confirm({
-      title: 'Finalizar solicitud',
-      text: '¿Enviar la solicitud a validación? Una vez finalizada no podrá editarla.',
+      title: detailMessages.confirmFinalizeTitle,
+      text: detailMessages.confirmFinalizeText,
     });
     if (!confirmed) return;
     try {
@@ -127,8 +127,8 @@ export function ApplicationDetailContent({ id }: { id: string }) {
       return;
     }
     const confirmed = await confirmDanger({
-      title: 'Abandonar solicitud',
-      text: '¿Confirmas que deseas abandonar esta solicitud?',
+      title: detailMessages.confirmAbandonTitle,
+      text: detailMessages.confirmAbandonText,
     });
     if (!confirmed) return;
     try {
@@ -143,9 +143,9 @@ export function ApplicationDetailContent({ id }: { id: string }) {
 
   const handleApprove = async () => {
     const confirmed = await confirm({
-      title: 'Aprobar solicitud',
-      text: '¿Confirmas la aprobación final de esta solicitud?',
-      confirmButtonText: 'Aprobar',
+      title: detailMessages.confirmApproveTitle,
+      text: detailMessages.confirmApproveText,
+      confirmButtonText: detailMessages.confirmApproveButton,
     });
     if (!confirmed) return;
     try {
@@ -158,10 +158,10 @@ export function ApplicationDetailContent({ id }: { id: string }) {
 
   const handleReject = async () => {
     const rejectReason = await confirmWithReason({
-      title: 'Rechazar solicitud',
-      text: '¿Confirmas el rechazo definitivo de esta solicitud?',
+      title: detailMessages.confirmRejectTitle,
+      text: detailMessages.confirmRejectPrompt,
       inputLabel: detailMessages.rejectReasonLabel,
-      confirmButtonText: 'Rechazar',
+      confirmButtonText: detailMessages.confirmRejectButton,
     });
     if (rejectReason === null) return;
     try {
@@ -177,7 +177,7 @@ export function ApplicationDetailContent({ id }: { id: string }) {
   };
 
   return (
-    <main className="relative mx-auto max-w-3xl p-6">
+    <main className="relative mx-auto max-w-3xl p-4 sm:p-6">
       <div
         className={`absolute inset-0 z-50 flex flex-col items-center justify-center rounded-2xl bg-white/70 backdrop-blur-sm transition-opacity duration-300 ${
           isActionPending ? 'opacity-100' : 'pointer-events-none opacity-0'
@@ -195,14 +195,14 @@ export function ApplicationDetailContent({ id }: { id: string }) {
         >
           {detailMessages.back}
         </button>
-        <h1 className="text-3xl font-extrabold text-slate-900">
+        <h1 className="text-2xl font-extrabold text-slate-900 sm:text-3xl">
           {detailMessages.requestTitle} {app.firstName} {app.lastName}
         </h1>
         <StatusBadge status={app.status} />
       </div>
 
-      <section className="mt-6 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-bold text-slate-900">
+      <section className="mt-6 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:p-6">
+        <h2 className="text-lg font-bold text-slate-900 sm:text-xl">
           {detailMessages.personalSection}
         </h2>
         <dl className="mt-3 grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2">
@@ -239,8 +239,8 @@ export function ApplicationDetailContent({ id }: { id: string }) {
         </dl>
       </section>
 
-      <section className="mt-4 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-bold text-slate-900">
+      <section className="mt-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:p-6">
+        <h2 className="text-lg font-bold text-slate-900 sm:text-xl">
           {detailMessages.financialSection}
         </h2>
         <dl className="mt-3 grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2">
@@ -272,8 +272,8 @@ export function ApplicationDetailContent({ id }: { id: string }) {
       </section>
 
       {app.status === 'DRAFT' && (
-        <section className="mt-4 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-bold text-slate-900">
+        <section className="mt-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:p-6">
+          <h2 className="text-lg font-bold text-slate-900 sm:text-xl">
             {detailMessages.actionsSection}
           </h2>
           <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -303,18 +303,18 @@ export function ApplicationDetailContent({ id }: { id: string }) {
                 {detailMessages.finalize}
               </button>
             )}
-            <div className="flex items-center gap-2">
+            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
               <input
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 placeholder={detailMessages.reasonPlaceholder}
-                className="rounded-xl border border-slate-300 p-2.5 text-sm"
+                className="w-full rounded-xl border border-slate-300 p-2.5 text-sm sm:w-auto"
                 disabled={isActionPending}
                 aria-label={detailMessages.reasonPlaceholder}
               />
               <button
                 onClick={handleAbandon}
-                className="rounded-xl bg-red-600 px-5 py-2.5 font-semibold text-white shadow-md shadow-red-100 transition hover:-translate-y-0.5 hover:bg-red-700 disabled:opacity-50"
+                className="w-full rounded-xl bg-red-600 px-5 py-2.5 font-semibold text-white shadow-md shadow-red-100 transition hover:-translate-y-0.5 hover:bg-red-700 disabled:opacity-50 sm:w-auto"
                 disabled={isActionPending}
               >
                 {detailMessages.abandon}
@@ -325,11 +325,11 @@ export function ApplicationDetailContent({ id }: { id: string }) {
       )}
 
       {role === 'admin' && app.status === 'PENDING_VALIDATION' && (
-        <section className="mt-4 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-bold text-slate-900">
-            Decisión del administrador
+        <section className="mt-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:p-6">
+          <h2 className="text-lg font-bold text-slate-900 sm:text-xl">
+            {detailMessages.adminDecisionTitle}
           </h2>
-          <p className="text-sm text-slate-600">Aprueba o rechaza esta solicitud. El rechazo requiere un motivo.</p>
+          <p className="text-sm text-slate-600">{detailMessages.adminDecisionDescription}</p>
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <button
               onClick={handleApprove}
@@ -350,8 +350,8 @@ export function ApplicationDetailContent({ id }: { id: string }) {
       )}
 
       {simulation && (
-        <section className={`mt-4 rounded-2xl border p-6 shadow-sm ${simulation.status === 'approved' ? 'border-emerald-100 bg-emerald-50' : 'border-orange-100 bg-orange-50'}`}>
-          <h2 className="text-xl font-bold text-slate-900">
+        <section className={`mt-4 rounded-2xl border p-4 shadow-sm sm:p-6 ${simulation.status === 'approved' ? 'border-emerald-100 bg-emerald-50' : 'border-orange-100 bg-orange-50'}`}>
+          <h2 className="text-lg font-bold text-slate-900 sm:text-xl">
             {detailMessages.simulationTitle}
           </h2>
           <p className="mt-2 font-semibold">
