@@ -22,9 +22,22 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ResponseFormatInterceptor(app.get(Reflector)));
   app.useGlobalFilters(new AllExceptionsFilter());
   const apiPrefix = process.env.API_PREFIX || 'api/v1';
-  const corsOrigin = process.env.CORS_ORIGIN || 'http://localhost:3000';
+  const rawCors = process.env.CORS_ORIGIN || 'http://localhost:3000,http://localhost:3001';
+  const allowedOrigins =
+    rawCors === '*'
+      ? ['*']
+      : rawCors
+          .split(',')
+          .map((o) => o.trim())
+          .filter(Boolean);
+  const origin =
+    allowedOrigins.length === 1
+      ? (allowedOrigins[0] as any)
+      : allowedOrigins[0] === '*'
+        ? true
+        : (allowedOrigins as any[]);
   app.enableCors({
-    origin: corsOrigin as any,
+    origin,
     credentials: true,
   });
   app.setGlobalPrefix(apiPrefix);
