@@ -67,6 +67,8 @@ Se completó el rediseño de la interfaz y la usabilidad del micrositio:
 - **Listado de solicitudes:** tarjetas rediseñadas con chip de canal, fecha/hora de creación, grid responsive (1/2/3 columnas), filtros con wrap y ordenamiento descendente por fecha gestionado por el backend.
 - **Sesión:** `RoleHeader` integrado dentro del contenedor principal de solicitudes.
 - **Skeletons:** spinners de carga del detalle y del listado reemplazados por esqueletos con la estructura real de los componentes.
+- **Favicon:** icono del proyecto (`src/app/icon.tsx`) reemplaza el favicon por defecto de Next.js.
+- **Tests:** cobertura ampliada con pruebas unitarias para utilidades (`normalizePhone`, `formatCOP`, `parseRole`).
 - **Organización:** componentes de `applications` agrupados en `detail/`, `form/`, `list/`, `skeletons/` y `view/`.
 
 ## ✅ Comandos
