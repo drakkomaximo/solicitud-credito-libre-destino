@@ -2,7 +2,15 @@
 
 Micrositio de originación digital de crédito de libre destino con backend en NestJS (arquitectura hexagonal, TDD) y frontend en Next.js.
 
-> 🏗️ **Estructura del proyecto:** `backend/` contiene la API NestJS y `frontend/` la aplicación Next.js. Próximo foco de trabajo: desarrollo del frontend.
+> 🏗️ **Estructura del proyecto:** `backend/` contiene la API NestJS y `frontend/` la aplicación Next.js.
+
+## 🌐 Demo en producción
+
+| Servicio | URL |
+|----------|-----|
+| **Frontend (Vercel)** | https://solicitud-credito-libre-destino.vercel.app/ |
+| **Backend (Railway)** | https://solicitud-credito-libre-destino-production.up.railway.app/api/v1 |
+| **Swagger** | https://solicitud-credito-libre-destino-production.up.railway.app/api/v1/docs |
 
 ## 📁 Estructura
 
@@ -220,6 +228,21 @@ El contenedor aplica migraciones automáticamente y expone el backend en el puer
 
 El proyecto queda **configurado** para Azure, pero no requiere un despliegue real en la nube para la prueba.
 
+### Frontend en Vercel
+
+El frontend está desplegado en **Vercel** conectado al repositorio de GitHub (deploy automático en cada push a `main`):
+
+1. Importar el repositorio en Vercel y fijar el **Root Directory** en `frontend/`.
+2. Framework detectado automáticamente (Next.js); build con `next build`.
+3. Configurar la variable de entorno `NEXT_PUBLIC_API_URL` apuntando al backend de Railway (`https://solicitud-credito-libre-destino-production.up.railway.app/api/v1`).
+4. Agregar el dominio generado por Vercel a la variable `CORS_ORIGIN` del backend en Railway para habilitar las peticiones con credenciales.
+
+Consideraciones del despliegue del frontend:
+
+- **Server Components + streaming:** las rutas usan `loading.tsx` por segmento y `Suspense`, lo que Vercel sirve con streaming nativo; las páginas estáticas (`/`, `/applications`, `/applications/new`) se prerenderizan y las dinámicas (`/applications/[id]`) se renderizan bajo demanda.
+- **Variables públicas:** solo se expone `NEXT_PUBLIC_API_URL`; no hay secretos en el bundle del cliente.
+- **Previews:** cada PR genera un preview deploy propio; si se usan, sus dominios también deben agregarse a `CORS_ORIGIN`.
+
 ## 🤖 Uso de inteligencia artificial
 
 Este proyecto fue desarrollado con asistencia de un agente de código (Cascade, modelo SWE-1.6 de Cognition), integrado en el IDE del desarrollador, bajo un flujo de pair programming iterativo.
@@ -293,7 +316,7 @@ git config --global commit.gpgsign true
 - **Decisión final:** una solicitud en `PENDING_VALIDATION` la aprueba o rechaza manualmente un administrador (`PATCH /api/v1/admin/applications/:id/decision`). En un escenario real este paso lo daría un analista de crédito o un motor de decisión automático.
 - **Reintentos de simulación:** se permite editar y re-simular una solicitud incluso tras un resultado aprobado o no viable; el objetivo del micrositio es lograr solicitudes viables. Para finalizar, la última simulación aprobada debe ser posterior a la última edición de datos. En producción se limitaría el número de simulaciones y se usarían variables de decisión no visibles al usuario.
 - **Internacionalización parcial de la UI:** aunque los mensajes principales están en español, la estructura de componentes no está preparada para múltiples idiomas. En producción conviene usar `next-intl` o similar con detección de locale y catálogos separados.
-- **Feedback visual durante acciones asíncronas:** la UI ahora bloquea con un overlay/spinner durante mutaciones. Para una experiencia premium se podrían reemplazar los modales de SweetAlert2 por toasts sin bloqueo y estados optimistas con TanStack Query.
+- **Feedback visual durante acciones asíncronas:** las acciones del detalle (abandonar, finalizar, aprobar, rechazar) muestran el spinner dentro del botón que ejecuta la acción y deshabilitan las demás, sin overlays que cubran la pantalla. Para una experiencia premium se podrían reemplazar los modales de SweetAlert2 por toasts sin bloqueo y estados optimistas con TanStack Query.
 - **Paleta y animaciones:** el rediseño aplicado usa Tailwind con sombras, gradientes y micro-interacciones. La quinta mejora propuesta es agregar transiciones con Framer Motion en formularios de pasos, listas y cambios de estado; esto queda como trabajo futuro para no introducir dependencia adicional en este ciclo.
 - **Dependencia del token en cookie:** el frontend almacena el token de solicitud/admin en una cookie accesible por JS; en producción se recomienda `HttpOnly` + `SameSite=Strict` y refresh tokens, o session storage en flujos de corta duración.
 - **Cálculo de simulación visible:** la fórmula de cuota y tasa es expuesta en el frontend. Un motor real no revelaría la tasa de interés ni los cálculos hasta la oferta definitiva, y la aprobación no dependería de una regla tan simple.
