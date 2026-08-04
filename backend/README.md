@@ -20,7 +20,7 @@ API NestJS que soporta el flujo de originación digital de crédito de libre des
 
 ## 🚀 Estado actual
 
-El backend mantiene los contratos de API y autenticación intactos. En este ciclo se ajustó `PrismaCreditApplicationRepository.findAll` para ordenar las solicitudes por `createdAt` de forma descendente (más recientes primero), con `id` como desempate, y para usar la paginación por cursor nativa de Prisma. Los refuerzos del lado del servidor —rate limiting, logs de auditoría, firma de commits y tests de guardias JWT/E2E— quedan como trabajo futuro.
+El backend mantiene los contratos de API y autenticación intactos. En este ciclo se ajustó `PrismaCreditApplicationRepository.findAll` para ordenar las solicitudes por `createdAt` de forma descendente (más recientes primero), con `id` como desempate, y para usar la paginación por cursor nativa de Prisma. También se agregó correlación de peticiones con `x-request-id` y logging HTTP/errores con ese identificador. Los refuerzos del lado del servidor —rate limiting, logs de auditoría estructurados, firma de commits y tests de guardias JWT/E2E— quedan como trabajo futuro.
 
 ## 📁 Estructura de carpetas
 
