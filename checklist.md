@@ -49,12 +49,12 @@ Este documento resume el estado de cada requerimiento del enunciado, el criterio
 |---------|--------|-------|-----------------|
 | Next.js App Router, React y TypeScript | `✅` | `app/` router, páginas principales | Revisar uso de `loading.tsx` |
 | Arquitectura limpia, separación de UI, hooks, servicios y utilidades | `✅` | Capas `domain`, `application`, `infrastructure`, `presentation` | Definir design system y tokens de color |
-| Renderizado consciente (SSR/Server Components) | `⚠️` | Uso mayoritario de Client Components por interactividad | Migrar listado a RSC con streaming |
+| Renderizado consciente (SSR/Server Components) | `⚠️` | Global `loading.tsx`, landmark `<main>` y skeletons agregados; listado aún Client Component | Migrar listado a RSC con streaming |
 | Consumo de servicios REST | `✅` | `HttpClient` genérico + repositorios | Añadir `react-query` devtools condicional |
 | Validaciones de formulario | `✅` | Zod en pasos y edición | Validación asíncrona de documentos duplicados |
-| Accesibilidad | `⚠️` | Etiquetas básicas, foco en formularios | Auditar con axe-core, roles y ARIA |
-| Trazabilidad | `✅` | Eventos de dominio persistidos y visibles | Correlacionar eventos con request ID |
-| Cloud de referencia (Azure, no obligatorio) | `⚠️` | Preparado para Vercel con `vercel.json` | Evaluar contenedores Docker para Azure |
+| Accesibilidad | `⚠️` | `aria-invalid`, `aria-describedby`, `aria-label` en Footer, landmark `<main>` y `loading.tsx` accesible implementados | Auditar con axe-core, roles y ARIA restantes |
+| Trazabilidad | `✅` | Eventos de dominio persistidos y visibles; `x-request-id` en frontend y backend | Correlacionar eventos con request ID (hecho) |
+| Cloud de referencia (Azure, no obligatorio) | `⚠️` | Vercel documentado en READMEs, CORS y `vercel.json` listos | Evaluar contenedores Docker para Azure |
 
 ---
 
@@ -83,11 +83,11 @@ Este documento resume el estado de cada requerimiento del enunciado, el criterio
 | Aspecto | Estado | Notas | Mejoras futuras |
 |---------|--------|-------|-----------------|
 | Seguridad básica (no exponer secretos, sanitizar entradas) | `✅` | Token en cookie `HttpOnly` no, pero `SameSite=Lax`; env vars para API | Revisar manejo de token y XSS |
-| Observabilidad (logs/telemetría) | `⚠️` | Logs básicos en consola del cliente | Integrar Sentry o Vercel Analytics |
-| Trazabilidad (correlación) | `⚠️` | Eventos por solicitud; falta request ID global | Añadir `x-request-id` en frontend y backend |
+| Observabilidad (logs/telemetría) | `⚠️` | `x-request-id` implementado en todas las peticiones | Integrar Sentry o logs estructurados en backend |
+| Trazabilidad (correlación) | `✅` | Header `x-request-id` generado en frontend, leído/devuelto por backend; eventos por solicitud | — |
 | Mantenibilidad | `✅` | Estructura clara, nombres consistentes | Completar design system |
 | Calidad (pruebas automatizadas) | `✅` | 20 archivos de tests, 42+ casos | Subir cobertura de hooks y componentes |
-| Performance | `⚠️` | Carga razonable, skeletons | Implementar `Suspense` y `loading.tsx` |
+| Performance | `⚠️` | `loading.tsx` global, skeletons en lista y formularios; carga razonable | Implementar `Suspense` en listado con Server Components |
 | Usabilidad | `✅` | Navegación clara, textos en español, responsive | Test de usabilidad con usuarios |
 
 ---
@@ -111,11 +111,11 @@ Este documento resume el estado de cada requerimiento del enunciado, el criterio
 | Criterio | % | Estado estimado | Comentario |
 |----------|---:|-----------------|------------|
 | Arquitectura y dominio frontend | 40% | `✅` ~35/40 | Capas limpias, Next.js App Router, TypeScript |
-| UX técnica, accesibilidad y performance | 15% | `⚠️` ~10/15 | Responsive y validaciones; falta accesibilidad profunda y performance |
+| UX técnica, accesibilidad y performance | 15% | `⚠️` ~11/15 | Responsive y validaciones; accesibilidad básica lista, falta SC/Suspense |
 | Integración con backend y contratos | 15% | `✅` ~13/15 | Consumo correcto, contratos claros, CORS flexible |
 | Calidad y pruebas | 15% | `✅` ~13/15 | 20 archivos de tests; faltan tests de hooks/componentes |
-| Seguridad, observabilidad y trazabilidad | 10% | `⚠️` ~6/10 | Básico; falta observabilidad real y request ID |
-| Documentación y criterio técnico | 5% | `✅` ~4/5 | READMEs actualizados; faltan las 3 historias técnicas |
+| Seguridad, observabilidad y trazabilidad | 10% | `⚠️` ~8/10 | CORS explícito y x-request-id listos; falta token HttpOnly y logs estructurados |
+| Documentación y criterio técnico | 5% | `✅` ~5/5 | READMEs actualizados con CORS/Vercel; 3 historias técnicas incluidas |
 | **Total estimado** | **100%** | **~91/100** | Sin contar el PLUS de backend que aportaría puntos adicionales |
 
 ---
@@ -131,9 +131,9 @@ Este documento resume el estado de cada requerimiento del enunciado, el criterio
 
 ## Mejoras futuras priorizadas
 
-1. **Accesibilidad**: auditar con `axe-core`, roles, ARIA y foco visible (iniciado con `<main>`, `aria-label` y `loading.tsx`).
-2. **Observabilidad**: `x-request-id`, logs estructurados o Sentry.
-3. **Performance**: `Suspense` en listado y migración de Server Components en listado (`loading.tsx` y `<main>` ya agregados).
-4. **Skeletons en "cargar más"**: evaluar si agregar placeholders al final del listado.
+1. **Performance / Server Components**: `Suspense` en listado y migración a RSC (`loading.tsx` y `<main>` ya agregados).
+2. **Seguridad**: token en cookie `HttpOnly`/`SameSite=Strict` seteada desde backend.
+3. **Accesibilidad**: auditar con `axe-core`, roles, ARIA y foco visible (iniciada con `<main>`, `aria-label`, `aria-invalid` y `loading.tsx`).
+4. **Observabilidad**: logs estructurados en backend o Sentry.
 5. **Búsqueda avanzada**: índice GIN o FTS en PostgreSQL para búsqueda exacta.
 6. **Más tests**: hooks de TanStack Query y componentes con DOM (happy-dom/jsdom).
