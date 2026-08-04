@@ -12,11 +12,10 @@ import { FormField } from '@/presentation/components/forms/FormField';
 import { TextareaField } from '@/presentation/components/forms/TextareaField';
 import { CheckboxField } from '@/presentation/components/forms/CheckboxField';
 import { FadeIn } from '@/presentation/components/common/FadeIn';
-import { LoadingSpinner } from '@/presentation/components/common/LoadingSpinner';
+import { ApplicationFormSkeleton } from '@/presentation/components/applications/skeletons/ApplicationFormSkeleton';
 import { formatCOP } from '@/presentation/utils/formatCOP';
 import { editApplicationSchema, type EditApplicationFormData } from '@/presentation/validation/editApplicationSchema';
 import { applicationFormLabels } from '@/presentation/messages/applicationForm';
-import { commonMessages } from '@/presentation/messages/common';
 
 type FormData = EditApplicationFormData;
 
@@ -66,7 +65,7 @@ export function ApplicationEditFormContent({ id }: { id: string }) {
   };
 
   if (isPending) {
-    return <LoadingSpinner label={commonMessages.loading} />;
+    return <ApplicationFormSkeleton />;
   }
 
   if (error) {

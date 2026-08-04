@@ -5,9 +5,7 @@ import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import { ApplicationFilters } from '@/presentation/components/applications/list/ApplicationFilters';
 import { ApplicationListResults } from '@/presentation/components/applications/list/ApplicationListResults';
 import { ApplicationListSkeleton } from '@/presentation/components/applications/skeletons/ApplicationListSkeleton';
-import { LoadingSpinner } from '@/presentation/components/common/LoadingSpinner';
 import { listPageMessages } from '@/presentation/messages/list';
-import { commonMessages } from '@/presentation/messages/common';
 
 const SEARCH_DEBOUNCE_MS = 500;
 
@@ -93,12 +91,7 @@ export function ApplicationsList({ role }: { role: string }) {
         onReset={resetFilters}
       />
 
-      <div className="relative mt-6">
-        {isPending && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-white/70 backdrop-blur-sm">
-            <LoadingSpinner label={commonMessages.loading} />
-          </div>
-        )}
+      <div className="mt-6">
         <Suspense fallback={<ApplicationListSkeleton />}>
           <ApplicationListResults role={role} status={status} channel={channel} q={q} />
         </Suspense>
