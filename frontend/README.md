@@ -94,6 +94,7 @@ Se completó el rediseño de la interfaz y la usabilidad del micrositio:
 - **Favicon:** icono del proyecto (`src/app/icon.tsx`) reemplaza el favicon por defecto de Next.js.
 - **Tests:** cobertura ampliada con pruebas unitarias para utilidades, validaciones y casos de uso.
 - **Accesibilidad básica:** landmark `<main>`, skip link, `aria-label` en footer, `aria-current`/`aria-expanded` en navegación y `loading.tsx` accesible (`aria-busy`, `aria-live`).
+- **Manejo de rutas no encontradas:** página 404 (`not-found.tsx`) con UI coherente al diseño, accesible y con enlace al inicio.
 - **Organización:** componentes de `applications` agrupados en `detail/`, `form/`, `list/`, `skeletons/` y `view/`.
 
 ## ✅ Comandos
