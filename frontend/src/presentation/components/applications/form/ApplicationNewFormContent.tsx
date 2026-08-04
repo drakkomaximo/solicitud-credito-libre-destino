@@ -12,7 +12,7 @@ import { ApplicationNewFormStep1 } from './new-form/ApplicationNewFormStep1';
 import { ApplicationNewFormStep2 } from './new-form/ApplicationNewFormStep2';
 import { ApplicationNewFormStep3 } from './new-form/ApplicationNewFormStep3';
 import { FadeIn } from '@/presentation/components/common/FadeIn';
-import { LoadingSpinner } from '@/presentation/components/common/LoadingSpinner';
+import { ApplicationFormSkeleton } from '@/presentation/components/applications/skeletons/ApplicationFormSkeleton';
 import type { CreateApplicationInput } from '@/domain/entities/Application';
 import { newApplicationSchema, type NewApplicationFormData } from '@/presentation/validation/newApplicationSchema';
 import { applicationFormLabels } from '@/presentation/messages/applicationForm';
@@ -118,7 +118,7 @@ export function ApplicationNewFormContent() {
   };
 
   if (isRefsPending) {
-    return <LoadingSpinner label={applicationFormLabels.loadingReferences} />;
+    return <ApplicationFormSkeleton />;
   }
 
   if (refsError) {
