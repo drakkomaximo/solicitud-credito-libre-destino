@@ -22,6 +22,13 @@ export interface ApiResponse<T> {
   errors?: Array<{ message: string }>;
 }
 
+function generateRequestId(): string {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+    return crypto.randomUUID();
+  }
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
 export async function httpClient<T>(
   path: string,
   options?: RequestInit & { raw?: false },
@@ -36,11 +43,13 @@ export async function httpClient<T>(
 ): Promise<T | ApiResponse<T>> {
   const { raw, ...rest } = options;
   const url = `${getApiBase()}/api/v1${path}`;
+  const requestId = generateRequestId();
   const res = await fetch(url, {
     ...rest,
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
+      'x-request-id': requestId,
       ...(rest.headers || {}),
     },
   });
@@ -52,10 +61,11 @@ export async function httpClient<T>(
       payload?.errors?.map((e: { message: string }) => e.message).join(', ') ||
       payload?.message ||
       res.statusText;
+    const responseRequestId = res.headers?.get?.('x-request-id') || requestId;
     if (res.status === 401 && onUnauthorized) {
       onUnauthorized();
     }
-    throw new ApiError(res.status, details);
+    throw new ApiError(res.status, details, responseRequestId);
   }
 
   if (raw) {

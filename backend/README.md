@@ -496,3 +496,15 @@ Esta implementación se mantuvo deliberadamente mínima para cumplir el alcance 
 - **Exposición de cálculo financiero:** la tasa (`interestRate`) y la fórmula de cuota se devuelven al cliente. En producción el motor real no revelaría la tasa ni la regla de aprobación hasta la oferta definitiva, y aplicaría validaciones de frecuencia de simulación.
 - **Estructura de respuesta de simulación no normalizada:** el endpoint `POST /applications/:id/simulate-offer` devuelve un objeto simple distinto del `CreditApplication` completo. El frontend debe combinarlo con los eventos para mostrar resultados consistentes.
 - **Búsqueda por palabras clave:** el filtro `q` del listado usa coincidencia simple. Para búsqueda exacta, autocompletado o FTS se requiere un índice (`GIN` de PostgreSQL, Elasticsearch, etc.) y la definición clara de qué campos son buscables.
+
+## 🌐 CORS y despliegue
+
+El backend permite orígenes mediante la variable `CORS_ORIGIN` (lista separada por comas). Ejemplo para Vercel:
+
+```bash
+CORS_ORIGIN=http://localhost:3000,http://localhost:3001,https://mi-proyecto.vercel.app
+```
+
+- No uses `*` cuando `credentials: true` esté activo; los navegadores rechazan credenciales con wildcard.
+- Si tienes varios entornos (preview, producción), agrégales todos separados por comas.
+- El header `x-request-id` ya está permitido para futura trazabilidad.

@@ -24,6 +24,23 @@ bun run dev
 
 Abrir http://localhost:3001.
 
+## 🌐 Despliegue en Vercel
+
+El proyecto incluye `vercel.json` con los comandos de build para Bun. Para desplegar:
+
+1. Crea un proyecto en Vercel apuntando a la carpeta `frontend` (o al raíz si Vercel detecta la raíz).
+2. Configura la variable de entorno `NEXT_PUBLIC_API_URL` con la URL del backend, ej. `https://mi-api.com/api/v1`.
+3. En el backend, agrega el dominio de Vercel a `CORS_ORIGIN`, ej. `https://mi-proyecto.vercel.app`.
+4. No uses `*` en `CORS_ORIGIN` porque el frontend envía cookies/credenciales.
+
+Si usas múltiples entornos de preview, agrégales todos separados por comas:
+
+```
+CORS_ORIGIN=http://localhost:3001,https://mi-proyecto.vercel.app,https://*.vercel.app
+```
+
+> Nota: los subdominios wildcard (`*.vercel.app`) no son confiables en todos los navegadores; para producción usa el dominio exacto.
+
 ## 📁 Estructura
 
 ```
